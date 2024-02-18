@@ -31,6 +31,14 @@
 
 ---
 
+# The Plan
+
+Create a [Bun loader plugin](https://bun.sh/docs/runtime/plugins#loaders) that does something fancy to make "use client" and "use server" work.
+
+## does something fancy?
+
+---
+
 ## bun
 
 To install dependencies:
