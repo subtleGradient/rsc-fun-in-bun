@@ -16,6 +16,6 @@
     /* Linting */
     "strict": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
+    "noFallthroughCasesInSwitch": true
   }
 }
