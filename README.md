@@ -7,22 +7,26 @@
 
 ## TODO: low level concrete goals
 
-- [ ] document RSC & "use client" & "use server"
 - [ ] toy tests can be run with `bun test`
 - [ ] toy supports "use client" at the top of a file
 - [ ] toy supports "use server" at the top of a file
 - [ ] toy supports "use server" at the top of an async function
 
-### TODO: Tasks
+### TODO: concrete tasks (motion, not progress)
 
-- [ ] clarify my goals and plans
+- [ ] document "use client"
+- [ ] document "use server"
+- [ ] document RSC
+- [ ] first draft of a plan
 
 ---
 
 # context
 
 ## What the heck is RSC?
+
 ## "use client"
+
 ## "use server"
 
 ---
