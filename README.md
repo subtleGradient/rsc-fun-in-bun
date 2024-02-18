@@ -1,10 +1,16 @@
-# rsc-fun-in-bun
+# rsc-fun-in-bun "toy" project
 
-## TODO: Goals
+## TODO: High level subjective goals
 
-- [ ] "use client" at the top of a file
-- [ ] "use server" at the top of a file
-- [ ] "use server" at the top of an async function
+- [ ] Understand what the heck "RSC" actually is and how it works
+- [ ] Build a toy implementation of something vaguely RSC-ish, that runs in bun.sh
+
+## TODO: low level concrete goals
+
+- [ ] toy tests can be run with `bun test`
+- [ ] toy supports "use client" at the top of a file
+- [ ] toy supports "use server" at the top of a file
+- [ ] toy supports "use server" at the top of an async function
 
 ### TODO: Tasks
 
