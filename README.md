@@ -28,6 +28,9 @@ Build stuff
 - [x] create a example "use server" async function
 - [x] create a example "use server" file
 - [x] toy tests can be run with `bun test`
+- [x] create a toy example project
+- [x] add ReactDOM.renderToReadableStream
+- figure out what to do next, add more tasks
 - see [example0 tests](examples/example0.test.ts) for further concrete stuff being built
 
 ---
