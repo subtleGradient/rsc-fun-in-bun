@@ -30,8 +30,18 @@ Build stuff
 - [x] toy tests can be run with `bun test`
 - [x] create a toy example project
 - [x] add ReactDOM.renderToReadableStream
-- figure out what to do next, add more tasks
 - see [example0 tests](examples/example0.test.ts) for further concrete stuff being built
+
+Build more stuff
+
+- [ ] create an example React async server component
+- [ ] add the example React async server component to the toy example project
+- [ ] create an example React client component
+- [ ] add the example React client component to the toy example project
+
+Build even more stuff
+
+- figure out what to do next, add more tasks
 
 ---
 
