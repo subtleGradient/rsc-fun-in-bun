@@ -25,6 +25,7 @@ Think & plan
 Build stuff
 
 - [x] create a example "use client" file
+- [ ] create a example "use server" async function
 - [ ] create a example "use server" file
 - [ ] toy tests can be run with `bun test`
 
