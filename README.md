@@ -27,7 +27,8 @@ Build stuff
 - [x] create a example "use client" file
 - [x] create a example "use server" async function
 - [x] create a example "use server" file
-- [ ] toy tests can be run with `bun test`
+- [x] toy tests can be run with `bun test`
+- see [example0 tests](examples/example0.test.ts) for further concrete stuff being built
 
 ---
 
