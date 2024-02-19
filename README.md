@@ -63,7 +63,8 @@ Directives
 
 Build even more stuff
 
-- figure out what to do next, add more tasks
+- figure out what to do next
+- add more tasks
 
 ---
 
