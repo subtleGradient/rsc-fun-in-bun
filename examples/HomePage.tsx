@@ -9,9 +9,9 @@ export function HomePage() {
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <Uname />
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
-      <ServerCodeFromClient1 />
+      <ServerCode_fromUseClientFile />
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
-      <ServerCodeFromClient2 />
+      <ServerCode_fromUseServerFile />
     </main>
   )
 }
@@ -21,7 +21,7 @@ async function Uname() {
   return <div>uname: {uname}</div>
 }
 
-async function ServerCodeFromClient1() {
+async function ServerCode_fromUseClientFile() {
   const stuff = await doStuffOnTheServer_definedInClientCode()
   return (
     <section>
@@ -33,7 +33,7 @@ async function ServerCodeFromClient1() {
   )
 }
 
-async function ServerCodeFromClient2() {
+async function ServerCode_fromUseServerFile() {
   const stuff = await doStuffOnTheServer()
   return (
     <section>
