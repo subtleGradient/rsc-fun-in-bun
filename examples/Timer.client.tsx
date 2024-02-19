@@ -6,7 +6,7 @@ function intervalStore(onStoreChange: () => void) {
   return () => clearInterval(interval)
 }
 export function Timer() {
-  React.useSyncExternalStore(intervalStore, Math.random)
+  React.useSyncExternalStore(intervalStore, Math.random, Math.random)
 
   return <>{new Date().toLocaleTimeString()}</>
 }

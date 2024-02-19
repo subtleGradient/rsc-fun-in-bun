@@ -1,4 +1,5 @@
 import { $ } from "bun"
+import { Timer } from "./Timer.client"
 import { doStuffOnTheServer_definedInClientCode } from "./example0.client"
 import { doStuffOnTheServer } from "./example0.server"
 
@@ -6,6 +7,10 @@ export function HomePage() {
   return (
     <main>
       <h1>Hello, world!</h1>
+      <h2>
+        <Timer />
+      </h2>
+
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <Uname />
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
