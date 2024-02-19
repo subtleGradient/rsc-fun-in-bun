@@ -3,14 +3,16 @@
 
 export {} // Make this a module
 
+console.debug("executing", import.meta.url)
 console.assert(typeof window !== "undefined", "This is client-side code, so `window` should be defined.")
 
 export async function doStuffOnTheServer_definedInClientCode() {
   "use server"
   console.assert(typeof window === "undefined", "This is server-side code, so `window` should not be defined.")
+  console.debug("executing", import.meta.url, "doStuffOnTheServer_definedInClientCode", "running on the server?")
 
   const { $ } = await import("bun")
-  return await $`ls -la`.text()
+  return await $`ls -a /`.text()
 }
 
 export async function example() {
