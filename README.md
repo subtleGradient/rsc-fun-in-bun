@@ -48,6 +48,10 @@ Import stuff
   - [ ] verify that all react imports are importing the react-server build
 - [ ] figure out: do I actually need the react-server build of react and react-dom?
 
+type stuff
+
+- [ ] support async component `'() => Promise<Element>' is not a valid JSX element type` error
+
 hydrate stuff
 
 - [ ] hydration manually
