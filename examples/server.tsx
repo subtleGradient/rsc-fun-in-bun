@@ -31,7 +31,6 @@ async function serveHome(req: Request): Promise<Response> {
     <Root>
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <HomeLayout>
-        {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
         <HomePage />
       </HomeLayout>
     </Root>

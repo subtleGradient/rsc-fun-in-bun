@@ -1,11 +1,16 @@
 import { $ } from "bun"
 
-export async function HomePage() {
-  const uname = await $`uname -a`.text()
+export function HomePage() {
   return (
     <main>
       <h1>Hello, world!</h1>
-      <pre>{uname}</pre>
+      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
+      <Uname />
     </main>
   )
+}
+
+async function Uname() {
+  const uname = await $`uname -a`.text()
+  return <div>{uname}</div>
 }
