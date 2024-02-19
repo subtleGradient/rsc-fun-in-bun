@@ -4,7 +4,6 @@
 // https://github.com/oven-sh/bun/issues/8990
 // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
 
-import React from "react"
 // import type * as ReactType from "react/canary"
 // @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
 // const React = (await import("../node_modules/react/react.react-server.js")) as typeof ReactType
@@ -20,7 +19,7 @@ import ReactDOM from "react-dom/server"
 
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
-import { ImportMap_fromPackage } from "./ImportMap_fromPackage"
+import { RootComponent } from "./RootComponent"
 
 function js(strings: TemplateStringsArray, ...values: unknown[]) {
   let source = ""
@@ -34,24 +33,22 @@ function js(strings: TemplateStringsArray, ...values: unknown[]) {
   return source
 }
 
-const server = Bun.serve({
-  async fetch(req) {
-    const url = new URL(req.url)
+function router(req: Request): Response | Promise<Response> {
+  const url = new URL(req.url)
 
-    if (url.pathname === browser.pathname) {
-      return new Response(browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
-    }
+  if (url.pathname === browser.pathname) {
+    return new Response(browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
+  }
 
-    if (url.pathname.endsWith(".js")) {
-      const source = `console.log('Hello from ${url.pathname}')`
-      return new Response(source, { headers: { "Content-Type": "application/javascript" } })
-    }
+  if (url.pathname.endsWith(".js")) {
+    const source = `console.log('Hello from ${url.pathname}')`
+    return new Response(source, { headers: { "Content-Type": "application/javascript" } })
+  }
 
-    if (url.pathname === "/") return serveHome(req)
+  if (url.pathname === "/") return serveHome(req)
 
-    return new Response("404", { status: 404 })
-  },
-})
+  return new Response("404", { status: 404 })
+}
 
 const browser = Object.assign(
   () => {
@@ -79,27 +76,14 @@ const browser = Object.assign(
   },
 )
 
-function Root({ children }: { children: React.ReactNode }) {
-  return (
-    <React.StrictMode>
-      <head>
-        {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
-        <ImportMap_fromPackage />
-      </head>
-
-      <>{children}</>
-    </React.StrictMode>
-  )
-}
-
 async function serveHome(req: Request): Promise<Response> {
   const children = (
-    <Root>
+    <RootComponent>
       {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <HomeLayout>
         <HomePage />
       </HomeLayout>
-    </Root>
+    </RootComponent>
   )
 
   const timestamp = Date.now().toString(36)
@@ -151,4 +135,7 @@ async function serveHome(req: Request): Promise<Response> {
   return response
 }
 
-console.log("Server running at", server.url.href)
+if (import.meta.main) {
+  const server = Bun.serve({ fetch: router })
+  console.log("Server running at", server.url.href)
+}
