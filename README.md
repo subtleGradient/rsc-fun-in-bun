@@ -37,12 +37,28 @@ Build more stuff
 - [x] create an example React async server component
 - [x] add the example React async server component to the toy example project
 - [x] create an example React client component: Timer
-- [x] add Timer to the toy example project
-  - [x] SSR
-  - [x] add importmap
-  - [x] pin client dependencies to package.json versions
-  - [ ] hydration manually
-  - [ ] hydration automagically based on the "use client" directive
+- [x] add Timer to the toy example project with SSG
+
+Import stuff
+
+- [x] add importmap
+- [x] pin client dependencies to package.json versions
+- [x] figure out how to install the react-server builds of react and react-dom on the client
+- [ ] figure out how to install the react-server builds of react and react-dom on the server
+  - [ ] verify that all react imports are importing the react-server build
+- [ ] figure out: do I actually need the react-server build of react and react-dom?
+
+hydrate stuff
+
+- [ ] hydration manually
+- [ ] hydration automagically based on the "use client" directive
+
+Directives
+
+- [ ] Bun import plugin for "use client" imports
+- [ ] loading "use client" code on the server does
+- [ ] support loading "use client" code on the server
+- [ ] support loading "use server" code on the client
 - [ ] add Suspense boundary to the server component
 
 Build even more stuff

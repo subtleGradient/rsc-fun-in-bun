@@ -1,6 +1,23 @@
 /// <reference types="react/canary" />
-import * as React from "react"
-import * as ReactDOM from "react-dom/server"
+/// <reference types="react-dom/canary" />
+
+// import type * as ReactDOMType from "react-dom/canary"
+// import type * as ReactType from "react/canary"
+
+// https://nodejs.org/api/cli.html#-c-condition---conditionscondition
+
+import React from "react"
+// @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
+// const __React = (await import("../node_modules/react/react.react-server.js")) as typeof ReactType
+// if (!("__SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED" in React))
+//   throw new Error("expected the React build with server internals")
+
+import ReactDOM from "react-dom/server"
+// @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
+// const __ReactDOM = (await import("../node_modules/react-dom/react-dom.react-server.js")) //as typeof ReactDOMType
+// TODO: figure out how to verify that ReactDOM is the server build
+// TODO: figure out how to make sure that ReactDOM is not requiring a different React file
+
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
 import { ImportMap_fromPackage } from "./ImportMap_fromPackage"
@@ -45,8 +62,16 @@ const browser = Object.assign(
   {
     pathname: "/browser.js",
     toModuleSource: () => js`
-      import * as React from "react";
-      // export {}; // Make this a module
+      import React from "react"
+      import ReactDOM from "react-dom"
+      import ReactDOM_client from "react-dom/client"
+
+      window.React = React
+      window.ReactDOM = ReactDOM
+
+      console.log(React.version)
+      console.log(ReactDOM.version)
+
       const pathname = (${browser.pathname});
       const impl = (${browser});
       const result = await impl();
@@ -98,8 +123,8 @@ async function serveHome(req: Request): Promise<Response> {
        * <script async src={bootstrapScripts[number]} /> // injected at the end of the body
        */
       bootstrapScripts: [
-        `bootstrapScript0.browser.js?_=${timestamp}`, //
-        `bootstrapScript1.browser.js?_=${timestamp}`,
+        // `bootstrapScript0.browser.js?_=${timestamp}`, //
+        // `bootstrapScript1.browser.js?_=${timestamp}`,
       ],
 
       /** 3.
@@ -107,8 +132,8 @@ async function serveHome(req: Request): Promise<Response> {
        * <script type=module src={bootstrapModules[number]} /> // injected at the end of the body
        */
       bootstrapModules: [
-        `bootstrapModule0.module.js?_=${timestamp}`,
-        `bootstrapModule1.module.js?_=${timestamp}`,
+        // `bootstrapModule0.module.js?_=${timestamp}`,
+        // `bootstrapModule1.module.js?_=${timestamp}`,
         `${browser.pathname}?_=${timestamp}`,
       ],
 
