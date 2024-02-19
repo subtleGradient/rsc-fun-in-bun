@@ -39,6 +39,8 @@ Build more stuff
 - [x] create an example React client component: Timer
 - [x] add Timer to the toy example project
   - [x] SSR
+  - [x] add importmap
+  - [x] pin client dependencies to package.json versions
   - [ ] hydration manually
   - [ ] hydration automagically based on the "use client" directive
 - [ ] add Suspense boundary to the server component
