@@ -1,32 +1,47 @@
+/// <reference types="react/canary" />
+import * as React from "react"
 import * as ReactDOM from "react-dom/server"
+import { HomeLayout } from "./HomeLayout"
+import { HomePage } from "./HomePage"
 
 const server = Bun.serve({
   async fetch(req) {
     const url = new URL(req.url)
-    if (url.pathname === "/") return home(req)
+
+    if (url.pathname.endsWith(".js")) {
+      const source = `console.log('Hello from ${url.pathname}')`
+      return new Response(source, {
+        headers: { "Content-Type": "application/javascript" },
+      })
+    }
+
+    if (url.pathname === "/") return serveHome(req)
+
     return new Response("404", { status: 404 })
   },
 })
 
-async function home(req: Request): Promise<Response> {
-  const body = (
-    <main>
-      <h1>Hello, world!</h1>
-    </main>
+function Root({ children }: { children: React.ReactNode | Promise<React.ReactNode> }) {
+  children = children && typeof children === "object" && "then" in children ? React.use(children) : children
+  return <>{children}</>
+}
+
+async function serveHome(req: Request): Promise<Response> {
+  const children = (
+    <Root>
+      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
+      <HomeLayout>
+        {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
+        <HomePage />
+      </HomeLayout>
+    </Root>
   )
 
-  const root = (
-    <html>
-      <head>
-        <title>hi</title>
-      </head>
-      <body>{body}</body>
-    </html>
-  )
+  const timestamp = Date.now().toString(36)
 
   const reactStream = await ReactDOM.renderToReadableStream(
     /** 0. injected as an html string */
-    root,
+    children,
     {
       signal: req.signal,
 
@@ -43,8 +58,8 @@ async function home(req: Request): Promise<Response> {
        * <script async src={bootstrapScripts[number]} /> // injected at the end of the body
        */
       bootstrapScripts: [
-        "bootstrapScript0.browser.js", //
-        "bootstrapScript1.browser.js",
+        "bootstrapScript0.browser.js?_=" + timestamp, //
+        "bootstrapScript1.browser.js?_=" + timestamp,
       ],
 
       /** 3.
@@ -52,8 +67,8 @@ async function home(req: Request): Promise<Response> {
        * <script type=module src={bootstrapModules[number]} /> // injected at the end of the body
        */
       bootstrapModules: [
-        "bootstrapModule0.module.js", //
-        "bootstrapModule1.module.js",
+        "bootstrapModule0.module.js?_=" + timestamp, //
+        "bootstrapModule1.module.js?_=" + timestamp,
       ],
 
       // identifierPrefix: "renderToReadableStream identifierPrefix",
