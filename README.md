@@ -36,7 +36,7 @@ Build more stuff
 
 - [x] create an example React async server component
 - [x] add the example React async server component to the toy example project
-- [ ] create an example React client component
+- [x] create an example React client component
 - [ ] add the example React client component to the toy example project
 - [ ] add Suspense boundary to the server component
 
