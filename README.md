@@ -36,8 +36,11 @@ Build more stuff
 
 - [x] create an example React async server component
 - [x] add the example React async server component to the toy example project
-- [x] create an example React client component
-- [ ] add the example React client component to the toy example project
+- [x] create an example React client component: Timer
+- [x] add Timer to the toy example project
+  - [x] SSR
+  - [ ] hydration manually
+  - [ ] hydration automagically based on the "use client" directive
 - [ ] add Suspense boundary to the server component
 
 Build even more stuff
