@@ -11,11 +11,8 @@ export function HomePage() {
         <Timer />
       </h2>
 
-      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <Uname />
-      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <ServerCode_fromUseClientFile />
-      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <ServerCode_fromUseServerFile />
     </main>
   )

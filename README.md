@@ -50,7 +50,7 @@ Import stuff
 
 type stuff
 
-- [ ] support async component `'() => Promise<Element>' is not a valid JSX element type` error
+- [x] support async component `'() => Promise<Element>' is not a valid JSX element type` error
 
 hydrate stuff
 

@@ -1,5 +1,9 @@
+/// <reference types="react" />
 /// <reference types="react/canary" />
+/// <reference types="react/experimental" />
+/// <reference types="react-dom" />
 /// <reference types="react-dom/canary" />
+/// <reference types="react-dom/experimental" />
 
 // https://github.com/oven-sh/bun/issues/8990
 // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
@@ -79,7 +83,6 @@ const browser = Object.assign(
 async function serveHome(req: Request): Promise<Response> {
   const children = (
     <RootComponent>
-      {/* @ts-expect-error -- '() => Promise<Element>' is not a valid JSX element type */}
       <HomeLayout>
         <HomePage />
       </HomeLayout>
