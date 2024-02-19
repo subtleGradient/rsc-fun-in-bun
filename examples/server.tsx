@@ -21,8 +21,7 @@ const server = Bun.serve({
   },
 })
 
-function Root({ children }: { children: React.ReactNode | Promise<React.ReactNode> }) {
-  children = children && typeof children === "object" && "then" in children ? React.use(children) : children
+function Root({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
