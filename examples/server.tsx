@@ -22,7 +22,7 @@ const server = Bun.serve({
 })
 
 function Root({ children }: { children: React.ReactNode }) {
-  return <>{children}</>
+  return <React.StrictMode>{children}</React.StrictMode>
 }
 
 async function serveHome(req: Request): Promise<Response> {
