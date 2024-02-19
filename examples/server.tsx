@@ -1,20 +1,20 @@
 /// <reference types="react/canary" />
 /// <reference types="react-dom/canary" />
 
-// import type * as ReactDOMType from "react-dom/canary"
-// import type * as ReactType from "react/canary"
-
+// https://github.com/oven-sh/bun/issues/8990
 // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
 
 import React from "react"
+// import type * as ReactType from "react/canary"
 // @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
-// const __React = (await import("../node_modules/react/react.react-server.js")) as typeof ReactType
+// const React = (await import("../node_modules/react/react.react-server.js")) as typeof ReactType
 // if (!("__SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED" in React))
 //   throw new Error("expected the React build with server internals")
 
 import ReactDOM from "react-dom/server"
+// import type * as ReactDOMType from "react-dom/canary"
 // @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
-// const __ReactDOM = (await import("../node_modules/react-dom/react-dom.react-server.js")) //as typeof ReactDOMType
+// const ReactDOM = (await import("../node_modules/react-dom/react-dom.react-server.js")) as typeof ReactDOMType
 // TODO: figure out how to verify that ReactDOM is the server build
 // TODO: figure out how to make sure that ReactDOM is not requiring a different React file
 
