@@ -12,7 +12,7 @@ export async function doStuffOnTheServer_definedInClientCode() {
   return await $`ls -a /`.text()
 }
 
-export async function example() {
+export async function exampleClientFunction() {
   // "use client" is not necessary here, because it's already at the top of the file
   console.assert(typeof window !== "undefined", "This is client-side code, so `window` should be defined.")
   console.log("Hello from example0!")

@@ -2,6 +2,7 @@ import { $ } from "bun"
 import { Timer } from "./Timer.client"
 import { doStuffOnTheServer_definedInClientCode } from "./example0.client"
 import { doStuffOnTheServer } from "./example0.server"
+console.debug("executing", import.meta.url)
 
 export function HomePage() {
   return (

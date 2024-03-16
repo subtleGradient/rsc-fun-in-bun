@@ -14,27 +14,6 @@ import { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule
 const ReactDOM = { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule }
 import ReactDOMServer from "react-dom/server"
 
-type IReactServerSharedInternals = {
-  ReactCurrentCache: {
-    current?: {
-      getCacheSignal: () => unknown
-      getCacheForType: (createFetchCache: () => unknown) => unknown
-    }
-  }
-}
-
-const SERVER_INTERNALS_KEY = Object.keys(React).find(key => key.includes("SERVER_INTERNALS")) ?? ""
-const ReactServerSharedInternals: IReactServerSharedInternals = (React as any)[SERVER_INTERNALS_KEY]
-
-console.assert(
-  ReactServerSharedInternals,
-  // https://github.com/oven-sh/bun/issues/8990
-  // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
-  "ReactServerSharedInternals should be defined; You may need to run with --conditions=react-server or upgrade bun",
-  process.argv,
-  Object.keys(React).filter(key => key.includes("INTERNALS")),
-)
-
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
 import { RootComponent } from "./RootComponent"

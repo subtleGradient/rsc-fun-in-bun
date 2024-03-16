@@ -22,7 +22,11 @@ plugin({
       new Proxy(
         {},
         {
-          get: (target, prop) => {
+          apply(_, that, args) {
+            console.log("proxy apply", import.meta.url, args)
+            return undefined
+          },
+          get: (_, prop) => {
             console.log("proxy get", import.meta.url, prop)
             if (prop === "then") {
               return undefined
