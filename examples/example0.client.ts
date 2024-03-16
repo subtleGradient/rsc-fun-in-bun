@@ -1,10 +1,7 @@
 /// <reference lib="dom" />
 "use client"
 
-export {} // Make this a module
-
 console.debug("executing", import.meta.url)
-console.assert(typeof window !== "undefined", "This is client-side code, so `window` should be defined.")
 
 export async function doStuffOnTheServer_definedInClientCode() {
   "use server"
