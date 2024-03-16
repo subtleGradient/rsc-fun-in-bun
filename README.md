@@ -15,14 +15,14 @@
 
 ### TODO: concrete tasks (motion, not progress)
 
-Think & plan
+#### Think & plan
 
 - [x] bad first draft of document "use client"
 - [x] bad first draft of document "use server"
 - [x] bad first draft of document RSC
 - [x] bad first draft of a plan
 
-Build stuff
+#### Build stuff
 
 - [x] create a example "use client" file
 - [x] create a example "use server" async function
@@ -32,32 +32,37 @@ Build stuff
 - [x] add ReactDOM.renderToReadableStream
 - see [example0 tests](examples/example0.test.ts) for further concrete stuff being built
 
-Build more stuff
+#### Build more stuff
 
 - [x] create an example React async server component
 - [x] add the example React async server component to the toy example project
 - [x] create an example React client component: Timer
 - [x] add Timer to the toy example project with SSG
 
-Import stuff
+#### Import stuff
 
 - [x] add importmap
 - [x] pin client dependencies to package.json versions
 - [x] figure out how to install the react-server builds of react and react-dom on the client
-- [ ] figure out how to install the react-server builds of react and react-dom on the server
-  - [ ] verify that all react imports are importing the react-server build
+  - we don't want to use the server builds on the client
+- [x] figure out how to install the react-server builds of react and react-dom on the server
+  - [x] verify that all react imports are importing the react-server build
 - [ ] figure out: do I actually need the react-server build of react and react-dom?
 
-type stuff
+#### type stuff
 
 - [x] support async component `'() => Promise<Element>' is not a valid JSX element type` error
 
-hydrate stuff
+#### learn stuff
+
+- [ ] Following along with these docs: https://www.tldraw.com/v/ewUjqL4R984F5b-qghZUC?v=-131,-3551,2315,1212&p=page
+
+#### hydrate stuff
 
 - [ ] hydration manually
 - [ ] hydration automagically based on the "use client" directive
 
-Directives
+#### Directives
 
 - [ ] Bun import plugin for "use client" imports
 - [ ] loading "use client" code on the server does
@@ -65,7 +70,7 @@ Directives
 - [ ] support loading "use server" code on the client
 - [ ] add Suspense boundary to the server component
 
-Build even more stuff
+#### Build even more stuff
 
 - figure out what to do next
 - add more tasks
@@ -127,13 +132,13 @@ Create a [Bun loader plugin](https://bun.sh/docs/runtime/plugins#loaders) that d
 To install dependencies:
 
 ```bash
-bun install
+bun i
 ```
 
 To run:
 
 ```bash
-bun run rsc-fun-in-bun.ts
+bun dev
 ```
 
 This project was created using `bun init` in bun v1.0.27. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
