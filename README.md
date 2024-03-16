@@ -59,13 +59,9 @@
 
 - [ ] Following along with these docs: https://www.tldraw.com/v/ewUjqL4R984F5b-qghZUC?v=-131,-3551,2315,1212&p=page
 
-#### hydrate stuff
-
-- [ ] hydration manually
-- [ ] hydration automagically based on the "use client" directive
-
 #### Directives
 
+- [ ] Bun import plugin for ".client.js" files
 - [ ] Bun import plugin for "use client" imports
 - [ ] loading "use client" code on the server does
 - [ ] support loading "use client" code on the server
