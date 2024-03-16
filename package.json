@@ -3,7 +3,8 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch examples/server.tsx"
+    "dev": "bun --watch --conditions=react-server examples/server.tsx",
+    "dev-broken": "bun --watch examples/server.tsx"
   },
   "devDependencies": {
     "@types/bun": "latest",

@@ -5,40 +5,53 @@
 /// <reference types="react-dom/canary" />
 /// <reference types="react-dom/experimental" />
 
-// https://github.com/oven-sh/bun/issues/8990
-// https://nodejs.org/api/cli.html#-c-condition---conditionscondition
+import { verifyReactServer } from "./verify-react-server"
 
-// import type * as ReactType from "react/canary"
-// @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
-// const React = (await import("../node_modules/react/react.react-server.js")) as typeof ReactType
-// if (!("__SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED" in React))
-//   throw new Error("expected the React build with server internals")
+verifyReactServer()
 
-import ReactDOM from "react-dom/server"
-// import type * as ReactDOMType from "react-dom/canary"
-// @ ts-expect-error -- couldn't figure out how to pass --conditions to bun
-// const ReactDOM = (await import("../node_modules/react-dom/react-dom.react-server.js")) as typeof ReactDOMType
-// TODO: figure out how to verify that ReactDOM is the server build
-// TODO: figure out how to make sure that ReactDOM is not requiring a different React file
+import React from "react"
+import { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule } from "react-dom"
+const ReactDOM = { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule }
+import ReactDOMServer from "react-dom/server"
+
+type IReactServerSharedInternals = {
+  ReactCurrentCache: {
+    current?: {
+      getCacheSignal: () => unknown
+      getCacheForType: (createFetchCache: () => unknown) => unknown
+    }
+  }
+}
+
+const SERVER_INTERNALS_KEY = Object.keys(React).find(key => key.includes("SERVER_INTERNALS")) ?? ""
+const ReactServerSharedInternals: IReactServerSharedInternals = (React as any)[SERVER_INTERNALS_KEY]
+
+console.assert(
+  ReactServerSharedInternals,
+  // https://github.com/oven-sh/bun/issues/8990
+  // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
+  "ReactServerSharedInternals should be defined; You may need to run with --conditions=react-server or upgrade bun",
+  process.argv,
+  Object.keys(React).filter(key => key.includes("INTERNALS")),
+)
 
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
 import { RootComponent } from "./RootComponent"
+import { js } from "./js"
 
-function js(strings: TemplateStringsArray, ...values: unknown[]) {
-  let source = ""
-  for (let i = 0; i < strings.length; i++) {
-    source += strings[i]
-    if (i < values.length) {
-      const value = values[i]
-      source += typeof value === "function" ? value.toString() : JSON.stringify(value)
-    }
-  }
-  return source
-}
+const transpiler = new Bun.Transpiler()
 
-function router(req: Request): Response | Promise<Response> {
+async function router(req: Request): Promise<Response> {
   const url = new URL(req.url)
+
+  if (await Bun.file(url.pathname).exists()) {
+    return new Response(await transpiler.transform(await Bun.file(url.pathname).text(), "tsx"), {
+      headers: { "Content-Type": "application/javascript" },
+    })
+  } else {
+    console.log("file does not exist", url.pathname)
+  }
 
   if (url.pathname === browser.pathname) {
     return new Response(browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
@@ -91,7 +104,7 @@ async function serveHome(req: Request): Promise<Response> {
 
   const timestamp = Date.now().toString(36)
 
-  const reactStream = await ReactDOM.renderToReadableStream(
+  const reactStream = await ReactDOMServer.renderToReadableStream(
     /** 0. injected as an html string */
     children,
     {
@@ -117,11 +130,12 @@ async function serveHome(req: Request): Promise<Response> {
       /** 3.
        * <link rel=modulepreload fetchpriority=low href={bootstrapModules[number]}> // injected in the head
        * <script type=module src={bootstrapModules[number]} /> // injected at the end of the body
+       * but this gets injected before we can render a ImportMap_fromPackage
        */
       bootstrapModules: [
         // `bootstrapModule0.module.js?_=${timestamp}`,
         // `bootstrapModule1.module.js?_=${timestamp}`,
-        `${browser.pathname}?_=${timestamp}`,
+        // `${browser.pathname}?_=${timestamp}`,
       ],
 
       // identifierPrefix: "renderToReadableStream identifierPrefix",
