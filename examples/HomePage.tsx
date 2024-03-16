@@ -1,5 +1,4 @@
 import { $ } from "bun"
-import { HydrateInnards } from "./HydrateInnards"
 import { Timer } from "./Timer.client"
 import { doStuffOnTheServer_definedInClientCode } from "./example0.client"
 import { doStuffOnTheServer } from "./example0.server"
@@ -11,8 +10,6 @@ export function HomePage() {
       <h2>
         <Timer />
       </h2>
-
-      <HydrateInnards Component={Timer} src={new URL("./Timer.client.tsx", import.meta.url).pathname} method="Timer" />
 
       <Uname />
       <ServerCode_fromUseClientFile />
