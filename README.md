@@ -47,7 +47,9 @@
   - we don't want to use the server builds on the client
 - [x] figure out how to install the react-server builds of react and react-dom on the server
   - [x] verify that all react imports are importing the react-server build
+- [x] bun now supports --conditions flags, simplifying react-erver imports
 - [ ] figure out: do I actually need the react-server build of react and react-dom?
+- [x] import react-server-dom-webpack
 
 #### type stuff
 

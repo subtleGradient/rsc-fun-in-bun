@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "react": "canary",
-    "react-dom": "canary"
+    "react-dom": "canary",
+    "react-server-dom-webpack": "canary"
   }
 }
