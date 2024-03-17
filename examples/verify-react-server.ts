@@ -1,6 +1,5 @@
 import React from "react"
 import ReactDOM from "react-dom"
-import * as RSDWClient from "react-server-dom-webpack/client"
 import * as RSDWServer from "react-server-dom-webpack/server"
 
 type IReactServerSharedInternals = {
@@ -39,5 +38,4 @@ export function verifyReactServer() {
     )
 
   const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
-  console.log(proxy)
 }
