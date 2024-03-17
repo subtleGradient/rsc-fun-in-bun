@@ -1,5 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
+import * as RSDWClient from "react-server-dom-webpack/client"
+import * as RSDWServer from "react-server-dom-webpack/server"
 
 type IReactServerSharedInternals = {
   ReactCurrentCache: {
@@ -10,8 +12,9 @@ type IReactServerSharedInternals = {
   }
 }
 export function verifyReactServer() {
-  const SERVER_INTERNALS_KEY = Object.keys(React).find(key => key.includes("SERVER_INTERNALS")) ?? ""
-  const ReactServerSharedInternals: IReactServerSharedInternals = (React as any)[SERVER_INTERNALS_KEY]
+  const ReactSharedInternals = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+  const ReactServerSharedInternals: IReactServerSharedInternals = (React as any)
+    .__SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 
   if (!ReactServerSharedInternals)
     console.warn(
@@ -25,9 +28,16 @@ export function verifyReactServer() {
       },
     )
 
+  const ReactDOMSharedInternals = (ReactDOM as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+  if (!ReactDOMSharedInternals?.ReactDOMCurrentDispatcher?.current)
+    console.warn("ReactDOMCurrentDispatcher.current should be defined")
+
   if (ReactDOM.render != null)
     console.warn(
       "ReactDOMServer.render should NOT be defined on the server",
       "You may need to run with --conditions=react-server or upgrade bun",
     )
+
+  const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
+  console.log(proxy)
 }
