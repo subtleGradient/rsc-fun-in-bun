@@ -1,4 +1,4 @@
-export async function HomeLayout({ children }: { children: React.ReactNode }) {
+export function HomeLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>

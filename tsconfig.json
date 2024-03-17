@@ -16,6 +16,8 @@
     /* Linting */
     "strict": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "types": ["react", "react-dom", "react/canary", "react-dom/canary", "react/experimental", "react-dom/experimental"]
   }
 }
