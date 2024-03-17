@@ -1,8 +1,23 @@
+declare module "react-server-dom-webpack/server.browser" {
+  export * from "react-server-dom-webpack/server.edge"
+}
+
+// so you can quick jump to the code
+if (!1!) import("./node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.edge.development.js")
+declare module "react-server-dom-webpack/server.edge" {
+  export * from "react-server-dom-webpack/server"
+  export const renderToPipeableStream: never
+}
+
 // so you can quick jump to the code
 if (!1!) import("./node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.development.js")
+declare module "react-server-dom-webpack/server.node" {
+  export * from "react-server-dom-webpack/server"
+  export const renderToPipeableStream: never
+}
 
 declare module "react-server-dom-webpack/server" {
-  import { Readable } from "stream"
+  import type { Readable } from "stream"
 
   type BundlerConfig = any // Placeholder type for Bundler Config
   type ServerComponentResponse = any // Placeholder type for Server Component Response
@@ -11,24 +26,6 @@ declare module "react-server-dom-webpack/server" {
   type EnvironmentName = string
   type OnPostponeHandler = (reason?: any) => void
   type Model = any // Placeholder for model data type
-
-  /**
-   * Options for rendering to a pipeable stream.
-   */
-  interface RenderToPipeableStreamOptions {
-    onError?: ErrorHandler
-    identifierPrefix?: IdentifierPrefix
-    onPostpone?: OnPostponeHandler
-    environmentName?: EnvironmentName
-  }
-
-  /**
-   * Result of rendering to a pipeable stream.
-   */
-  interface PipeableStream {
-    pipe: (destination: Writable) => Writable
-    abort: (reason: string) => void
-  }
 
   /**
    * Represents an action result.
@@ -94,6 +91,30 @@ declare module "react-server-dom-webpack/server" {
    * @param exportName The name of the export.
    */
   export function registerServerReference(reference: any, id: string, exportName: string | null): void
+
+  /**
+   * Options for rendering to a pipeable stream.
+   */
+  interface RenderToPipeableStreamOptions {
+    onError?: ErrorHandler
+    identifierPrefix?: IdentifierPrefix
+    onPostpone?: OnPostponeHandler
+    environmentName?: EnvironmentName
+  }
+
+  import type { PipeableStream } from "react-dom/server"
+
+  /**
+   * Renders a React component to a readable stream.
+   * @param model The model to render.
+   * @param webpackMap The webpack map for module resolution.
+   * @param options Options for rendering.
+   */
+  export function renderToReadableStream(
+    model: Model,
+    webpackMap: BundlerConfig,
+    options?: RenderToPipeableStreamOptions & { signal?: AbortSignal },
+  ): ReadableStream
 
   /**
    * Renders a React component to a pipeable stream.

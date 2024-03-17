@@ -38,4 +38,7 @@ export function verifyReactServer() {
     )
 
   const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
+
+  const ReactCurrentCache = ReactSharedInternals?.ReactCurrentCache
+  if (!ReactCurrentCache?.current) console.warn("ReactCurrentCache.current.getCacheSignal should be defined")
 }

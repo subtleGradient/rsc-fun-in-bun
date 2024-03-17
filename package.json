@@ -3,7 +3,7 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch --conditions=react-server examples/server.tsx",
+    "dev": "bun --watch --conditions=react-server --conditions=edge-light examples/server.tsx",
     "dev-broken": "bun --watch examples/server.tsx"
   },
   "devDependencies": {
@@ -15,8 +15,10 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@types/use-sync-external-store": "^0.0.6",
     "react": "canary",
     "react-dom": "canary",
-    "react-server-dom-webpack": "canary"
+    "react-server-dom-webpack": "canary",
+    "use-sync-external-store": "canary"
   }
 }

@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import { useSyncExternalStore } from "use-sync-external-store/shim"
 
 function intervalStore(onStoreChange: () => void) {
   const interval = setInterval(onStoreChange, 1000)
@@ -8,7 +8,7 @@ function intervalStore(onStoreChange: () => void) {
 }
 
 export function Timer() {
-  React.useSyncExternalStore(intervalStore, Math.random, Math.random)
+  useSyncExternalStore(intervalStore, Math.random, Math.random)
 
   return <>{new Date().toLocaleTimeString()}</>
 }

@@ -7,8 +7,9 @@
 
 import React from "react"
 import ReactDOM from "react-dom"
+import ReactDOMServer from "react-dom/server"
 import * as RSDWClient from "react-server-dom-webpack/client"
-import * as RSDWServer from "react-server-dom-webpack/server"
+import * as RSDWServer from "react-server-dom-webpack/server.edge"
 
 if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
@@ -85,10 +86,11 @@ async function serveHome(req: Request): Promise<Response> {
 
   const timestamp = Date.now().toString(36)
 
-  const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
-  console.log({ proxy })
+  // const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
 
-  const reactStream = "lulz"
+  // const reactStream = RSDWServer.renderToPipeableStream(children, {})
+  // const reactStream = RSDWServer.renderToReadableStream(children, {})
+  const reactStream = await ReactDOMServer.renderToReadableStream(children, {})
 
   const response = new Response(reactStream, {
     headers: { "Content-Type": "text/html" },
