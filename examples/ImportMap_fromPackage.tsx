@@ -1,18 +1,20 @@
 import { $ } from "bun"
 import { ImportMap } from "./ImportMap"
 
+type npm_ls = { dependencies: { [key: string]: { version: string } } }
+
 export async function ImportMap_fromPackage() {
-  const react = await $`npm ls react --json`.json()
-  const react_dom = await $`npm ls react-dom --json`.json()
+  const { dependencies } = (await $`npm ls react react-dom react-server-dom-webpack --json`.json()) as npm_ls
+  const esm = (name: string) => `https://esm.run/${name}@${dependencies[name].version}`
   return (
     <ImportMap
       imports={{
-        // "*": `https://cdn.jsdelivr.net`,
-        // react: `https://cdn.jsdelivr.net/npm/react@${react.dependencies.react.version}/react.react-server.js/+esm`,
-        // "": "https://cdn.jsdelivr.net/npm/react@react.dependencies.react.version/jsx-dev-runtime.min.js",
-        react: `https://cdn.jsdelivr.net/npm/react@${react.dependencies.react.version}/+esm`,
-        "react-dom": `https://cdn.jsdelivr.net/npm/react-dom@${react_dom.dependencies["react-dom"].version}/cjs/react-dom.development.js/+esm`,
-        "react-dom/client": `https://cdn.jsdelivr.net/npm/react-dom@${react_dom.dependencies["react-dom"].version}/client/+esm`,
+        "*": `https://esm.run/`,
+        react: esm("react"),
+        "react-dom": `${esm("react-dom")}/cjs/react-dom.development.\js`,
+        "react-dom/client": `${esm("react-dom")}/client`,
+        "react-server-dom-webpack/client":
+          esm("react-server-dom-webpack") + `/cjs/react-server-dom-webpack-client.development.\js`,
       }}
     />
   )
