@@ -1,3 +1,6 @@
+export const ts = js
+export const tsx = js
+export const jsx = js
 export function js(strings: TemplateStringsArray, ...values: unknown[]) {
   let source = ""
   for (let i = 0; i < strings.length; i++) {
