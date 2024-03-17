@@ -7,10 +7,8 @@
 
 import React from "react"
 import ReactDOM from "react-dom"
-// @ts-expect-error
-import * as RSDWServer from "react-server-dom-webpack/server"
-// @ts-expect-error
 import * as RSDWClient from "react-server-dom-webpack/client"
+import * as RSDWServer from "react-server-dom-webpack/server"
 
 if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
