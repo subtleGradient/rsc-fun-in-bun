@@ -7,9 +7,11 @@
 
 import React from "react"
 import ReactDOM from "react-dom"
-import ReactDOMServer from "react-dom/server"
 import * as RSDWClient from "react-server-dom-webpack/client"
 import * as RSDWServer from "react-server-dom-webpack/server.edge"
+// @ts-expect-error -- no types?
+import ReactDOMServer from "react-dom/server.browser"
+console.log(!!ReactDOMServer)
 
 if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
@@ -89,10 +91,19 @@ async function serveHome(req: Request): Promise<Response> {
   // const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
 
   // const reactStream = RSDWServer.renderToPipeableStream(children, {})
-  // const reactStream = RSDWServer.renderToReadableStream(children, {})
-  const reactStream = await ReactDOMServer.renderToReadableStream(children, {})
+  const rscStream = RSDWServer.renderToReadableStream(children, await import("./ReactClientManifest.json"), {
+    onError: error => {
+      console.error("Error rendering", error)
+    },
+    identifierPrefix: "identifierPrefix",
+    environmentName: "environmentName",
+    onPostpone: postpone => {
+      console.log("Postponing", postpone)
+    },
+  })
+  // const reactStream = await ReactDOMServer.renderToReadableStream(children, {})
 
-  const response = new Response(reactStream, {
+  const response = new Response(rscStream, {
     headers: { "Content-Type": "text/html" },
   })
 

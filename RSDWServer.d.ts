@@ -19,7 +19,8 @@ declare module "react-server-dom-webpack/server.node" {
 declare module "react-server-dom-webpack/server" {
   import type { Readable } from "stream"
 
-  type BundlerConfig = any // Placeholder type for Bundler Config
+  type ModulePath = string
+  type BundlerConfig = Record<ModulePath, unknown> // Placeholder type for Bundler Config
   type ServerComponentResponse = any // Placeholder type for Server Component Response
   type ErrorHandler = (error: Error) => void
   type IdentifierPrefix = string
