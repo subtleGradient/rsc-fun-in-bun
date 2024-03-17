@@ -7,12 +7,10 @@
     "dev-broken": "bun --watch examples/server.tsx"
   },
   "devDependencies": {
+    "typescript": "^5.4.2",
     "@types/bun": "latest",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@types/use-sync-external-store": "^0.0.6",
