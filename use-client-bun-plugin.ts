@@ -1,5 +1,5 @@
 import { plugin, Transpiler, type JavaScriptLoader } from "bun"
-const transpiler = new Transpiler()
+
 const tsx = String.raw
 const html = String.raw
 
@@ -13,8 +13,10 @@ export const __NAME__ = Object.assign(() => {
 })
 `
 const generateClientExport = (name: string, fileUrl: string) => {
+  // const modProxy = createClientModuleProxy(fileUrl)
+  // console.log("modProxy", modProxy)
   recentlyImportedClientStuff.set(name, fileUrl)
-  fileUrl = fileUrl.replace(process.cwd(), "").replace(/\\/g, "/")
+  fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
   return TEMPLATE_CLIENT_EXPORT.replace(/__NAME__/g, name).replace(/__FILE_URL__/g, fileUrl)
 }
 
@@ -37,12 +39,28 @@ plugin({
   name: "React RSC use client (server)",
   target: "bun",
   async setup(builder) {
-    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)$/ }, async args => {
-      // console.log("plugin; importing", args.path)
+    const transpiler = new Transpiler({
+      target: "browser",
+      allowBunRuntime: false,
+      minifyWhitespace: false,
+      inline: false,
+      autoImportJSX: true,
+      trimUnusedImports: false,
+      deadCodeElimination: false,
+      jsxOptimizationInline: false,
+      treeShaking: false,
+      // define,
+      // exports,
+      // loader,
+      // logLevel,
+      // macro,
+      // tsconfig,
+    })
+
+    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)#SERVER$/ }, async args => {
       const content = await Bun.file(args.path).text()
       const ext = args.path.split(".").pop() as JavaScriptLoader
       const mod = transpiler.scan(await transpiler.transform(content, ext))
-      // console.log(args.path, mod.exports)
       const exportsCode = mod.exports.map(key => generateClientExport(key, args.path)).join("\n")
 
       const contents = tsx`
