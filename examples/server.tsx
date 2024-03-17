@@ -5,14 +5,18 @@
 /// <reference types="react-dom/canary" />
 /// <reference types="react-dom/experimental" />
 
+import React from "react"
+import ReactDOM from "react-dom"
+// @ts-expect-error
+import * as RSDWServer from "react-server-dom-webpack/server"
+// @ts-expect-error
+import * as RSDWClient from "react-server-dom-webpack/client"
+
+if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
+
 import { verifyReactServer } from "./verify-react-server"
 
 verifyReactServer()
-
-import React from "react"
-import { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule } from "react-dom"
-const ReactDOM = { preconnect, prefetchDNS, preinit, preinitModule, preload, preloadModule }
-import ReactDOMServer from "react-dom/server"
 
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
@@ -83,46 +87,10 @@ async function serveHome(req: Request): Promise<Response> {
 
   const timestamp = Date.now().toString(36)
 
-  const reactStream = await ReactDOMServer.renderToReadableStream(
-    /** 0. injected as an html string */
-    children,
-    {
-      signal: req.signal,
+  const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
+  console.log({ proxy })
 
-      onError(error, errorInfo) {
-        console.error("ReactDOM.renderToReadableStream", error, errorInfo)
-        return "An error occurred"
-      },
-
-      /** 1. injected as `<script>${bootstrapScriptContent}</script>` immediately after the react children */
-      bootstrapScriptContent: "console.log('Hello from renderToReadableStream bootstrapScriptContent!')",
-
-      /** 2.
-       * <link rel=preload as=script fetchpriority=low href={bootstrapScripts[number]}> // injected in the head
-       * <script async src={bootstrapScripts[number]} /> // injected at the end of the body
-       */
-      bootstrapScripts: [
-        // `bootstrapScript0.browser.js?_=${timestamp}`, //
-        // `bootstrapScript1.browser.js?_=${timestamp}`,
-      ],
-
-      /** 3.
-       * <link rel=modulepreload fetchpriority=low href={bootstrapModules[number]}> // injected in the head
-       * <script type=module src={bootstrapModules[number]} /> // injected at the end of the body
-       * but this gets injected before we can render a ImportMap_fromPackage
-       */
-      bootstrapModules: [
-        // `bootstrapModule0.module.js?_=${timestamp}`,
-        // `bootstrapModule1.module.js?_=${timestamp}`,
-        // `${browser.pathname}?_=${timestamp}`,
-      ],
-
-      // identifierPrefix: "renderToReadableStream identifierPrefix",
-      // namespaceURI: "http://www.w3.org/1999/xhtml",
-      // nonce: "renderToReadableStream nonce",
-      // progressiveChunkSize: 1024,
-    },
-  )
+  const reactStream = "lulz"
 
   const response = new Response(reactStream, {
     headers: { "Content-Type": "text/html" },
