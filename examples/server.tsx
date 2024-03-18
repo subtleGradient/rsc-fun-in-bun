@@ -1,16 +1,14 @@
-import React from "react"
-import ReactDOM from "react-dom"
-import * as RSDWClient from "react-server-dom-webpack/client"
-import * as RSDWServer from "react-server-dom-webpack/server.edge"
-// @ts-expect-error -- no types?
-import ReactDOMServer from "react-dom/server.browser"
-console.log(!!ReactDOMServer)
-
-if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
-
 import { verifyReactServer } from "./verify-react-server"
 
-verifyReactServer()
+await verifyReactServer()
+
+import React from "react"
+import ReactDOM from "react-dom"
+// import ReactDOMServer from "react-dom/server.bun" // importing it here breaks because of ReactCurrentCache
+import RSDWClient from "react-server-dom-webpack/client"
+import RSDWServer from "react-server-dom-webpack/server.edge"
+
+if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
@@ -31,7 +29,11 @@ async function router(req: Request): Promise<Response> {
   }
 
   if (url.pathname === browser.pathname) {
-    return new Response(browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
+    return new Response(await browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
+  }
+
+  if (url.pathname === RSC.pathname) {
+    return new Response(await RSC.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
   }
 
   if (url.pathname.endsWith(".js")) {
@@ -44,6 +46,40 @@ async function router(req: Request): Promise<Response> {
   return new Response("404", { status: 404 })
 }
 
+const RSC = Object.assign(
+  () => {
+    console.log("Hello from RSC!")
+    console.debug("executing", import.meta.url)
+    console.assert(typeof window === "undefined", "This is server-side code, so `window` should not be defined.")
+  },
+  {
+    pathname: "/rsc.js",
+    toModuleSource: async () => {
+      const rscStream = RSDWServer.renderToReadableStream(<HomePage />, await import("./ReactClientManifest.json"), {
+        onError: error => {
+          console.error("Error rendering", error)
+        },
+        identifierPrefix: "identifierPrefix",
+        environmentName: "environmentName",
+        onPostpone: postpone => {
+          console.log("Postponing", postpone)
+        },
+      })
+
+      const decoder = new TextDecoder()
+
+      return rscStream.pipeThrough(
+        new TransformStream({
+          transform: (chunk, controller) => {
+            // console.log("chunk", decoder.decode(chunk))
+            controller.enqueue(`CHONK! (${decoder.decode(chunk)})\n\n`)
+          },
+        }),
+      )
+    },
+  },
+)
+
 const browser = Object.assign(
   () => {
     console.log("Hello from browser!")
@@ -52,7 +88,7 @@ const browser = Object.assign(
   },
   {
     pathname: "/browser.js",
-    toModuleSource: () => js`
+    toModuleSource: async () => js`
       import React from "react"
       import ReactDOM from "react-dom"
       import ReactDOM_client from "react-dom/client"
@@ -76,27 +112,16 @@ async function serveHome(req: Request): Promise<Response> {
       <HomeLayout>
         <HomePage />
       </HomeLayout>
+
+      <script src={browser.pathname}></script>
+      <script src={RSC.pathname}></script>
     </RootComponent>
   )
 
-  const timestamp = Date.now().toString(36)
+  const ReactDOMServer = await import("react-dom/server")
+  const htmlStream = await ReactDOMServer.renderToReadableStream(children, {})
 
-  // const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
-
-  // const reactStream = RSDWServer.renderToPipeableStream(children, {})
-  const rscStream = RSDWServer.renderToReadableStream(children, await import("./ReactClientManifest.json"), {
-    onError: error => {
-      console.error("Error rendering", error)
-    },
-    identifierPrefix: "identifierPrefix",
-    environmentName: "environmentName",
-    onPostpone: postpone => {
-      console.log("Postponing", postpone)
-    },
-  })
-  // const reactStream = await ReactDOMServer.renderToReadableStream(children, {})
-
-  const response = new Response(rscStream, {
+  const response = new Response(htmlStream, {
     headers: { "Content-Type": "text/html" },
   })
 

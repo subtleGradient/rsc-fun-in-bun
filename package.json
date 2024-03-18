@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun --watch --conditions=react-server examples/server.tsx",
+    "dev-debug": "bun --watch --conditions=react-server examples/server.tsx",
     "dev-broken": "bun --watch examples/server.tsx"
   },
   "devDependencies": {

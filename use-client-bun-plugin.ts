@@ -1,7 +1,8 @@
-import { plugin, Transpiler, type JavaScriptLoader } from "bun"
+/// <reference types="bun" />
 
-const tsx = String.raw
-const html = String.raw
+import { plugin, Transpiler, type JavaScriptLoader } from "bun"
+import { createClientModuleProxy } from "react-server-dom-webpack/server.edge"
+import { tsx } from "./examples/js"
 
 const TEMPLATE_CLIENT_EXPORT = tsx`
 export const __NAME__ = Object.assign(
@@ -10,12 +11,15 @@ export const __NAME__ = Object.assign(
 )
 `
 const generateClientExport = (name: string, fileUrl: string) => {
-  // const modProxy = createClientModuleProxy(fileUrl)
-  // console.log("modProxy", modProxy)
   fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
   const $$id = `${fileUrl}#${name}`
-  ReactClientManifest[$$id] = {} // TODO: What goes here?
-  return TEMPLATE_CLIENT_EXPORT.replace(/__NAME__/g, name).replace(/__ID__/g, $$id)
+  ReactClientManifest[$$id] = createClientModuleProxy(fileUrl)
+  return (
+    TEMPLATE_CLIENT_EXPORT
+      //
+      .replace(/__NAME__/g, name)
+      .replace(/__ID__/g, $$id)
+  )
 }
 
 const ReactClientManifest: Record<string, unknown> = {}
@@ -51,7 +55,7 @@ plugin({
       // tsconfig,
     })
 
-    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)$/ }, async args => {
+    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)#DISABLED$/ }, async args => {
       const content = await Bun.file(args.path).text()
       const ext = args.path.split(".").pop() as JavaScriptLoader
       const mod = transpiler.scan(await transpiler.transform(content, ext))

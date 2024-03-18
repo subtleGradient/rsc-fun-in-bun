@@ -2,19 +2,37 @@ import React from "react"
 import ReactDOM from "react-dom"
 import * as RSDWServer from "react-server-dom-webpack/server"
 
-type IReactServerSharedInternals = {
-  ReactCurrentCache: {
-    current?: {
-      getCacheSignal: () => unknown
-      getCacheForType: (createFetchCache: () => unknown) => unknown
-    }
+type ReactCurrentCache = {
+  current: null | {
+    getCacheSignal: () => unknown
+    getCacheForType: (createFetchCache: () => unknown) => unknown
   }
 }
-export function verifyReactServer() {
-  const ReactSharedInternals = (React as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
-  const ReactServerSharedInternals: IReactServerSharedInternals = (React as any)
-    .__SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
 
+type ReactSharedInternals_OG = {
+  ReactCurrentCache: ReactCurrentCache
+}
+type ReactSharedInternals_react_server = {
+  ReactCurrentCache: undefined
+}
+type ReactServerSharedInternals = {
+  ReactCurrentCache: ReactCurrentCache
+}
+
+type ReactInnards = {
+  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals_OG | ReactSharedInternals_react_server
+  __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: ReactServerSharedInternals
+}
+
+export async function verifyReactServer() {
+  const ReactInnards: ReactInnards = React as any
+
+  const {
+    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals,
+    __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactServerSharedInternals,
+  } = ReactInnards
+
+  // react with react-server condition
   if (!ReactServerSharedInternals)
     console.warn(
       // https://github.com/oven-sh/bun/issues/8990
@@ -27,6 +45,10 @@ export function verifyReactServer() {
       },
     )
 
+  // RSDWServer
+  const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
+
+  // ReactDOM
   const ReactDOMSharedInternals = (ReactDOM as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
   if (!ReactDOMSharedInternals?.ReactDOMCurrentDispatcher?.current)
     console.warn("ReactDOMCurrentDispatcher.current should be defined")
@@ -37,8 +59,16 @@ export function verifyReactServer() {
       "You may need to run with --conditions=react-server or upgrade bun",
     )
 
-  const proxy = RSDWServer.createClientModuleProxy("file://some/path/Client.tsx")
+  // ReactDOMServer
+  console.log("ReactDOMServer.renderToString")
+  const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache ?? ReactServerSharedInternals?.ReactCurrentCache
+  ReactSharedInternals.ReactCurrentCache ??= ReactCurrentCache
+  if (!(typeof ReactCurrentCache === "object" && "current" in ReactCurrentCache))
+    console.warn("ReactSharedInternals.ReactCurrentCache.current should be defined")
 
-  const ReactCurrentCache = ReactSharedInternals?.ReactCurrentCache
-  if (!ReactCurrentCache?.current) console.warn("ReactCurrentCache.current should be defined")
+  const ReactDOMServer = await import("react-dom/server")
+
+  ReactDOMServer.renderToString(React.createElement("div"))
+  // console.log("ReactDOMServer.renderToReadableStream")
+  // ReactDOMServer.renderToReadableStream(React.createElement("div"))
 }
