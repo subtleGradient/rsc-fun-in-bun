@@ -2,18 +2,11 @@
 
 import { plugin, Transpiler, type JavaScriptLoader } from "bun"
 import { registerClientReference } from "react-server-dom-webpack/server.edge"
-import { tsx } from "./examples/js"
 
-const TEMPLATE_CLIENT_EXPORT = tsx`
-export const __NAME__ = Object.assign(
-  () => { throw new Error("'use client' function '__NAME__' called on the server") },
-  { $$typeof: Symbol.for("react.client.reference"), $$id: "__ID__" }
-)
-`
 const generateClientExport = (displayName: string, fileUrl: string) => {
   fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
   const $$id = `${fileUrl}#${displayName}`
-  ReactClientManifest[$$id] = [fileUrl, displayName]
+  ReactClientManifest[$$id] = { id: fileUrl, chunks: [], name: displayName }
   return registerClientReference(Object.assign(ClientComponent_onTheServer, { displayName }), fileUrl, displayName)
 
   function ClientComponent_onTheServer() {
@@ -21,7 +14,7 @@ const generateClientExport = (displayName: string, fileUrl: string) => {
   }
 }
 
-const ReactClientManifest: Record<string, [fileId: string, exportId: string]> = {}
+const ReactClientManifest: Record<string, ReactClientManifestRecord> = {}
 
 plugin({
   name: "React Client Manifest",
@@ -55,24 +48,35 @@ plugin({
     })
 
     builder.onLoad({ filter: /\.client\.(jsx?|tsx?)$/ }, async args => {
-      const moduleSourceOriginal = await Bun.file(args.path).text()
-      const ext = args.path.split(".").pop() as JavaScriptLoader
-      const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)
-      const moduleIO = transpiler.scan(moduleSourceTransformed)
+      let exports = clientProxyCache.get(args.path)
+      if (!exports) {
+        exports = {}
+        const moduleSourceOriginal = await Bun.file(args.path).text()
+        const ext = args.path.split(".").pop() as JavaScriptLoader
+        const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)
+        const moduleIO = transpiler.scan(moduleSourceTransformed)
 
-      // const moduleSourceTransformedWithNoComments = moduleSourceTransformed
-      //   .replace(/\/\/.*$/gm, "")
-      //   .replace(/\/\*.*\*\//g, "")
+        // const moduleSourceTransformedWithNoComments = moduleSourceTransformed
+        //   .replace(/\/\/.*$/gm, "")
+        //   .replace(/\/\*.*\*\//g, "")
 
-      // TODO: look at the first line of the moduleSource to see if it has "use client" or "use server"
-      // TODO: look at the first line of the exported function to see if it has "use server"
+        // TODO: look at the first line of the moduleSource to see if it has "use client" or "use server"
+        // TODO: look at the first line of the exported function to see if it has "use server"
 
-      const exports: Record<string, ReturnType<typeof generateClientExport>> = {}
-      moduleIO.exports.forEach(key => {
-        exports[key] = generateClientExport(key, args.path)
-      })
+        moduleIO.exports.forEach(key => {
+          exports![key] = generateClientExport(key, args.path)
+        })
+
+        clientProxyCache.set(args.path, exports)
+      }
 
       return { loader: "object", exports }
     })
   },
 })
+
+type ClientExport = ReturnType<typeof generateClientExport>
+type ClientProxyExports = Record<string, ClientExport>
+const clientProxyCache = new Map<string, ClientProxyExports>()
+
+type ReactClientManifestRecord = { id: string; chunks: unknown; name: string }

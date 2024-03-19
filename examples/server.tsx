@@ -2,7 +2,7 @@ import { verifyReactServer } from "./verify-react-server"
 
 await verifyReactServer()
 
-import React from "react"
+import React, { Suspense } from "react"
 import ReactDOM from "react-dom"
 // import ReactDOMServer from "react-dom/server.bun" // importing it here breaks because of ReactCurrentCache
 import RSDWClient from "react-server-dom-webpack/client"
@@ -66,9 +66,19 @@ const RSC2 = Object.assign(
   {
     pathname: "/rsc.html",
     toModuleSource: async () => {
+      const Sleep = async () => {
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        return <>Slept for 1 second</>
+      }
+
       const children = (
         <div>
+          <h1>Hello from RSC!</h1>
+          <Sleep />
           <Timer />
+          <Suspense fallback="Loading...">
+            <Sleep />
+          </Suspense>
         </div>
       )
 
@@ -91,7 +101,9 @@ const RSC2 = Object.assign(
       const ReactDOMServer = await import("react-dom/server")
       const htmlStream = arrayToStream(
         html`<!DOCTYPE html>`,
+        "\n",
         `<HTML>`,
+        "\n",
         ReactDOMServer.renderToString(
           <>
             <head>
@@ -99,17 +111,24 @@ const RSC2 = Object.assign(
             </head>
           </>,
         ),
+        "\n",
         `<BODY>`,
+        "\n",
         ReactDOMServer.renderToString(
           <>
             <h1>Hello from RSC!</h1>
           </>,
         ),
+        "\n",
       )
 
-      const rscChonkToScript = createTextTransformStream(
-        rsc => `<script>${js`(self.__RSC??=[]).push(...${[rsc]})`}</script>` + "\n\n",
-      )
+      let lastTime = Date.now()
+
+      const rscChonkToScript = createTextTransformStream(rsc => {
+        const elapsed = Date.now() - lastTime
+        lastTime = Date.now()
+        return `<script>/* elapsed = ${elapsed}ms */${js`(self.__RSC??=[]).push(\`${rsc}\`)`}</script>` + "\n\n"
+      })
 
       return concatStreams(htmlStream, rscStream.pipeThrough(rscChonkToScript), arrayToStream(html`</BODY></HTML>`))
     },
