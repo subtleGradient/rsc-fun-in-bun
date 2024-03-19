@@ -61,7 +61,7 @@
 
 #### Directives
 
-- [ ] Bun import plugin for ".client.js" files
+- [x] Bun import plugin for ".client.js" files (mostly working, needs more tests)
 - [ ] Bun import plugin for "use client" imports
 - [ ] loading "use client" code on the server does
 - [ ] support loading "use client" code on the server
