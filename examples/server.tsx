@@ -10,10 +10,14 @@ import RSDWServer from "react-server-dom-webpack/server.edge"
 
 if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
+import { arrayToStream } from "../util/arrayToStream"
+import { concatStreams } from "../util/compoReadableStream"
+import { createTextTransformStream } from "../util/createTransformStream"
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
 import { RootComponent } from "./RootComponent"
-import { js } from "./js"
+import { Timer } from "./Timer.client"
+import { html, js } from "./js"
 
 const transpiler = new Bun.Transpiler()
 
@@ -24,16 +28,23 @@ async function router(req: Request): Promise<Response> {
     return new Response(await transpiler.transform(await Bun.file(url.pathname).text(), "tsx"), {
       headers: { "Content-Type": "application/javascript" },
     })
-  } else {
-    console.log("file does not exist", url.pathname)
   }
 
   if (url.pathname === browser.pathname) {
     return new Response(await browser.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
   }
 
+  if (url.pathname === RSC2.pathname) {
+    return new Response(await RSC2.toModuleSource(), { headers: { "Content-Type": "text/html" } })
+  }
+
   if (url.pathname === RSC.pathname) {
-    return new Response(await RSC.toModuleSource(), { headers: { "Content-Type": "application/javascript" } })
+    return new Response(await RSC.toModuleSource(), {
+      headers: {
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-store",
+      },
+    })
   }
 
   if (url.pathname.endsWith(".js")) {
@@ -45,6 +56,65 @@ async function router(req: Request): Promise<Response> {
 
   return new Response("404", { status: 404 })
 }
+
+const RSC2 = Object.assign(
+  () => {
+    console.log("Hello from RSC!")
+    console.debug("executing", import.meta.url)
+    console.assert(typeof window === "undefined", "This is server-side code, so `window` should not be defined.")
+  },
+  {
+    pathname: "/rsc.html",
+    toModuleSource: async () => {
+      const children = (
+        <div>
+          <Timer />
+        </div>
+      )
+
+      console.log((Timer as any).$$id)
+
+      const ReactClientManifest = await import("./ReactClientManifest.json")
+      console.log({ ReactClientManifest })
+
+      const rscStream = RSDWServer.renderToReadableStream(children, ReactClientManifest, {
+        onError: error => {
+          console.error("Error rendering", error)
+        },
+        // identifierPrefix: "identifierPrefix",
+        // environmentName: "environmentName",
+        onPostpone: postpone => {
+          console.log("Postponing", postpone)
+        },
+      })
+
+      const ReactDOMServer = await import("react-dom/server")
+      const htmlStream = arrayToStream(
+        html`<!DOCTYPE html>`,
+        `<HTML>`,
+        ReactDOMServer.renderToString(
+          <>
+            <head>
+              <title>Hello from RSC!</title>
+            </head>
+          </>,
+        ),
+        `<BODY>`,
+        ReactDOMServer.renderToString(
+          <>
+            <h1>Hello from RSC!</h1>
+          </>,
+        ),
+      )
+
+      const rscChonkToScript = createTextTransformStream(
+        rsc => `<script>${js`(self.__RSC??=[]).push(...${[rsc]})`}</script>` + "\n\n",
+      )
+
+      return concatStreams(htmlStream, rscStream.pipeThrough(rscChonkToScript), arrayToStream(html`</BODY></HTML>`))
+    },
+  },
+)
 
 const RSC = Object.assign(
   () => {

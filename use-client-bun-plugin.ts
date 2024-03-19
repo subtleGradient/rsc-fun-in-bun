@@ -1,7 +1,7 @@
 /// <reference types="bun" />
 
 import { plugin, Transpiler, type JavaScriptLoader } from "bun"
-import { createClientModuleProxy } from "react-server-dom-webpack/server.edge"
+import { registerClientReference } from "react-server-dom-webpack/server.edge"
 import { tsx } from "./examples/js"
 
 const TEMPLATE_CLIENT_EXPORT = tsx`
@@ -10,24 +10,23 @@ export const __NAME__ = Object.assign(
   { $$typeof: Symbol.for("react.client.reference"), $$id: "__ID__" }
 )
 `
-const generateClientExport = (name: string, fileUrl: string) => {
+const generateClientExport = (displayName: string, fileUrl: string) => {
   fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
-  const $$id = `${fileUrl}#${name}`
-  ReactClientManifest[$$id] = createClientModuleProxy(fileUrl)
-  return (
-    TEMPLATE_CLIENT_EXPORT
-      //
-      .replace(/__NAME__/g, name)
-      .replace(/__ID__/g, $$id)
-  )
+  const $$id = `${fileUrl}#${displayName}`
+  ReactClientManifest[$$id] = [fileUrl, displayName]
+  return registerClientReference(Object.assign(ClientComponent_onTheServer, { displayName }), fileUrl, displayName)
+
+  function ClientComponent_onTheServer() {
+    throw new Error(`'use client' function '${$$id}' called on the server`)
+  }
 }
 
-const ReactClientManifest: Record<string, unknown> = {}
+const ReactClientManifest: Record<string, [fileId: string, exportId: string]> = {}
 
 plugin({
   name: "React Client Manifest",
   setup(build) {
-    build.module("ReactClientManifest.json", () => {
+    build.onLoad({ filter: /ReactClientManifest\.json$/ }, () => {
       return { loader: "object", exports: ReactClientManifest }
     })
   },
@@ -55,17 +54,25 @@ plugin({
       // tsconfig,
     })
 
-    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)#DISABLED$/ }, async args => {
-      const content = await Bun.file(args.path).text()
+    builder.onLoad({ filter: /\.client\.(jsx?|tsx?)$/ }, async args => {
+      const moduleSourceOriginal = await Bun.file(args.path).text()
       const ext = args.path.split(".").pop() as JavaScriptLoader
-      const mod = transpiler.scan(await transpiler.transform(content, ext))
-      const exportsCode = mod.exports.map(key => generateClientExport(key, args.path)).join("\n")
+      const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)
+      const moduleIO = transpiler.scan(moduleSourceTransformed)
 
-      const contents = tsx`
-        console.debug("executing", import.meta.url)
-        ${exportsCode}
-      `
-      return { loader: "tsx", contents }
+      // const moduleSourceTransformedWithNoComments = moduleSourceTransformed
+      //   .replace(/\/\/.*$/gm, "")
+      //   .replace(/\/\*.*\*\//g, "")
+
+      // TODO: look at the first line of the moduleSource to see if it has "use client" or "use server"
+      // TODO: look at the first line of the exported function to see if it has "use server"
+
+      const exports: Record<string, ReturnType<typeof generateClientExport>> = {}
+      moduleIO.exports.forEach(key => {
+        exports[key] = generateClientExport(key, args.path)
+      })
+
+      return { loader: "object", exports }
     })
   },
 })

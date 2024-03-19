@@ -7,7 +7,7 @@ export function js(strings: TemplateStringsArray, ...values: unknown[]) {
     source += strings[i]
     if (i < values.length) {
       const value = values[i]
-      source += typeof value === "function" ? value.toString() : JSON.stringify(value)
+      source += typeof value === "function" ? value.toString() : typeof value === "string" ? value : JSON.stringify(value)
     }
   }
   return source

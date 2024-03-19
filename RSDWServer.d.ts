@@ -85,7 +85,11 @@ declare module "react-server-dom-webpack/server" {
    * @param id The ID of the module.
    * @param exportName The name of the export.
    */
-  export function registerClientReference(proxyImplementation: any, id: string, exportName: string): void
+  export function registerClientReference<T extends object>(
+    proxyImplementation: T,
+    id: string,
+    exportName: string,
+  ): T & { $$typeof: symbol; $$id: string; $$async: boolean }
 
   /**
    * Registers a server-side reference.
@@ -93,7 +97,11 @@ declare module "react-server-dom-webpack/server" {
    * @param id The ID of the module.
    * @param exportName The name of the export.
    */
-  export function registerServerReference(reference: any, id: string, exportName: string | null): void
+  export function registerServerReference<T extends object>(
+    reference: T,
+    id: string,
+    exportName: string | null,
+  ): T & { $$typeof: symbol; $$id: string; $$bound: null }
 
   /**
    * Options for rendering to a pipeable stream.

@@ -60,7 +60,6 @@ export async function verifyReactServer() {
     )
 
   // ReactDOMServer
-  console.log("ReactDOMServer.renderToString")
   const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache ?? ReactServerSharedInternals?.ReactCurrentCache
   ReactSharedInternals.ReactCurrentCache ??= ReactCurrentCache
   if (!(typeof ReactCurrentCache === "object" && "current" in ReactCurrentCache))
