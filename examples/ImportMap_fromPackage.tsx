@@ -10,11 +10,12 @@ export async function ImportMap_fromPackage() {
     <ImportMap
       imports={{
         "*": `https://esm.run/`,
-        react: esm("react"),
+        // react: esm("react"),
+        react: `https://cdn.jsdelivr.net/npm/react@${dependencies.react.version}/umd/react.development.\js/+esm`,
         "react-dom": `${esm("react-dom")}/cjs/react-dom.development.\js`,
         "react-dom/client": `${esm("react-dom")}/client`,
-        "react-server-dom-webpack/client":
-          esm("react-server-dom-webpack") + `/cjs/react-server-dom-webpack-client.development.\js`,
+        "react-server-dom-webpack/client": esm("react-server-dom-webpack") + `/client`,
+        // "react-server-dom-webpack/client": "/examples/react-server-dom-webpack-client.browser.development.js",
       }}
     />
   )

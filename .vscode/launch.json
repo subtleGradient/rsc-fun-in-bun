@@ -8,10 +8,10 @@
       "type": "bun",
       "internalConsoleOptions": "neverOpen",
       "request": "launch",
-      "name": "Debug File",
+      "name": "Bun debug this",
       "program": "${file}",
       "cwd": "${workspaceFolder}",
-      "runtimeArgs": ["--conditions", "react-server"],
+      "args": ["--config=server.bunfig.toml", "--conditions=react-server"],
       "stopOnEntry": false,
       "watchMode": true
     },

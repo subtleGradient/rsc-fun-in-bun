@@ -3,18 +3,17 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun --watch --conditions=react-server examples/server.tsx",
-    "dev-debug": "bun --watch --conditions=react-server examples/server.tsx",
-    "dev-broken": "bun --watch examples/server.tsx"
+    "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
+    "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
   },
   "devDependencies": {
     "typescript": "^5.4.2",
     "@types/bun": "latest",
     "@types/react": "^18.2.56",
-    "@types/react-dom": "^18.2.19"
+    "@types/react-dom": "^18.2.19",
+    "@types/use-sync-external-store": "^0.0.6"
   },
   "dependencies": {
-    "@types/use-sync-external-store": "^0.0.6",
     "react": "canary",
     "react-dom": "canary",
     "react-server-dom-webpack": "canary",

@@ -1,4 +1,4 @@
-import { verifyReactServer } from "./verify-react-server"
+import { verifyReactServer } from "../verify-react-server"
 
 await verifyReactServer()
 
@@ -10,11 +10,14 @@ import RSDWServer from "react-server-dom-webpack/server.edge"
 
 if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
 
+import type { JavaScriptLoader } from "bun"
+import path from "path"
 import { arrayToStream } from "../util/arrayToStream"
 import { concatStreams } from "../util/compoReadableStream"
 import { createTextTransformStream } from "../util/createTransformStream"
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
+import { ImportMap_fromPackage } from "./ImportMap_fromPackage"
 import { RootComponent } from "./RootComponent"
 import { Timer } from "./Timer.client"
 import { html, js } from "./js"
@@ -24,10 +27,18 @@ const transpiler = new Bun.Transpiler()
 async function router(req: Request): Promise<Response> {
   const url = new URL(req.url)
 
-  if (await Bun.file(url.pathname).exists()) {
-    return new Response(await transpiler.transform(await Bun.file(url.pathname).text(), "tsx"), {
-      headers: { "Content-Type": "application/javascript" },
+  const pathToFile = path.join(process.cwd(), url.pathname)
+  const requestedFile = Bun.file(pathToFile)
+  if (await requestedFile.exists()) {
+    const ext = path.extname(pathToFile) as JavaScriptLoader
+    return new Response(await transpiler.transform(await requestedFile.text(), ext), {
+      headers: {
+        "Content-Type": "application/javascript",
+        "Cache-Control": "no-store",
+      },
     })
+  } else {
+    console.log("File does not exist", pathToFile)
   }
 
   if (url.pathname === browser.pathname) {
@@ -108,6 +119,17 @@ const RSC2 = Object.assign(
           <>
             <head>
               <title>Hello from RSC!</title>
+              {await ImportMap_fromPackage()}
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: js`
+                  __webpack_require__ = async function (moduleId) {
+                    console.log("require", moduleId)
+                    return await import(moduleId)
+                  }
+              `,
+                }}
+              />
             </head>
           </>,
         ),
@@ -117,9 +139,14 @@ const RSC2 = Object.assign(
         ReactDOMServer.renderToString(
           <>
             <h1>Hello from RSC!</h1>
+            <div id="root" />
+            <script type="module" src="/examples/client-bootstrap.js" />
           </>,
         ),
         "\n",
+        html`<script>
+          console.log("Hello from RSC!")
+        </script>`,
       )
 
       let lastTime = Date.now()
