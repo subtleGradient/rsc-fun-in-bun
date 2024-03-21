@@ -1,8 +1,93 @@
 # rsc-fun-in-bun "toy" project
 
+---
+
+# v2 -- March 2024
+
+- [x] understand RSC
+- [ ] explain RSC by example
+- [ ] make it easy to use RSC in bun for personal toy projects
+
+---
+
+<details>
+
+<summary>TODO (v2)</summary>
+
+## import anything anywhere
+
+### server components everywhere
+
+- create a react server component
+- import it on the server, it composes with other server components
+- import it on the client, it composes with other client components
+
+Importing server components on the client is not part of the React spec. This is a new feature that I am experimenting with.
+
+### client components everywhere
+
+- create a client component
+- import it on the server, it composes with other server components
+- import it on the client, it composes with other client components
+
+### server actions everywhere
+
+[Calling a Server Action](https://react.dev/reference/react/use-server#calling-a-server-action-outside-of-form)
+
+**What is a server action?** A server action is a function that can be called from the client, runs on the server, then returns a value to the client.
+
+- create a server action
+- import it on the server, it is callable like any other server function
+- import it on the client, it is callable like any other client function
+
+### client actions everywhere
+
+Client Actions are not part of the React spec. This is a new feature that I am proposing.
+
+**What is a client action?** It's just like a server action, but in reverse. A client action is a function that can be called from the server, runs on the client, then returns a value to the server.
+
+**Why would I want client actions?** 🤷‍♂️ Wacky shennanigans? I dunno
+
+- create a client action
+- import it on the server, it is callable like any other server function
+- import it on the client, it is callable like any other client function
+
+### dynamic client components
+
+This is not part of the React spec. This is a new feature that I am experimenting with.
+
+What if the server could compose virtual components that don't literally exist in the server repo. Then on the client, the virtual components could be resolved to real components based on the client's environment.
+
+For example, the server could compose a "Button" component that is a virtual component. Then on the client, the virtual "Button" component could be resolved to a real "Button" component that is specific to the client's environment. e.g. a web browser button, a mobile app button, etc.
+
+### p2p components
+
+### React Native portals
+
+### React Native Server Components RNSC? RSC-Native? Native-RSC?
+
+### Swift-backed React Server Components
+
+### Kotlin-backed React Server Components
+
+### micro-frontends
+
+This is not part of the React spec. This is a new feature that I am experimenting with.
+
+What if we could compose entire micro-apps together like we do with components?
+
+
+</details>
+
+---
+
+<details>
+
+<summary>TODO (v1)</summary>
+
 ## TODO: High level subjective goals
 
-- [ ] Understand what the heck "RSC" actually is and how it works
+- [x] Understand what the heck "RSC" actually is and how it works
 - [ ] Build a toy implementation of something vaguely RSC-ish, that runs in bun.sh
 - [ ] build a library compatible with RSC
 - [ ] get added to [the list of Bleeding-edge React frameworks](https://react.dev/learn/start-a-new-react-project#bleeding-edge-react-frameworks)
@@ -73,7 +158,13 @@
 - figure out what to do next
 - add more tasks
 
+</details>
+
 ---
+
+<details>
+
+<summary>context</summary>
 
 # context
 
@@ -121,25 +212,9 @@ Encapsulation of complexity is my favorite aspect of this new tech.
 
 Create a [Bun loader plugin](https://bun.sh/docs/runtime/plugins#loaders) that does something fancy to make "use client" and "use server" work.
 
-## does something fancy?
+</details>
 
 ---
-
-## bun
-
-To install dependencies:
-
-```bash
-bun i
-```
-
-To run:
-
-```bash
-bun dev
-```
-
-This project was created using `bun init` in bun v1.0.27. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
 
 ## The "MIT No Attribution" (MIT-0) License
 
