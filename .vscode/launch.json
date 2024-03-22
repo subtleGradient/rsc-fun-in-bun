@@ -6,33 +6,14 @@
   "configurations": [
     {
       "type": "bun",
-      "internalConsoleOptions": "neverOpen",
+      "runtimeArgs": ["--config=react-server.bunfig.toml", "--conditions=react-server"],
+      "internalConsoleOptions": "openOnFirstSessionStart",
       "request": "launch",
       "name": "Bun debug this",
       "program": "${file}",
       "cwd": "${workspaceFolder}",
-      "args": ["--config=server.bunfig.toml", "--conditions=react-server"],
       "stopOnEntry": false,
       "watchMode": true
-    },
-    {
-      "type": "bun",
-      "internalConsoleOptions": "neverOpen",
-      "request": "launch",
-      "name": "Run File",
-      "program": "${file}",
-      "cwd": "${workspaceFolder}",
-      "runtimeArgs": ["--conditions", "react-server"],
-      "noDebug": true,
-      "watchMode": false
-    },
-    {
-      "type": "bun",
-      "internalConsoleOptions": "neverOpen",
-      "request": "attach",
-      "name": "Attach Bun",
-      "url": "ws://localhost:6499/",
-      "stopOnEntry": false
     }
   ]
 }

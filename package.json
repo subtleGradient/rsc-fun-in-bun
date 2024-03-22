@@ -7,13 +7,15 @@
     "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
   },
   "devDependencies": {
-    "typescript": "^5.4.2",
     "@types/bun": "latest",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",
-    "@types/use-sync-external-store": "^0.0.6"
+    "@types/use-sync-external-store": "^0.0.6",
+    "bun-plugin-server-components": "^0.0.1-alpha.0",
+    "typescript": "^5.4.2"
   },
   "dependencies": {
+    "peechy": "^0.4.34",
     "react": "canary",
     "react-dom": "canary",
     "react-server-dom-webpack": "canary",

@@ -20,3 +20,9 @@ export async function exampleClientFunction() {
   console.log("Server stuff done!")
   console.log(results)
 }
+
+export function ExampleClientView() {
+  // "use client" is not necessary here, because it's already at the top of the file
+  console.assert(typeof window !== "undefined", "This is client-side code, so `window` should be defined.")
+  return <div>ExampleClientView</div>
+}
