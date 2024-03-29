@@ -3,6 +3,8 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
+    "bunp": "bun update $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => [`canary`,`latest`].includes(version)).map(([name]) => name).join(` `))')",
+    "predev": "bun bunp",
     "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
     "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
   },
