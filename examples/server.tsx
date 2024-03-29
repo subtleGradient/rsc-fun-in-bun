@@ -154,7 +154,7 @@ const RSC2 = Object.assign(
       const rscChonkToScript = createTextTransformStream(rsc => {
         const elapsed = Date.now() - lastTime
         lastTime = Date.now()
-        return `<script>/* elapsed = ${elapsed}ms */${js`(self.__RSC??=[]).push(\`${rsc}\`)`}</script>` + "\n\n"
+        return `<script>/* elapsed = ${elapsed}ms */${js`(self.__RSC??=[]).push(${"`"}${rsc}${"`"})`}</script>` + "\n\n"
       })
 
       return concatStreams(htmlStream, rscStream.pipeThrough(rscChonkToScript), arrayToStream(html`</BODY></HTML>`))
