@@ -1,0 +1,13 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HTML server react-dom/server GET "/" responds with 200 1`] = `
+"<!DOCTYPE html>
+<HTML>
+<head><title>Hello from ReactDOMServer.renderToString!</title></head>
+<BODY>
+<h1>Hello from ReactDOMServer.renderToReadableStream!</h1><div id="root"></div>
+<!-- ahoy! -->
+<script>
+            console.log("Hello from RSC!")
+          </script>"
+`;
