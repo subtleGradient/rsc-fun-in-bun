@@ -1,1 +1,4 @@
-preload = ["./verify-react-server.ts", "./use-client-bun-plugin.ts"]
+preload = [
+  "./verify-react-server.ts",
+  "./plugins/useClient_fromServer.plugin.ts",
+]
