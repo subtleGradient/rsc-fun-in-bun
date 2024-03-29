@@ -24,7 +24,7 @@ import { html, js } from "./js"
 
 const transpiler = new Bun.Transpiler()
 
-async function router(req: Request): Promise<Response> {
+export async function router(req: Request): Promise<Response> {
   const url = new URL(req.url)
 
   const pathToFile = path.join(process.cwd(), url.pathname)
