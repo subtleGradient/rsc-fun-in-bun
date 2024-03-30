@@ -35,3 +35,34 @@ exports[`client first (classic) client components render stuff on the client lik
     }
           main()</script>"
 `;
+
+exports[`client first (modules) client components render stuff on the client like it's 2014 renders a component on the client (using fetch) 1`] = `
+"<!DOCTYPE html><HTML><head><title>Hello from ReactDOMServer.renderToString!</title><script type="importmap">{
+  "imports": {
+    "*": "https://esm.run/",
+    "react/jsx-dev-runtime": "/node_modules/react/cjs/react-jsx-dev-runtime.development.js",
+    "react/jsx-runtime": "/node_modules/react/cjs/react-jsx-runtime.development.js",
+    "react": "/node_modules/react/cjs/react.development.js",
+    "react-dom": "https://esm.run/react-dom@19.0.0-canary-a73c3450e-20240329/cjs/react-dom.development.js",
+    "react-dom/client": "https://esm.run/react-dom@19.0.0-canary-a73c3450e-20240329/client",
+    "react-server-dom-webpack/client": "https://esm.run/react-server-dom-webpack@19.0.0-canary-a73c3450e-20240329/client"
+  }
+}</script></head><h1>Hello from ReactDOMServer.renderToReadableStream!</h1><div id="root"></div><div id="root">loading...</div><script type=module>let main = function() {
+  function ClientComponent() {
+    return jsxDEV("div", {
+      id: "generated-by-client",
+      children: "Hello from ClientComponent!"
+    }, undefined, false, undefined, this);
+  }
+  const root = ReactDOM.hydrateRoot(document.getElementById("root"), jsxDEV(ClientComponent, {}, undefined, false, undefined, this));
+};
+import JSX from "react/jsx-dev-runtime";
+const { jsxDEV, Fragment } = JSX;
+import React from "react";
+import ReactDOM from "react-dom/client";
+console.log(React.version);
+console.log(jsxDEV);
+Object.assign(window, { React, ReactDOM, jsxDEV, Fragment });
+main();
+</script>"
+`;

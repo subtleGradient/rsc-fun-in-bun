@@ -10,8 +10,11 @@ export async function ImportMap_fromPackage() {
     <ImportMap
       imports={{
         "*": `https://esm.run/`,
+        'react/jsx-dev-runtime': '/node_modules/react/cjs/react-jsx-dev-runtime.development.js', // requires a server
+        'react/jsx-runtime': '/node_modules/react/cjs/react-jsx-runtime.development.js', // requires a server
+        // react: `https://cdn.jsdelivr.net/npm/react@${dependencies.react.version}/umd/react.development.\js/+esm`,
         // react: esm("react"),
-        react: `https://cdn.jsdelivr.net/npm/react@${dependencies.react.version}/umd/react.development.\js/+esm`,
+        react: '/node_modules/react/cjs/react.development.js',
         "react-dom": `${esm("react-dom")}/cjs/react-dom.development.\js`,
         "react-dom/client": `${esm("react-dom")}/client`,
         "react-server-dom-webpack/client": esm("react-server-dom-webpack") + `/client`,
