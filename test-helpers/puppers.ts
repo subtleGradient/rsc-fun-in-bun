@@ -13,8 +13,7 @@ declare module "puppeteer-core" {
   interface Page {
     [Symbol.asyncDispose](): Promise<void>
     pipeConsoleLogs: boolean
-    _pipeConsoleLogs: boolean
-    _logPiper: (msg: ConsoleMessage) => void
+    pipeConsoleLogs_isEnabled: boolean
   }
 }
 
@@ -29,16 +28,16 @@ Page.prototype[Symbol.asyncDispose] = async function () { await this.close() } /
   }
 
   Object.defineProperties(Page.prototype, {
-    _pipeConsoleLogs: { configurable: true, enumerable: false, writable: true, value: false },
+    pipeConsoleLogs_isEnabled: { configurable: true, enumerable: false, writable: true, value: false },
 
     pipeConsoleLogs: {
       configurable: true,
       enumerable: true,
-      get() { return this._pipeConsoleLogs }, // prettier-ignore
+      get() { return this.pipeConsoleLogs_isEnabled }, // prettier-ignore
       set(this: Page, isEnabled: boolean) {
         if (isEnabled) this.on("console", logPiper)
         else this.off("console", logPiper)
-        this._pipeConsoleLogs = isEnabled
+        this.pipeConsoleLogs_isEnabled = isEnabled
       },
     },
   })
@@ -70,7 +69,5 @@ beforeAll(async () => {
 })
 
 afterAll(() => browser.close())
-
-// return Object.assign(browser, { [Symbol.dispose]: () => browser.close() })
 
 export { browser, puppeteer }
