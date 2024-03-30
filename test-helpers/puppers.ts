@@ -17,8 +17,13 @@ declare module "puppeteer-core" {
   }
 }
 
-Browser.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
-Page.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
+Browser.prototype[Symbol.asyncDispose] = async function () {
+  if (this.connected) await this.close()
+}
+
+Page.prototype[Symbol.asyncDispose] = async function () {
+  if (!this.isClosed()) await this.close({ runBeforeUnload: false })
+}
 
 Object.defineProperties(Page.prototype, {
   pipeConsoleLogs_isEnabled: { configurable: true, enumerable: false, writable: true, value: false },
@@ -33,7 +38,11 @@ Object.defineProperties(Page.prototype, {
           // @ts-ignore -- trust me bro 😎
           console[msg.type()](...args)
         })
-      } else this.off("console")
+        this.on("error", console.error)
+      } else {
+        this.off("console")
+        this.off("error")
+      }
     },
   },
 })
@@ -61,6 +70,8 @@ beforeAll(async () => {
       "--no-startup-window", // each new page will open in a new window instead of tabs
     ],
   })
+
+  process.once("beforeExit", async () => await browser.close())
 })
 
 afterAll(() => browser.close())
