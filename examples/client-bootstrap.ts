@@ -2,7 +2,7 @@
 
 import React from "react"
 import ReactDOM from "react-dom/client"
-import * as RSDWClient from "react-server-dom-webpack/client"
+import * as ReactServerDOMClient from "react-server-dom-webpack/client"
 
 console.log("Client bootstrap", React.version)
 
@@ -37,9 +37,9 @@ const rscReadableStream = new ReadableStream({
   },
 })
 
-const ui = RSDWClient.createFromReadableStream(rscReadableStream, {
+const ui = ReactServerDOMClient.createFromReadableStream(rscReadableStream, {
   callServer(id, args) {
-    console.log("RSDWClient.createFromReadableStream", "callServer", id, args)
+    console.log("ReactServerDOMClient.createFromReadableStream", "callServer", id, args)
   },
 })
 

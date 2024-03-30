@@ -5,10 +5,10 @@ await verifyReactServer()
 import React, { Suspense } from "react"
 import ReactDOM from "react-dom"
 // import ReactDOMServer from "react-dom/server.bun" // importing it here breaks because of ReactCurrentCache
-import RSDWClient from "react-server-dom-webpack/client"
+import ReactServerDOMClient from "react-server-dom-webpack/client"
 import RSDWServer from "react-server-dom-webpack/server.edge"
 
-if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, RSDWClient])
+if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, ReactServerDOMClient])
 
 import type { JavaScriptLoader } from "bun"
 import path from "path"
@@ -17,7 +17,7 @@ import { concatStreams } from "../util/compoReadableStream"
 import { createTextTransformStream } from "../util/createTransformStream"
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
-import { ImportMap_fromPackage } from "./ImportMap_fromPackage"
+import { ImportMapCustom } from "./ImportMap_fromPackage"
 import { RootComponent } from "./RootComponent"
 import { Timer } from "./Timer.client"
 import { html, js } from "./js"
@@ -119,7 +119,7 @@ const RSC2 = Object.assign(
           <>
             <head>
               <title>Hello from RSC!</title>
-              {await ImportMap_fromPackage()}
+              {await ImportMapCustom()}
               <script
                 dangerouslySetInnerHTML={{
                   __html: js`
