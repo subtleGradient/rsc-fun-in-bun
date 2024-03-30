@@ -226,13 +226,6 @@ describe("client first (modules)", () => {
         <>
           <h1>Hello from ReactDOMServer.renderToReadableStream!</h1>
           <div id="root" />
-          {/* <script src="/node_modules/react/umd/react.development.js" /> */}
-          {/* <script src="/node_modules/react-dom/umd/react-dom.development.js" /> */}
-          {/* <script src="/node_modules/react-dom/umd/react-dom-server.browser.development.js" /> */}
-          {/* <script src="/node_modules/react-server-dom-webpack/umd/react-server-dom-webpack-server.browser.development.js" /> */}
-          {/* <script src="/node_modules/react-server-dom-webpack/umd/react-server-dom-webpack-client.browser.development.js" /> */}
-          {/* <script src="https://unpkg.com/babel-standalone@6/babel.js" /> */}
-          {/* <script src="/node_modules/react/cjs/react-jsx-dev-runtime.development.js" /> */}
         </>,
       ),
       arrayToStream(
