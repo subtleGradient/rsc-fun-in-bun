@@ -6,6 +6,8 @@
     "bunp": "bun update $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => [`canary`,`latest`].includes(version)).map(([name]) => name).join(` `))')",
     "predev": "bun bunp",
     "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
+    "test:ui": "PUPPETEER_HEADLESS=true bun test ui",
+    "test:ui:open": "PUPPETEER_HEADLESS=false bun test ui",
     "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
   },
   "devDependencies": {
@@ -14,6 +16,7 @@
     "@types/react-dom": "^18.2.19",
     "@types/use-sync-external-store": "^0.0.6",
     "bun-plugin-server-components": "^0.0.1-alpha.0",
+    "puppeteer-core": "^22.6.1",
     "typescript": "^5.4.2"
   },
   "dependencies": {

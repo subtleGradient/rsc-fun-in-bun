@@ -1,6 +1,7 @@
-import type { Server } from "bun"
+import { type Server } from "bun"
 import { afterAll, beforeAll, describe, expect, it } from "bun:test"
 import { html } from "./examples/js"
+import { browser } from "./test-helpers/puppers"
 import { arrayToStream } from "./util/arrayToStream"
 import { concatStreams } from "./util/compoReadableStream"
 
@@ -88,5 +89,31 @@ describe("HTML server", () => {
         expect(await response.text()).toMatchSnapshot()
       })
     })
+  })
+})
+
+describe.todo("SSR", () => { })
+describe.todo("with static server components", () => { })
+describe.todo("with async server components", () => { })
+describe.todo("with client components", () => { })
+describe.todo("hydrated", () => { })
+
+describe("pupItUp 1", async () => {
+  it("works", async () => {
+    using page = Object.assign(await browser.newPage(), { [Symbol.dispose]: () => page.close() })
+    await page.goto("about:blank")
+    // const text = await page.evaluate(() => document.body.textContent)
+    // expect(text).toBe("Hello from RSC!")
+    // await Bun.sleep(1000)
+  })
+})
+
+describe("pupItUp 2", async () => {
+  it("works", async () => {
+    using page = Object.assign(await browser.newPage(), { [Symbol.dispose]: () => page.close() })
+    await page.goto("about:blank")
+    // const text = await page.evaluate(() => document.body.textContent)
+    // expect(text).toBe("Hello from RSC!")
+    // await Bun.sleep(1000)
   })
 })

@@ -14,6 +14,8 @@
 
 <summary>TODO (v2)</summary>
 
+- [ ] maybe figure out how to pull stuff from https://react-builds.vercel.app/ for stuff that isn't in npm
+
 ## import anything anywhere
 
 ### server components everywhere
@@ -75,7 +77,6 @@ For example, the server could compose a "Button" component that is a virtual com
 This is not part of the React spec. This is a new feature that I am experimenting with.
 
 What if we could compose entire micro-apps together like we do with components?
-
 
 </details>
 
