@@ -13,35 +13,30 @@ declare module "puppeteer-core" {
   interface Page {
     [Symbol.asyncDispose](): Promise<void>
     pipeConsoleLogs: boolean
-    pipeConsoleLogs_isEnabled: boolean
+    $pipeConsoleLogs_isEnabled: boolean
   }
 }
 
 Browser.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
 Page.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
 
-{
-  const logPiper = async (msg: ConsoleMessage) => {
-    const args = await Promise.all(msg.args().map(it => it.jsonValue()))
-    // @ts-ignore -- trust me bro 😎
-    console[msg.type()](...args)
-  }
-
-  Object.defineProperties(Page.prototype, {
-    pipeConsoleLogs_isEnabled: { configurable: true, enumerable: false, writable: true, value: false },
-
-    pipeConsoleLogs: {
-      configurable: true,
-      enumerable: true,
-      get() { return this.pipeConsoleLogs_isEnabled }, // prettier-ignore
-      set(this: Page, isEnabled: boolean) {
-        if (isEnabled) this.on("console", logPiper)
-        else this.off("console", logPiper)
-        this.pipeConsoleLogs_isEnabled = isEnabled
-      },
+Object.defineProperties(Page.prototype, {
+  pipeConsoleLogs_isEnabled: { configurable: true, enumerable: false, writable: true, value: false },
+  pipeConsoleLogs: {
+    configurable: true,
+    enumerable: true,
+    get(this: Page) { return this.$pipeConsoleLogs_isEnabled }, // prettier-ignore
+    set(this: Page, isEnabled: boolean) {
+      if ((this.$pipeConsoleLogs_isEnabled = isEnabled)) {
+        this.on("console", async (msg: ConsoleMessage) => {
+          const args = await Promise.all(msg.args().map(it => it.jsonValue()))
+          // @ts-ignore -- trust me bro 😎
+          console[msg.type()](...args)
+        })
+      } else this.off("console")
     },
-  })
-}
+  },
+})
 
 ////////////////////////////////////////////////////////////////
 
