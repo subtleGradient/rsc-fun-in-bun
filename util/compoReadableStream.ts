@@ -1,19 +1,16 @@
 export function concatStreams<T>(...streams: ReadableStream<T>[]): ReadableStream<T> {
   return new ReadableStream<T>({
-    async start(controller) {
+    async start(ccc) {
+      using controller = Object.assign(ccc, { [Symbol.dispose]() { controller.close() } })
       for (const stream of streams) {
-        const reader = stream.getReader()
+        using reader = Object.assign(stream.getReader(), { [Symbol.dispose]() { reader.releaseLock() } })
 
         while (true) {
           const { done, value } = await reader.read()
           if (done) break
           controller.enqueue(value)
         }
-
-        // Close the current reader to ensure it's no longer in use before moving to the next stream
-        reader.releaseLock()
       }
-      controller.close()
     },
   })
 }
