@@ -34,7 +34,7 @@ Object.defineProperties(Page.prototype, {
     set(this: Page, isEnabled: boolean) {
       if ((this.$pipeConsoleLogs_isEnabled = isEnabled)) {
         this.on("console", async (msg: ConsoleMessage) => {
-          const args = await Promise.all(msg.args().map(it => it.jsonValue()))
+          const args = await Promise.all(msg.args().map(it => it.toString()))
           // @ts-ignore -- trust me bro 😎
           console[msg.type()](...args)
         })
