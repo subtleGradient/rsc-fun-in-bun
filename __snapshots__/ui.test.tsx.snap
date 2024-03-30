@@ -11,3 +11,27 @@ exports[`HTML server react-dom/server GET "/" responds with 200 1`] = `
             console.log("Hello from RSC!")
           </script>"
 `;
+
+exports[`client first (classic) client components render stuff on the client like it's 2014 renders a component on the client (using fetch) 1`] = `
+"<!DOCTYPE html><HTML><head><title>Hello from ReactDOMServer.renderToString!</title></head><SCRIPT>
+          // fake commonjs environment for react-jsx-dev-runtime
+          window.process = { env: { NODE_ENV: "development" } }
+          window.require = (module) => {
+            if (module === "react") return window.React
+            if (module === "react-dom") return window.ReactDOM
+            throw new Error("Unknown module: " + module)
+          }
+          window.exports = window
+          </SCRIPT><BODY><h1>Hello from ReactDOMServer.renderToReadableStream!</h1><div id="root"></div><script src="/node_modules/react/umd/react.development.js"></script><script src="/node_modules/react-dom/umd/react-dom.development.js"></script><script src="/node_modules/react/cjs/react-jsx-dev-runtime.development.js"></script><div id="root">loading...</div><script>function main() {
+      const { React, ReactDOM } = window;
+      console.log(React.version);
+      function ClientComponent() {
+        return jsxDEV("div", {
+          id: "generated-by-client",
+          children: "Hello from ClientComponent!"
+        }, void 0, !1, void 0, this);
+      }
+      const root = ReactDOM.hydrateRoot(document.getElementById("root"), jsxDEV(ClientComponent, {}, void 0, !1, void 0, this));
+    }
+          main()</script>"
+`;
