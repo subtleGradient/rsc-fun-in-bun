@@ -2,16 +2,31 @@ import { $ } from "bun"
 import { ImportMap } from "./ImportMap"
 
 export async function ImportMapCustom() {
-  const root = '/node_modules/'
   const map = {
     // "*": `https://esm.run/`,
-    "react/jsx-dev-runtime": `${root}react/cjs/react-jsx-dev-runtime.development.js`,
-    "react/jsx-runtime": `${root}react/cjs/react-jsx-runtime.development.js`,
-    react: `${root}react/cjs/react.development.js`,
-    "react-dom": `${root}react-dom/cjs/react-dom.development.js`,
-    "react-dom/client": `${root}react-dom/cjs/react-dom-client.browser.development.js`,
-    "react-server-dom-webpack/client": `${root}react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js`,
-    "react-server-dom-webpack/server.browser": `${root}react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js`,
+    "*": "/",
+    "react/jsx-dev-runtime": `/node_modules/react/cjs/react-jsx-dev-runtime.development.js`,
+    "react/jsx-runtime": `/node_modules/react/cjs/react-jsx-runtime.development.js`,
+    react: `/node_modules/react/cjs/react.development.js`,
+    "react-dom": `/node_modules/react-dom/cjs/react-dom-server.browser.development.js`,
+    "react-dom/client": `/node_modules/react-dom/client.js`,
+    "react-server-dom-webpack/client": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js`,
+    // "react-server-dom-webpack/server.browser": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js`,
+  }
+  return <ImportMap imports={map} />
+}
+
+export async function ImportMapCustom_withRSC() {
+  const map = {
+    // "*": `https://esm.run/`,
+    "*": "/",
+    "react/jsx-dev-runtime": `/node_modules/react/cjs/react-jsx-dev-runtime.development.js`,
+    "react/jsx-runtime": `/node_modules/react/cjs/react-jsx-runtime.development.js`,
+    react: `/node_modules/react/cjs/react.react-server.development.js`,
+    "react-dom": `/node_modules/react-dom/cjs/react-dom-server.browser.development.js`,
+    "react-dom/client": `/node_modules/react-dom/client.js`,
+    "react-server-dom-webpack/client": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js`,
+    "react-server-dom-webpack/server.browser": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js`,
   }
   return <ImportMap imports={map} />
 }

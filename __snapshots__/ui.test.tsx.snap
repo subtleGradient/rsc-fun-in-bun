@@ -42,8 +42,8 @@ exports[`client first (modules) client components render stuff on the client lik
     "react/jsx-dev-runtime": "/node_modules/react/cjs/react-jsx-dev-runtime.development.js",
     "react/jsx-runtime": "/node_modules/react/cjs/react-jsx-runtime.development.js",
     "react": "/node_modules/react/cjs/react.development.js",
-    "react-dom": "/node_modules/react-dom/cjs/react-dom.development.js",
-    "react-dom/client": "/node_modules/react-dom/cjs/react-dom-client.browser.development.js",
+    "react-dom": "/node_modules/react-dom/cjs/react-dom-server.browser.development.js",
+    "react-dom/client": "/node_modules/react-dom/client.js",
     "react-server-dom-webpack/client": "/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js",
     "react-server-dom-webpack/server.browser": "/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js"
   }
