@@ -1,7 +1,50 @@
 import { afterAll, beforeAll } from "bun:test"
-import puppeteer, { Browser } from "puppeteer-core"
+import puppeteer, { Browser, ConsoleMessage, Page } from "puppeteer-core"
 
 let browser: Browser
+
+////////////////////////////////////////////////////////////////
+// duck punching shennanigans
+
+declare module "puppeteer-core" {
+  interface Browser {
+    [Symbol.asyncDispose](): Promise<void>
+  }
+  interface Page {
+    [Symbol.asyncDispose](): Promise<void>
+    pipeConsoleLogs: boolean
+    _pipeConsoleLogs: boolean
+    _logPiper: (msg: ConsoleMessage) => void
+  }
+}
+
+Browser.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
+Page.prototype[Symbol.asyncDispose] = async function () { await this.close() } // prettier-ignore
+
+{
+  const logPiper = async (msg: ConsoleMessage) => {
+    const args = await Promise.all(msg.args().map(it => it.jsonValue()))
+    // @ts-ignore -- trust me bro 😎
+    console[msg.type()](...args)
+  }
+
+  Object.defineProperties(Page.prototype, {
+    _pipeConsoleLogs: { configurable: true, enumerable: false, writable: true, value: false },
+
+    pipeConsoleLogs: {
+      configurable: true,
+      enumerable: true,
+      get() { return this._pipeConsoleLogs }, // prettier-ignore
+      set(this: Page, isEnabled: boolean) {
+        if (isEnabled) this.on("console", logPiper)
+        else this.off("console", logPiper)
+        this._pipeConsoleLogs = isEnabled
+      },
+    },
+  })
+}
+
+////////////////////////////////////////////////////////////////
 
 beforeAll(async () => {
   const headless = JSON.parse(process.env.PUPPETEER_HEADLESS ?? "false") as boolean
