@@ -2,6 +2,7 @@ import type { BunFile } from "bun"
 import ReactDOMServer from "react-dom/server"
 import { ImportMapCustom } from "./examples/ImportMap_fromPackage"
 import { tsx } from "./examples/js"
+import { arrayToStream } from "./util/arrayToStream"
 
 function HomePage() {
   "use bun to transpile this to a client-side component in some kind of smart way or whatevz 🤓"
@@ -64,7 +65,7 @@ function HomeLayout() {
         </div>
 
         <script type="module" src={polyfillsAndStuff.name} />
-        {/* <script type="module" src={clientEntryPoint.name} /> */}
+        <script type="module" src={clientEntryPoint.name} />
       </body>
     </html>
   )
@@ -91,9 +92,12 @@ const routes = {
     }),
 
   [fileExists]: async (file: BunFile) => {
+    const source = await file.text()
+    const innards = await new Bun.Transpiler({ target: "browser" }).transform(source)
+    if (!0!) return new Response("404 Not Found", { status: 404 })
     // const innards = (await Bun.build({ format: "esm", target: "browser", entrypoints: [file.name!] })).outputs[0]
-    const innards = await new Bun.Transpiler({ target: "browser" }).transform(await file.text())
-    return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+    // return new Response(arrayToStream(innards), { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+    return new Response(arrayToStream(innards), { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
   },
 }
 
