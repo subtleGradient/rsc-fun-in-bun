@@ -1,3 +1,4 @@
+import type { BunFile } from "bun"
 import ReactDOMServer from "react-dom/server"
 import { ImportMapCustom } from "./examples/ImportMap_fromPackage"
 import { tsx } from "./examples/js"
@@ -63,13 +64,17 @@ function HomeLayout() {
         </div>
 
         <script type="module" src={polyfillsAndStuff.name} />
-        <script type="module" src={clientEntryPoint.name} />
+        {/* <script type="module" src={clientEntryPoint.name} /> */}
       </body>
     </html>
   )
 }
 
+const fileExists = Symbol.for("file that exists")
+
 const routes = {
+  "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
+
   "/": async () =>
     new Response(await ReactDOMServer.renderToReadableStream(<HomeLayout />), {
       headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
@@ -84,6 +89,12 @@ const routes = {
     new Response(await clientEntryPoint.text!(), {
       headers: { "Content-Type": clientEntryPoint.type!, "Cache-Control": "no-store" },
     }),
+
+  [fileExists]: async (file: BunFile) => {
+    // const innards = (await Bun.build({ format: "esm", target: "browser", entrypoints: [file.name!] })).outputs[0]
+    const innards = await new Bun.Transpiler({ target: "browser" }).transform(await file.text())
+    return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+  },
 }
 
 export default function serve() {
@@ -94,12 +105,7 @@ export default function serve() {
       if (url.pathname in routes) return await routes[url.pathname]()
 
       const file = Bun.file(__dirname + url.pathname)
-
-      if (await file.exists()) {
-        // const innards = (await Bun.build({ format: "esm", target: "browser", entrypoints: [file.name!] })).outputs[0]
-        const innards = await new Bun.Transpiler({ target: "browser" }).transform(await file.text())
-        return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
-      }
+      if (await file.exists()) return await routes[fileExists](file)
 
       return new Response("404 Not Found", { status: 404 })
     },
