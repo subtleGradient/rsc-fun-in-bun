@@ -501,7 +501,7 @@ const root = ReactDOM.hydrateRoot(document.getElementById("root"), <ClientCompon
         // expect(await response.text()).toMatchSnapshot()
       })
 
-      it.only(
+      it(
         "renders a component on the client (using puppeteer)",
         async () => {
           await using page = await browser.newPage()

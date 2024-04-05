@@ -1,37 +1,10 @@
 import type { BunFile } from "bun"
 import ReactDOMServer from "react-dom/server"
-import { ImportMapCustom } from "./examples/ImportMap_fromPackage"
-import { tsx } from "./examples/js"
-import { arrayToStream } from "./util/arrayToStream"
+import { ImportMap } from "./examples/ImportMap"
+import { importMapReact } from "./examples/ImportMap_fromPackage"
+import { js, tsx } from "./examples/js"
 
-function HomePage() {
-  "use bun to transpile this to a client-side component in some kind of smart way or whatevz 🤓"
-  return (
-    <div id="generated-by-client" suppressHydrationWarning>
-      Hello from ClientComponent!
-    </div>
-  )
-}
-
-const clientEntryPoint = {
-  name: "/generated-on-the-fly/clientEntryPoint.mjs",
-  type: "text/javascript",
-  text: async () =>
-    await new Bun.Transpiler({ target: "browser" }).transform(tsx`
-/// <reference lib="dom" />
-import React from "react"
-import ReactDOM from "react-dom/client"
-import * as ReactServerDOMClient from "react-server-dom-webpack/client"
-
-console.log(React.version)
-
-const demo_reactPageRoot = ReactDOM.createRoot(document.getElementById("root"))
-
-// TODO: split this stuff out somehow smartly 🤓
-const InitialClientComponent = ${HomePage}
-demo_reactPageRoot.render(<InitialClientComponent />)
-`),
-}
+const getModuleIdByFilePath = (name: string) => Object.entries(importMapReact).find(([_, path]) => name?.endsWith(path))?.[0]
 
 const polyfillsAndStuff = {
   name: "/generated-on-the-fly/polyfillsAndStuff.mjs",
@@ -40,20 +13,58 @@ const polyfillsAndStuff = {
     await new Bun.Transpiler({ target: "browser" }).transform(tsx`
 /// <reference lib="dom" />
 window.__webpack_modules__ = {}
-window.__webpack_require__ = (moduleId) => __webpack_modules__[moduleId].exports
-
-import JSX from "react/jsx-dev-runtime"
-const { jsxDEV, Fragment } = JSX
-Object.assign(window, { jsxDEV, Fragment })
+window.require = window.__webpack_require__ = (moduleId) => __webpack_modules__[moduleId].exports
 `),
 }
+
+const clientEntryPoint = {
+  name: "/demo-RSC.clientEntryPoint.tsx",
+  type: "text/javascript",
+  publicPath: "/clientEntryPoint/",
+
+  get entrypoints() {
+    return [`.${this.name}`, "./demo-RSC.clientEntryPoint2.tsx"]
+  },
+
+  async routes() {
+    const routes: Record<string, () => Promise<Response>> = {}
+    const { outputs } = await this.build()
+    for (const output of outputs)
+      routes[`${this.publicPath}${output.path}`.replace("/./", "/")] = async () =>
+        new Response(output.stream(), { headers: { "Content-Type": output.type, "Cache-Control": "no-store" } })
+
+    routes[this.name] = routes[`${this.publicPath}demo-RSC.clientEntryPoint.js`]
+    return routes
+  },
+
+  build() {
+    this.build = () => build
+    const build = Bun.build({
+      format: "esm",
+      target: "browser",
+      splitting: true,
+      publicPath: this.publicPath,
+      sourcemap: "external",
+      entrypoints: this.entrypoints,
+    })
+    return build
+  },
+
+  // TODO: memoize this
+  async scan() {
+    const ttt = new Bun.Transpiler({ target: "browser" })
+    return ttt.scan(await ttt.transform(clientEntryPoint.name))
+  },
+}
+
+console.log(await clientEntryPoint.build().then(it => it.outputs))
 
 function HomeLayout() {
   return (
     <html>
       <head>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
-        <ImportMapCustom />
+        <ImportMap imports={importMapReact} />
       </head>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
@@ -86,20 +97,37 @@ const routes = {
       headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
     }),
 
-  [clientEntryPoint.name!]: async () =>
-    new Response(await clientEntryPoint.text!(), {
-      headers: { "Content-Type": clientEntryPoint.type!, "Cache-Control": "no-store" },
-    }),
+  ...(await clientEntryPoint.routes()),
 
   [fileExists]: async (file: BunFile) => {
+    const moduleId = getModuleIdByFilePath(file.name!)
     const source = await file.text()
-    const innards = await new Bun.Transpiler({ target: "browser" }).transform(source)
-    if (!0!) return new Response("404 Not Found", { status: 404 })
-    // const innards = (await Bun.build({ format: "esm", target: "browser", entrypoints: [file.name!] })).outputs[0]
-    // return new Response(arrayToStream(innards), { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
-    return new Response(arrayToStream(innards), { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+    const esmFromCommonJS = js`
+      const module = { ...${{ id: moduleId }}, exports: {} }
+      __webpack_modules__[module.id] = module
+      const { exports } = module
+      console.log("esmFromCommonJS", module)
+      export default exports
+    `.replace(/^\s+/gm, "")
+
+    let innards
+    // if (moduleId) innards = arrayToStream(esmFromCommonJS, await new Bun.Transpiler({ target: "browser" }).transform(source))
+    // else
+    {
+      innards = (
+        await Bun.build({
+          format: "esm",
+          target: "browser",
+          entrypoints: [file.name!],
+          // external: (await clientEntryPoint.scan()).imports.map(i => i.path),
+        })
+      ).outputs[0]
+    }
+    return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
   },
 }
+
+console.log(Object.keys(routes))
 
 export default function serve() {
   return Bun.serve({
