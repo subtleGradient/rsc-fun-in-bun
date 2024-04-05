@@ -4,8 +4,17 @@ import { ImportMap } from "./examples/ImportMap"
 import { importMapReact } from "./examples/ImportMap_fromPackage"
 import { js, tsx } from "./examples/js"
 
+type Pathname = string
+type RouteMap = Record<Pathname, Server["fetch"]>
+
+/**
+ * Based on the {@link importMapReact}, return the module ID that corresponds to the given file path.
+ */
 const getModuleIdByFilePath = (name: string) => Object.entries(importMapReact).find(([_, path]) => name?.endsWith(path))?.[0]
 
+/**
+ * A virtual file that contains stuff that needs to be loaded before the client entry point.
+ */
 const polyfillsAndStuff = {
   name: "/generated-on-the-fly/polyfillsAndStuff.mjs",
   type: "text/javascript",
@@ -17,43 +26,58 @@ window.require = window.__webpack_require__ = (moduleId) => __webpack_modules__[
 `),
 }
 
+/**
+ * A virtual folder that exposes the virtual client entry point files to the server.
+ */
 const clientEntryPoint = {
-  name: "/demo-RSC.clientEntryPoint.tsx",
-  type: "text/javascript",
   publicPath: "/clientEntryPoint/",
+  entrypoints: ["./demo-RSC.clientEntryPoint.tsx"],
 
-  get entrypoints() {
-    return [`.${this.name}`, "./demo-RSC.clientEntryPoint2.tsx"]
-  },
+  name: null as string | null,
 
-  async routes() {
-    const routes: Record<string, () => Promise<Response>> = {}
-    const { outputs } = await this.build()
-    for (const output of outputs)
-      routes[`${this.publicPath}${output.path}`.replace("/./", "/")] = async () =>
-        new Response(output.stream(), { headers: { "Content-Type": output.type, "Cache-Control": "no-store" } })
+  async createRouteMap(): Promise<RouteMap> {
+    this.createRouteMap = async () => routes // memoize
+    const routes: RouteMap = {}
 
-    routes[this.name] = routes[`${this.publicPath}demo-RSC.clientEntryPoint.js`]
+    const { success, logs, outputs } = await this.build()
+
+    if (!success) {
+      logs.forEach(log => console.warn(log))
+      throw new Error("Failed to build client entry point")
+    }
+
+    for (const output of outputs) {
+      const pathname = `${this.publicPath}${output.path}`.replace("/./", "/")
+      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
+      routes[pathname] = async () => new Response(output.stream(), { headers })
+      output.kind
+    }
+    // for (const output of outputs) {
+    //   const pathname = `${this.publicPath}${output.path}`.replace("/./", "/")
+    //   if (output.kind === "entry-point") this.name ||= pathname
+    // }
+
     return routes
   },
 
   build() {
     this.build = () => build
     const build = Bun.build({
+      publicPath: this.publicPath,
+      entrypoints: this.entrypoints,
+      splitting: true,
       format: "esm",
       target: "browser",
-      splitting: true,
-      publicPath: this.publicPath,
       sourcemap: "external",
-      entrypoints: this.entrypoints,
     })
     return build
   },
 
-  // TODO: memoize this
   async scan() {
-    const ttt = new Bun.Transpiler({ target: "browser" })
-    return ttt.scan(await ttt.transform(clientEntryPoint.name))
+    this.scan = async () => scan
+    const transpiler = new Bun.Transpiler({ target: "browser" })
+    const scan = transpiler.scan(await transpiler.transform(this.entrypoints[0]))
+    return scan
   },
 }
 
@@ -107,8 +131,7 @@ const fetchFileThatExists = async (request: Request, file: BunFile) => {
   return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
 }
 
-type Pathname = string
-const routes: Record<Pathname, Server["fetch"]> = {
+const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": async () =>
@@ -121,7 +144,7 @@ const routes: Record<Pathname, Server["fetch"]> = {
       headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
     }),
 
-  ...(await clientEntryPoint.routes()),
+  ...(await clientEntryPoint.createRouteMap()),
 }
 
 export default function serve() {
