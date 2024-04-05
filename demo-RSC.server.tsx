@@ -1,4 +1,4 @@
-import type { BunFile } from "bun"
+import type { BunFile, Server } from "bun"
 import ReactDOMServer from "react-dom/server"
 import { ImportMap } from "./examples/ImportMap"
 import { importMapReact } from "./examples/ImportMap_fromPackage"
@@ -57,8 +57,6 @@ const clientEntryPoint = {
   },
 }
 
-console.log(await clientEntryPoint.build().then(it => it.outputs))
-
 function HomeLayout() {
   return (
     <html>
@@ -82,9 +80,35 @@ function HomeLayout() {
   )
 }
 
-const fileExists = Symbol.for("file that exists")
+const fetchFileThatExists = async (request: Request, file: BunFile) => {
+  const moduleId = getModuleIdByFilePath(file.name!)
+  const source = await file.text()
+  const esmFromCommonJS = js`
+      const module = { ...${{ id: moduleId }}, exports: {} }
+      __webpack_modules__[module.id] = module
+      const { exports } = module
+      console.log("esmFromCommonJS", module)
+      export default exports
+    `.replace(/^\s+/gm, "")
 
-const routes = {
+  let innards
+  // if (moduleId) innards = arrayToStream(esmFromCommonJS, await new Bun.Transpiler({ target: "browser" }).transform(source))
+  // else
+  {
+    innards = (
+      await Bun.build({
+        format: "esm",
+        target: "browser",
+        entrypoints: [file.name!],
+        // external: (await clientEntryPoint.scan()).imports.map(i => i.path),
+      })
+    ).outputs[0]
+  }
+  return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+}
+
+type Pathname = string
+const routes: Record<Pathname, Server["fetch"]> = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": async () =>
@@ -98,46 +122,17 @@ const routes = {
     }),
 
   ...(await clientEntryPoint.routes()),
-
-  [fileExists]: async (file: BunFile) => {
-    const moduleId = getModuleIdByFilePath(file.name!)
-    const source = await file.text()
-    const esmFromCommonJS = js`
-      const module = { ...${{ id: moduleId }}, exports: {} }
-      __webpack_modules__[module.id] = module
-      const { exports } = module
-      console.log("esmFromCommonJS", module)
-      export default exports
-    `.replace(/^\s+/gm, "")
-
-    let innards
-    // if (moduleId) innards = arrayToStream(esmFromCommonJS, await new Bun.Transpiler({ target: "browser" }).transform(source))
-    // else
-    {
-      innards = (
-        await Bun.build({
-          format: "esm",
-          target: "browser",
-          entrypoints: [file.name!],
-          // external: (await clientEntryPoint.scan()).imports.map(i => i.path),
-        })
-      ).outputs[0]
-    }
-    return new Response(innards, { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
-  },
 }
-
-console.log(Object.keys(routes))
 
 export default function serve() {
   return Bun.serve({
     async fetch(request) {
       const url = new URL(request.url)
 
-      if (url.pathname in routes) return await routes[url.pathname]()
+      if (url.pathname in routes) return await routes[url.pathname](request)
 
       const file = Bun.file(__dirname + url.pathname)
-      if (await file.exists()) return await routes[fileExists](file)
+      if (await file.exists()) return await fetchFileThatExists(request, file)
 
       return new Response("404 Not Found", { status: 404 })
     },
@@ -145,6 +140,15 @@ export default function serve() {
 }
 
 if (import.meta.main) {
+  // console.log(await clientEntryPoint.build().then(it => it.outputs))
+
   const server = serve()
+
   console.log("Server running at", server.url.href)
+  console.log(
+    "    Responds to these routes:\n",
+    Object.keys(routes)
+      .map(pathname => `\t${server.url.origin}${pathname}`)
+      .join("\n"),
+  )
 }
