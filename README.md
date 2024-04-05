@@ -2,6 +2,20 @@
 
 ---
 
+as of April 2024, start here:
+
+[demo-RSC.server.tsx](./demo-RSC.server.tsx)
+
+eventually I'll make all this stuff work in the following tests
+
+[demo-RSC.server.test.tsx](./demo-RSC.server.test.tsx)
+
+```sh
+PUPPETEER_HEADLESS=true bun test demo-RSC.server.test.tsx
+```
+
+---
+
 # v2 -- March 2024
 
 - [x] understand RSC
