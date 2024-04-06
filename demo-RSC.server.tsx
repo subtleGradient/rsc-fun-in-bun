@@ -54,20 +54,25 @@ const externalsBundle = {
       if (output.kind === "entry-point") this.name ||= pathname
     }
 
-    ;(await this.scan()).imports.forEach(({ path: moduleId }) => {
-      const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
+    const { imports } = await this.scan()
+    imports.forEach(({ path: moduleId }) => {
       let source = js`export default __webpack_require__("${moduleId}");`
-      if (moduleId === "react/jsx-dev-runtime")
-        source += js`
-        const { jsxDEV, Fragment } = window;
-        export { jsxDEV, Fragment };
-      `
-      if (moduleId === "react/jsx-runtime")
-        source += js`
-        const { jsx, Fragment } = window;
-        export { jsx, Fragment };
-      `
+      // TODO: seems like this should not be necessary
+      // hack to make react/jsx-runtime and react/jsx-dev-runtime work
+      {
+        if (moduleId === "react/jsx-dev-runtime")
+          source += js`
+            const { jsxDEV, Fragment } = window;
+            export { jsxDEV, Fragment };
+          `
+        if (moduleId === "react/jsx-runtime")
+          source += js`
+            const { jsx, Fragment } = window;
+            export { jsx, Fragment };
+          `
+      }
+      const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs` as Pathname
+      const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
       routes[pathname] = async () => new Response(source, { headers })
       this.importMap[moduleId] = pathname
     })
@@ -176,10 +181,10 @@ function LinkModulePreloads() {
 function HomeLayout() {
   return (
     <>
-      <head>
+      <>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
         <LinkModulePreloads />
-      </head>
+      </>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
 
