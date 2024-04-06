@@ -198,6 +198,23 @@ function LinkModulePreloads() {
   )
 }
 
+/**
+ * TODO: merge {@link HomeImportMap} into {@link HomeLayout} once renderToReadableStream HEAD sorting is fixed
+ * The importMap script needs to be loaded before the modulepreload
+ * But {@link React.version} 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
+ * so this is a workaround for now
+ */
+function HomeImportMap() {
+  return (
+    <ImportMapScript
+      imports={{
+        ...externalsBundle.importMap,
+        ...clientEntryPointBundle.importMap,
+      }}
+    />
+  )
+}
+
 function HomeLayout() {
   return (
     <>
@@ -222,13 +239,16 @@ function HomeLayout() {
   )
 }
 
-const fetchFileThatExists = async (request: Request, file: BunFile) => {
+async function fetchFileThatExists(request: Request, file: BunFile) {
   const build = await Bun.build({
     format: "esm",
     target: "browser",
     entrypoints: [file.name!],
+    define,
+    external: Object.keys(externalsBundle.importMap),
   })
-  return new Response(build.outputs[0], { headers: { "Content-Type": file.type, "Cache-Control": "no-store" } })
+  const output = build.outputs[0]
+  return new Response(output, { headers: { "Content-Type": output.type, "Cache-Control": "no-store" } })
 }
 
 const routes: RouteMap = {
@@ -243,7 +263,7 @@ const routes: RouteMap = {
       // so this is a workaround for now
       concatStreams(
         arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
-        await ReactDOMServer.renderToReadableStream(<ImportMapScript imports={importMap} />),
+        await ReactDOMServer.renderToReadableStream(<HomeImportMap />),
         await ReactDOMServer.renderToReadableStream(<HomeLayout />),
         arrayToStream(`</HTML>`),
       ),
@@ -259,30 +279,23 @@ const routes: RouteMap = {
   ...(await clientEntryPointBundle.createRouteMap()),
 }
 
-const importMap: ImportMap = {
-  ...externalsBundle.importMap,
-  ...clientEntryPointBundle.importMap,
+export async function fetch(request: Request): Promise<Response> {
+  const url = new URL(request.url)
+  console.warn("\t" + url.href)
+
+  if (url.pathname in routes) return await routes[url.pathname as Pathname](request)
+
+  const file = Bun.file(__dirname + url.pathname)
+  if (await file.exists()) return await fetchFileThatExists(request, file)
+
+  return new Response("404 Not Found", { status: 404 })
 }
 
 export default function serve() {
-  return Bun.serve({
-    async fetch(request) {
-      const url = new URL(request.url)
-      console.warn("\t" + url.href)
-
-      if (url.pathname in routes) return await routes[url.pathname as Pathname](request)
-
-      const file = Bun.file(__dirname + url.pathname)
-      if (await file.exists()) return await fetchFileThatExists(request, file)
-
-      return new Response("404 Not Found", { status: 404 })
-    },
-  })
+  return Bun.serve({ fetch })
 }
 
 if (import.meta.main) {
-  // console.log(await clientEntryPoint.build().then(it => it.outputs))
-
   const server = serve()
 
   console.log("Server running at", server.url.href)
