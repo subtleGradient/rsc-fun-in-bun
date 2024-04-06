@@ -63,6 +63,11 @@ const externalsBundle = {
         const { jsxDEV, Fragment } = window;
         export { jsxDEV, Fragment };
       `
+      if (moduleId === "react/jsx-runtime")
+        source += js`
+        const { jsx, Fragment } = window;
+        export { jsx, Fragment };
+      `
       routes[pathname] = async () => new Response(source, { headers })
       this.importMap[moduleId] = pathname
     })
@@ -79,6 +84,7 @@ const externalsBundle = {
       format: "esm",
       target: "browser",
       sourcemap: "external",
+      minify: process.env.NODE_ENV === "production",
       naming: {
         entry: "[name].mjs",
         chunk: "[name]-[hash].mjs",
@@ -136,6 +142,7 @@ const clientEntryPointBundle = {
       format: "esm",
       target: "browser",
       sourcemap: "external",
+      minify: process.env.NODE_ENV === "production",
       naming: {
         entry: "[name].mjs",
         chunk: "[name]-[hash].mjs",
@@ -204,14 +211,17 @@ const routes: RouteMap = {
 
   "/": async () =>
     new Response(
+      // TODO: avoid concatStreams once renderToReadableStream HEAD sorting is fixed
+      // ideally this would just be a single call to renderToReadableStream
+      // but the importMap script needs to be loaded before the modulepreload
+      // but React 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
+      // so this is a workaround for now
       concatStreams(
-        arrayToStream(`<!doctype html><HTML lang=en>`),
+        arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
         await ReactDOMServer.renderToReadableStream(<ImportMapScript imports={importMap} />),
         await ReactDOMServer.renderToReadableStream(<HomeLayout />),
       ),
-      {
-        headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
-      },
+      { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } },
     ),
 
   [polyfillsAndStuff.name!]: async () =>

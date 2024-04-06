@@ -3,8 +3,8 @@ import React from "react"
 import ReactDOM from "react-dom"
 import ReactDOMClient from "react-dom/client"
 import * as ReactServerDOMClient from "react-server-dom-webpack/client"
-import JSX from "react/jsx-dev-runtime"
-const { jsxDEV, Fragment } = JSX
+import { jsxDEV } from "react/jsx-dev-runtime"
+import { Fragment, jsx } from "react/jsx-runtime"
 
 declare global {
   interface Window {
@@ -23,7 +23,9 @@ __webpack_modules__["react-dom"] = { exports: ReactDOM }
 __webpack_modules__["react-dom/client"] = { exports: ReactDOMClient }
 __webpack_modules__["react-server-dom-webpack/client"] = { exports: ReactServerDOMClient }
 __webpack_modules__["react/jsx-dev-runtime"] = { exports: { jsxDEV, Fragment } }
+__webpack_modules__["react/jsx-runtime"] = { exports: { jsxDEV, Fragment } }
 
-Object.assign(window, { jsxDEV, Fragment, React, ReactDOM, ReactServerDOMClient })
+Object.assign(window, { jsx, jsxDEV, Fragment })
+Object.assign(window, { React, ReactDOM, ReactServerDOMClient })
 
 console.log("React", React.version)
