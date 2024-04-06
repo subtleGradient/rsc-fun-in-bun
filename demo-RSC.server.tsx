@@ -14,6 +14,8 @@ const define: Record<string, string> = {
   __webpack_require__: "__NOT__webpack_require__",
   __webpack_modules__: "__NOT__webpack_modules__",
   __webpack_chunk_load__: "__NOT__webpack_chunk_load__",
+  "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
+  __DEV__: process.env.NODE_ENV! === "development" ? "true" : "false",
 }
 
 /**
@@ -65,27 +67,33 @@ const externalsBundle = {
 
     const transpiler = new Bun.Transpiler({ target: "browser", define })
     const { imports } = await this.scan()
-    imports.forEach(({ path: moduleId }) => {
+    for (const { path: moduleId } of imports) {
       let source = js`export default __webpack_require__("${moduleId}");`
+
+      // TODO: finish scanning the exports of the module. Will need to bundle the module first, using `external: ["*"]` to avoid bundling the module's dependencies
+      // const resolvePath = (await import.meta.resolve(moduleId)).replace("file://", "")
+      // const { exports } = transpiler.scan(await Bun.file(resolvePath).text())
+      // console.log({ moduleId, resolvePath, exports })
+
       // TODO: seems like this should not be necessary
       // hack to make react/jsx-runtime and react/jsx-dev-runtime work
       {
         if (moduleId === "react/jsx-dev-runtime")
           source += js`
-            const { jsxDEV, Fragment } = window;
-            export { jsxDEV, Fragment };
-          `
+            const  { Fragment, jsxDEV } = __webpack_require__("${moduleId}");
+            export { Fragment, jsxDEV };
+        `
         if (moduleId === "react/jsx-runtime")
           source += js`
-            const { jsx, Fragment } = window;
-            export { jsx, Fragment };
+            const  { Fragment, jsx } = __webpack_require__("${moduleId}");
+            export { Fragment, jsx };
           `
       }
       const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs` as Pathname
       const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
       routes[pathname] = async () => new Response(await transpiler.transform(source, "js"), { headers })
       this.importMap[moduleId] = pathname
-    })
+    }
 
     return routes
   },
@@ -172,7 +180,7 @@ const clientEntryPointBundle = {
 
   async scan() {
     this.scan = async () => scan
-    const transpiler = new Bun.Transpiler({ target: "browser" })
+    const transpiler = new Bun.Transpiler({ target: "browser", define })
     const scan = transpiler.scan(await transpiler.transform(this.entrypoints[0]))
     return scan
   },
