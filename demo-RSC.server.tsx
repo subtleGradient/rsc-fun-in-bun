@@ -180,23 +180,23 @@ const clientEntryPointBundle = {
 
 function LinkModulePreloads() {
   return (
-    <head>
+    <>
       {Object.keys(routes)
         .filter(it => it.endsWith(".mjs"))
         .map(pathname => (
           <link rel="modulepreload" key={pathname} href={pathname} />
         ))}
-    </head>
+    </>
   )
 }
 
 function HomeLayout() {
   return (
     <>
-      <>
+      <head>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
         <LinkModulePreloads />
-      </>
+      </head>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
 
