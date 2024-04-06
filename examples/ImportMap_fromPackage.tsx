@@ -1,5 +1,5 @@
 import { $ } from "bun"
-import { ImportMap } from "./ImportMap"
+import { ImportMapScript } from "./ImportMap"
 
 type ModuleID = string
 type ModulePath = string
@@ -19,7 +19,7 @@ export const importMapReact: ImportMapType = {
 
 /** @deprecated -- prefer `<ImportMap imports={importMapReact} />` instead */
 export async function ImportMapCustom() {
-  return <ImportMap imports={importMapReact} />
+  return <ImportMapScript imports={importMapReact} />
 }
 
 export async function ImportMapCustom_withRSC() {
@@ -34,7 +34,7 @@ export async function ImportMapCustom_withRSC() {
     "react-server-dom-webpack/client": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js`,
     "react-server-dom-webpack/server.browser": `/node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js`,
   }
-  return <ImportMap imports={map} />
+  return <ImportMapScript imports={map} />
 }
 
 type npm_ls = { dependencies: { [key: string]: { version: string } } }
@@ -43,7 +43,7 @@ export async function ImportMap_viaESM() {
   const { dependencies } = (await $`npm ls react react-dom react-server-dom-webpack --json`.json()) as npm_ls
   const esm = (name: string) => `https://esm.run/${name}@${dependencies[name].version}`
   return (
-    <ImportMap
+    <ImportMapScript
       imports={{
         "*": `https://esm.run/`,
         react: esm("react"),
