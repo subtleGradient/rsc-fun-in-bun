@@ -1,9 +1,9 @@
 import type { BunFile, Server } from "bun"
 import ReactDOMServer from "react-dom/server"
 import { ImportMapScript } from "./examples/ImportMap"
-import { js, tsx } from "./examples/js"
 import { arrayToStream } from "./util/arrayToStream"
 import { concatStreams } from "./util/compoReadableStream"
+import { js, tsx } from "./util/js"
 
 type Pathname = `/${string}`
 type ModuleID = string

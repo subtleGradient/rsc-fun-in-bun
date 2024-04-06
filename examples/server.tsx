@@ -8,19 +8,20 @@ import ReactDOM from "react-dom"
 import ReactServerDOMClient from "react-server-dom-webpack/client"
 import RSDWServer from "react-server-dom-webpack/server.edge"
 
-if (process.env["this stops this stuff from being uninstalled"]) console.log([React, ReactDOM, RSDWServer, ReactServerDOMClient])
+if (process.env["this stops this stuff from being uninstalled"])
+  console.log([React, ReactDOM, RSDWServer, ReactServerDOMClient])
 
 import type { JavaScriptLoader } from "bun"
 import path from "path"
 import { arrayToStream } from "../util/arrayToStream"
 import { concatStreams } from "../util/compoReadableStream"
 import { createTextTransformStream } from "../util/createTransformStream"
+import { html, js } from "../util/js"
 import { HomeLayout } from "./HomeLayout"
 import { HomePage } from "./HomePage"
 import { ImportMapCustom } from "./ImportMap_fromPackage"
 import { RootComponent } from "./RootComponent"
 import { Timer } from "./Timer.client"
-import { html, js } from "./js"
 
 const transpiler = new Bun.Transpiler()
 
@@ -111,7 +112,7 @@ const RSC2 = Object.assign(
 
       const ReactDOMServer = await import("react-dom/server")
       const htmlStream = arrayToStream(
-        html`<!DOCTYPE html>`,
+        html`<!doctype html>`,
         "\n",
         `<HTML>`,
         "\n",

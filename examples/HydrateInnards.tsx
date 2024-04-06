@@ -1,5 +1,5 @@
 import { useId } from "react"
-import { js } from "./js"
+import { js } from "../util/js"
 
 type Props = {
   src: string
