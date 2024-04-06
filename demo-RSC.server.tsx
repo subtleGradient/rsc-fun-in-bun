@@ -2,6 +2,8 @@ import type { BunFile, Server } from "bun"
 import ReactDOMServer from "react-dom/server"
 import { ImportMapScript } from "./examples/ImportMap"
 import { js, tsx } from "./examples/js"
+import { arrayToStream } from "./util/arrayToStream"
+import { concatStreams } from "./util/compoReadableStream"
 
 type Pathname = `/${string}`
 type ModuleID = string
@@ -12,18 +14,23 @@ type ImportMap = Record<ModuleID, Pathname>
  * A virtual file that contains stuff that needs to be loaded before the client entry point.
  */
 const polyfillsAndStuff = {
-  name: "/generated-on-the-fly/polyfillsAndStuff.mjs",
+  name: "/!/polyfillsAndStuff.mjs",
   type: "text/javascript",
   text: async () =>
-    await new Bun.Transpiler({ target: "browser" }).transform(tsx`
+    await new Bun.Transpiler({ target: "browser", loader: "tsx" }).transform(tsx`
 /// <reference lib="dom" />
-window.__webpack_modules__ = {}
-window.require = window.__webpack_require__ = (moduleId) => __webpack_modules__[moduleId].exports
+window.__webpack_modules__ ??= {}
+
+const webpackGetChunkFilename = () => {}
+window.__webpack_require__ = Object.assign(
+  (moduleId: string) => __webpack_modules__[moduleId].exports, //
+  { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
+)
 `),
 }
 
-const clientEntryPointExternals = {
-  publicPath: "/clientEntryPoint-externals/" as Pathname,
+const externalsBundle = {
+  publicPath: "/!/externals/" as Pathname,
   entrypoints: ["./demo-RSC.clientEntryPoint.externals.tsx"],
 
   name: null as string | null,
@@ -48,9 +55,9 @@ const clientEntryPointExternals = {
     }
 
     ;(await this.scan()).imports.forEach(({ path: moduleId }) => {
-      const pathname = `${this.publicPath}${moduleId}`.replace("/./", "/") as Pathname
+      const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs`.replace("/./", "/") as Pathname
       const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
-      let source = js`export default require("${moduleId}");`
+      let source = js`export default __webpack_require__("${moduleId}");`
       if (moduleId === "react/jsx-dev-runtime")
         source += js`
         const { jsxDEV, Fragment } = window;
@@ -72,6 +79,11 @@ const clientEntryPointExternals = {
       format: "esm",
       target: "browser",
       sourcemap: "external",
+      naming: {
+        entry: "[name].mjs",
+        chunk: "[name]-[hash].mjs",
+        asset: "[name]-[hash][ext]",
+      },
     })
     return build
   },
@@ -87,17 +99,12 @@ const clientEntryPointExternals = {
 /**
  * A virtual folder that exposes the virtual client entry point files to the server.
  */
-const clientEntryPoint = {
-  publicPath: "/clientEntryPoint/" as Pathname,
-  entrypoints: ["./demo-RSC.clientEntryPoint.tsx", "./demo-RSC.clientEntryPoint.externals.tsx"],
+const clientEntryPointBundle = {
+  publicPath: "/!/clientEntryPoint/" as Pathname,
+  entrypoints: ["./demo-RSC.clientEntryPoint.tsx"],
 
   name: null as string | null,
-
-  async createImportMap(): Promise<ImportMap> {
-    this.createImportMap = async () => importMap // memoize
-    const importMap: ImportMap = {}
-    return importMap
-  },
+  importMap: {} as ImportMap,
 
   async createRouteMap(): Promise<RouteMap> {
     this.createRouteMap = async () => routes // memoize
@@ -134,7 +141,7 @@ const clientEntryPoint = {
         chunk: "[name]-[hash].mjs",
         asset: "[name]-[hash][ext]",
       },
-      external: Object.keys(clientEntryPointExternals.importMap),
+      external: Object.keys(externalsBundle.importMap),
     })
     return build
   },
@@ -147,12 +154,24 @@ const clientEntryPoint = {
   },
 }
 
+function LinkModulePreloads() {
+  return (
+    <head>
+      {Object.keys(routes)
+        .filter(it => it.endsWith(".mjs"))
+        .map(pathname => (
+          <link rel="modulepreload" key={pathname} href={pathname} />
+        ))}
+    </head>
+  )
+}
+
 function HomeLayout() {
   return (
-    <html>
+    <>
       <head>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
-        <ImportMapScript imports={importMap} />
+        <LinkModulePreloads />
       </head>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
@@ -164,10 +183,10 @@ function HomeLayout() {
         </div>
 
         <script type="module" src={polyfillsAndStuff.name} />
-        <script type="module" src={clientEntryPointExternals.name!} />
-        <script type="module" src={clientEntryPoint.name!} />
+        <script type="module" src={externalsBundle.name!} />
+        <script type="module" src={clientEntryPointBundle.name!} />
       </body>
-    </html>
+    </>
   )
 }
 
@@ -184,22 +203,29 @@ const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": async () =>
-    new Response(await ReactDOMServer.renderToReadableStream(<HomeLayout />), {
-      headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
-    }),
+    new Response(
+      concatStreams(
+        arrayToStream(`<!doctype html><HTML lang=en>`),
+        await ReactDOMServer.renderToReadableStream(<ImportMapScript imports={importMap} />),
+        await ReactDOMServer.renderToReadableStream(<HomeLayout />),
+      ),
+      {
+        headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+      },
+    ),
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text!(), {
       headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
     }),
 
-  ...(await clientEntryPointExternals.createRouteMap()),
-  ...(await clientEntryPoint.createRouteMap()),
+  ...(await externalsBundle.createRouteMap()),
+  ...(await clientEntryPointBundle.createRouteMap()),
 }
 
 const importMap: ImportMap = {
-  ...clientEntryPointExternals.importMap,
-  ...(await clientEntryPoint.createImportMap()),
+  ...externalsBundle.importMap,
+  ...clientEntryPointBundle.importMap,
 }
 
 export default function serve() {

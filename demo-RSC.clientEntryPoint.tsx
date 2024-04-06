@@ -11,8 +11,6 @@ declare global {
 const container = document.getElementById("root")
 window.demo_reactPageRoot = ReactDOMClient.createRoot(container!)
 
-
-
 function HomePage() {
   return (
     <div id="generated-by-client" suppressHydrationWarning>
