@@ -10,6 +10,12 @@ type ModuleID = string
 type RouteMap = Record<Pathname, Server["fetch"]>
 type ImportMap = Record<ModuleID, Pathname>
 
+const define: Record<string, string> = {
+  __webpack_require__: "__NOT__webpack_require__",
+  __webpack_modules__: "__NOT__webpack_modules__",
+  __webpack_chunk_load__: "__NOT__webpack_chunk_load__",
+}
+
 /**
  * A virtual file that contains stuff that needs to be loaded before the client entry point.
  */
@@ -17,15 +23,18 @@ const polyfillsAndStuff = {
   name: "/!/polyfillsAndStuff.mjs",
   type: "text/javascript",
   text: async () =>
-    await new Bun.Transpiler({ target: "browser", loader: "tsx" }).transform(tsx`
+    await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(tsx`
 /// <reference lib="dom" />
-window.__webpack_modules__ ??= {}
+const webpackGetChunkFilename = (chunkId: string) => { throw new Error("webpackGetChunkFilename not implemented") }
 
-const webpackGetChunkFilename = () => {}
-window.__webpack_require__ = Object.assign(
-  (moduleId: string) => __webpack_modules__[moduleId].exports, //
+const __NOT__webpack_modules__ = {}
+const __NOT__webpack_chunk_load__ = (chunkId: string) => { throw new Error("chunk loading not implemented") }
+const __NOT__webpack_require__ = Object.assign(
+  (moduleId: string) => __NOT__webpack_modules__[moduleId].exports, //
   { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
 )
+
+Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, __NOT__webpack_require__ })
 `),
 }
 
@@ -54,6 +63,7 @@ const externalsBundle = {
       if (output.kind === "entry-point") this.name ||= pathname
     }
 
+    const transpiler = new Bun.Transpiler({ target: "browser", define })
     const { imports } = await this.scan()
     imports.forEach(({ path: moduleId }) => {
       let source = js`export default __webpack_require__("${moduleId}");`
@@ -73,7 +83,7 @@ const externalsBundle = {
       }
       const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs` as Pathname
       const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
-      routes[pathname] = async () => new Response(source, { headers })
+      routes[pathname] = async () => new Response(await transpiler.transform(source, "js"), { headers })
       this.importMap[moduleId] = pathname
     })
 
@@ -90,6 +100,7 @@ const externalsBundle = {
       target: "browser",
       sourcemap: "external",
       minify: process.env.NODE_ENV === "production",
+      define,
       naming: {
         entry: "[name].mjs",
         chunk: "[name]-[hash].mjs",
@@ -101,7 +112,7 @@ const externalsBundle = {
 
   async scan() {
     this.scan = async () => scan
-    const transpiler = new Bun.Transpiler({ target: "browser" })
+    const transpiler = new Bun.Transpiler({ target: "browser", define })
     const scan = transpiler.scan(await transpiler.transform(await Bun.file(this.entrypoints[0]).text(), "tsx"))
     return scan
   },
@@ -148,6 +159,7 @@ const clientEntryPointBundle = {
       target: "browser",
       sourcemap: "external",
       minify: process.env.NODE_ENV === "production",
+      define,
       naming: {
         entry: "[name].mjs",
         chunk: "[name]-[hash].mjs",
@@ -225,6 +237,7 @@ const routes: RouteMap = {
         arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
         await ReactDOMServer.renderToReadableStream(<ImportMapScript imports={importMap} />),
         await ReactDOMServer.renderToReadableStream(<HomeLayout />),
+        arrayToStream(`</HTML>`),
       ),
       { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } },
     ),

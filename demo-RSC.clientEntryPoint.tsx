@@ -3,7 +3,6 @@ import ReactDOMClient from "react-dom/client"
 
 declare global {
   interface Window {
-    __webpack_modules__: Record<string, { exports: unknown }>
     demo_reactPageRoot: ReactDOMClient.Root
   }
 }

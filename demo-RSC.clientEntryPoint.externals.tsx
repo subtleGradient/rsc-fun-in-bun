@@ -8,22 +8,18 @@ import { Fragment, jsx } from "react/jsx-runtime"
 
 declare global {
   interface Window {
-    __webpack_modules__: Record<string, { exports: unknown }>
-    __webpack_require__: { (id: string): unknown; m: any; c: any; d: any; n: any; o: any; p: any; s: any }
-    require: ((moduleId: string) => unknown) & unknown
-    demo_reactPageRoot: ReactDOMClient.Root
+    __NOT__webpack_modules__: Record<string, { exports: unknown }>
   }
 }
 
-window.__webpack_modules__ ??= {}
-const { __webpack_modules__ } = window
+const { __NOT__webpack_modules__ } = window
 
-__webpack_modules__["react"] = { exports: React }
-__webpack_modules__["react-dom"] = { exports: ReactDOM }
-__webpack_modules__["react-dom/client"] = { exports: ReactDOMClient }
-__webpack_modules__["react-server-dom-webpack/client"] = { exports: ReactServerDOMClient }
-__webpack_modules__["react/jsx-dev-runtime"] = { exports: { jsxDEV, Fragment } }
-__webpack_modules__["react/jsx-runtime"] = { exports: { jsxDEV, Fragment } }
+__NOT__webpack_modules__["react"] = { exports: React }
+__NOT__webpack_modules__["react-dom"] = { exports: ReactDOM }
+__NOT__webpack_modules__["react-dom/client"] = { exports: ReactDOMClient }
+__NOT__webpack_modules__["react-server-dom-webpack/client"] = { exports: ReactServerDOMClient }
+__NOT__webpack_modules__["react/jsx-dev-runtime"] = { exports: { jsxDEV, Fragment } }
+__NOT__webpack_modules__["react/jsx-runtime"] = { exports: { jsxDEV, Fragment } }
 
 Object.assign(window, { jsx, jsxDEV, Fragment })
 Object.assign(window, { React, ReactDOM, ReactServerDOMClient })
