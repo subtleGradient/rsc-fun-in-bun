@@ -239,6 +239,37 @@ function HomeLayout() {
   )
 }
 
+async function HomePageHTMLStream() {
+  // TODO: avoid concatStreams once renderToReadableStream HEAD sorting is fixed
+  // ideally this would just be a single call to renderToReadableStream
+  // but the importMap script needs to be loaded before the modulepreload
+  // but React 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
+  // so this is a workaround for now
+  return concatStreams(
+    arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
+    await ReactDOMServer.renderToReadableStream(<HomeImportMap />),
+    await ReactDOMServer.renderToReadableStream(<HomeLayout />),
+    arrayToStream(`</HTML>`),
+  )
+}
+
+const fetchHomePageHTML = async () =>
+  new Response(await HomePageHTMLStream(), { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } })
+
+const routes: RouteMap = {
+  "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
+
+  "/": fetchHomePageHTML,
+
+  [polyfillsAndStuff.name!]: async () =>
+    new Response(await polyfillsAndStuff.text!(), {
+      headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
+    }),
+
+  ...(await externalsBundle.createRouteMap()),
+  ...(await clientEntryPointBundle.createRouteMap()),
+}
+
 async function fetchFileThatExists(request: Request, file: BunFile) {
   const build = await Bun.build({
     format: "esm",
@@ -249,34 +280,6 @@ async function fetchFileThatExists(request: Request, file: BunFile) {
   })
   const output = build.outputs[0]
   return new Response(output, { headers: { "Content-Type": output.type, "Cache-Control": "no-store" } })
-}
-
-const routes: RouteMap = {
-  "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
-
-  "/": async () =>
-    new Response(
-      // TODO: avoid concatStreams once renderToReadableStream HEAD sorting is fixed
-      // ideally this would just be a single call to renderToReadableStream
-      // but the importMap script needs to be loaded before the modulepreload
-      // but React 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
-      // so this is a workaround for now
-      concatStreams(
-        arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
-        await ReactDOMServer.renderToReadableStream(<HomeImportMap />),
-        await ReactDOMServer.renderToReadableStream(<HomeLayout />),
-        arrayToStream(`</HTML>`),
-      ),
-      { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } },
-    ),
-
-  [polyfillsAndStuff.name!]: async () =>
-    new Response(await polyfillsAndStuff.text!(), {
-      headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
-    }),
-
-  ...(await externalsBundle.createRouteMap()),
-  ...(await clientEntryPointBundle.createRouteMap()),
 }
 
 export async function fetch(request: Request): Promise<Response> {
