@@ -1,6 +1,8 @@
 import { browser } from "@/test-helpers/puppers.ts"
 import { describe, expect, it } from "bun:test"
 
+const RSC_TYPE = "text/x-component"
+
 if (!1!) {
   describe("the `await using` keyword", async () => {
     it("disposes of the page auto-magically", async () => {
@@ -29,21 +31,24 @@ describe("toy-framework.server", () => {
 
   describe("/rsc/test-suspense", () => {
     it("returns RSC content", async () => {
-      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`))
+      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }))
       expect(response.status).toBe(200)
       expect(await response.text()).toMatchSnapshot()
     })
     it("updates asynchronously", async done => {
-      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`))
+      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }))
       // stream the responce anf verify that it sends multiple chunks
       const decoder = new TextDecoder()
       const reader = response.body!.getReader()
       reader.closed.then(done)
+      let count = 0
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
         expect(decoder.decode(value)).toMatchSnapshot()
+        count++
       }
+      expect(count).toBeGreaterThan(1)
     })
   })
 })

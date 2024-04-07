@@ -91,13 +91,8 @@ export const routes: RouteMap = {
       <div>
         hi
         <Suspense fallback={<div>loading...</div>}>
-          <AsyncView sleepForMs={4} />
-        </Suspense>
-        <Suspense fallback={<div>loading...</div>}>
-          <AsyncView sleepForMs={69} />
-        </Suspense>
-        <Suspense fallback={<div>loading...</div>}>
-          <AsyncView sleepForMs={55} />
+          <AsyncView sleepForMs={0} />
+          <AsyncView sleepForMs={10} />
         </Suspense>
       </div>,
       {
