@@ -1,174 +1,13 @@
-import { resolve, type BunFile, type Server } from "bun"
 import React from "react"
 import ReactDOMServer from "react-dom/server"
 import { arrayToStream } from "../../util/arrayToStream"
 import { concatStreams } from "../../util/compoReadableStream"
-import { js } from "../../util/js"
 import { ImportMapScript } from "../client/ImportMap"
-import { define, polyfillsAndStuff } from "./polyfillsAndStuff"
-
-type Pathname = `/${string}`
-type ModuleID = string
-type RouteMap = Record<Pathname, Server["fetch"]>
-type ImportMap = Record<ModuleID, Pathname>
-
-const externalsBundle = {
-  publicPath: "/!/externals/" as Pathname,
-  entrypoints: [await resolve("../client/clientEntryPoint.externals.tsx", __dirname)],
-
-  name: null as string | null,
-  importMap: {} as ImportMap,
-
-  async createRouteMap(): Promise<RouteMap> {
-    this.createRouteMap = async () => routes // memoize
-    const routes: RouteMap = {}
-
-    const { success, logs, outputs } = await this.build()
-
-    if (!success) {
-      logs.forEach(log => console.warn(log))
-      throw new Error("Failed to build client entry point")
-    }
-
-    for (const output of outputs) {
-      const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
-      routes[pathname] = async () => new Response(output, { headers })
-      if (output.kind === "entry-point") this.name ||= pathname
-    }
-
-    const transpiler = new Bun.Transpiler({ target: "browser", define })
-    const { imports } = await this.scan()
-    for (const { path: moduleId } of imports) {
-      let source = js`export default __webpack_require__("${moduleId}");`
-
-      // TODO: finish scanning the exports of the module. Will need to bundle the module first, using `external: ["*"]` to avoid bundling the module's dependencies
-      // const resolvePath = (await import.meta.resolve(moduleId)).replace("file://", "")
-      // const { exports } = transpiler.scan(await Bun.file(resolvePath).text())
-      // console.log({ moduleId, resolvePath, exports })
-
-      // TODO: seems like this should not be necessary
-      // hack to make react/jsx-runtime and react/jsx-dev-runtime work
-      {
-        if (moduleId === "react/jsx-dev-runtime")
-          source += js`
-            const  { Fragment, jsxDEV } = __webpack_require__("${moduleId}");
-            export { Fragment, jsxDEV };
-        `
-        if (moduleId === "react/jsx-runtime")
-          source += js`
-            const  { Fragment, jsx } = __webpack_require__("${moduleId}");
-            export { Fragment, jsx };
-          `
-      }
-      const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs` as Pathname
-      const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
-      routes[pathname] = async () => new Response(await transpiler.transform(source, "js"), { headers })
-      this.importMap[moduleId] = pathname
-    }
-
-    return routes
-  },
-
-  build() {
-    this.build = () => build
-    const build = Bun.build({
-      publicPath: this.publicPath,
-      entrypoints: this.entrypoints,
-      splitting: true,
-      format: "esm",
-      target: "browser",
-      sourcemap: "external",
-      minify: process.env.NODE_ENV === "production",
-      define,
-      naming: {
-        entry: "[name].mjs",
-        chunk: "[name]-[hash].mjs",
-        asset: "[name]-[hash][ext]",
-      },
-    })
-    return build
-  },
-
-  async scan() {
-    this.scan = async () => scan
-    const transpiler = new Bun.Transpiler({ target: "browser", define })
-    const scan = transpiler.scan(await transpiler.transform(await Bun.file(this.entrypoints[0]).text(), "tsx"))
-    return scan
-  },
-}
-
-/**
- * A virtual folder that exposes the virtual client entry point files to the server.
- */
-const clientEntryPointBundle = {
-  publicPath: "/!/clientEntryPoint/" as Pathname,
-  entrypoints: [await resolve("../client/clientEntryPoint.tsx", __dirname)],
-
-  name: null as string | null,
-  importMap: {} as ImportMap,
-
-  async createRouteMap(): Promise<RouteMap> {
-    this.createRouteMap = async () => routes // memoize
-    const routes: RouteMap = {}
-
-    const { success, logs, outputs } = await this.build()
-
-    if (!success) {
-      logs.forEach(log => console.warn(log))
-      throw new Error("Failed to build client entry point")
-    }
-
-    for (const output of outputs) {
-      const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
-      routes[pathname] = async () => new Response(output, { headers })
-      if (output.kind === "entry-point") this.name ||= pathname
-    }
-
-    return routes
-  },
-
-  build() {
-    this.build = () => build
-    const build = Bun.build({
-      publicPath: this.publicPath,
-      entrypoints: this.entrypoints,
-      splitting: true,
-      format: "esm",
-      target: "browser",
-      sourcemap: "external",
-      minify: process.env.NODE_ENV === "production",
-      define,
-      naming: {
-        entry: "[name].mjs",
-        chunk: "[name]-[hash].mjs",
-        asset: "[name]-[hash][ext]",
-      },
-      external: Object.keys(externalsBundle.importMap),
-    })
-    return build
-  },
-
-  async scan() {
-    this.scan = async () => scan
-    const transpiler = new Bun.Transpiler({ target: "browser", define })
-    const scan = transpiler.scan(await transpiler.transform(this.entrypoints[0]))
-    return scan
-  },
-}
-
-function LinkModulePreloads() {
-  return (
-    <>
-      {Object.keys(routes)
-        .filter(it => it.endsWith(".mjs"))
-        .map(pathname => (
-          <link rel="modulepreload" key={pathname} href={pathname} />
-        ))}
-    </>
-  )
-}
+import { LinkModulePreloads } from "../client/LinkModulePreloads"
+import { clientEntryPointBundle } from "./clientEntryPointBundle"
+import { externalsBundle } from "./externalsBundle"
+import { polyfillsAndStuff } from "./polyfillsAndStuff"
+import type { Pathname, RouteMap } from "./types"
 
 /**
  * TODO: merge {@link HomeImportMap} into {@link HomeLayout} once renderToReadableStream HEAD sorting is fixed
@@ -187,12 +26,12 @@ function HomeImportMap() {
   )
 }
 
-function HomeLayout() {
+function HomeLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
   return (
     <React.StrictMode>
       <head>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
-        <LinkModulePreloads />
+        <LinkModulePreloads pathnames={(Object.keys(props.routes) as Pathname[]).filter(it => it.endsWith(".mjs"))} />
       </head>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
@@ -203,9 +42,7 @@ function HomeLayout() {
           </div>
         </div>
 
-        <script type="module" src={polyfillsAndStuff.name} />
-        <script type="module" src={externalsBundle.name!} />
-        <script type="module" src={clientEntryPointBundle.name!} />
+        {props.children}
       </body>
     </React.StrictMode>
   )
@@ -220,7 +57,13 @@ async function HomePageHTMLStream() {
   return concatStreams(
     arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
     await ReactDOMServer.renderToReadableStream(<HomeImportMap />),
-    await ReactDOMServer.renderToReadableStream(<HomeLayout />),
+    await ReactDOMServer.renderToReadableStream(
+      <HomeLayout routes={routes}>
+        <script type="module" src={polyfillsAndStuff.name} />
+        <script type="module" src={externalsBundle.name!} />
+        <script type="module" src={clientEntryPointBundle.name!} />
+      </HomeLayout>,
+    ),
     arrayToStream(`</HTML>`),
   )
 }
@@ -240,18 +83,6 @@ export const routes: RouteMap = {
 
   ...(await externalsBundle.createRouteMap()),
   ...(await clientEntryPointBundle.createRouteMap()),
-}
-
-async function fetchFileThatExists(request: Request, file: BunFile) {
-  const build = await Bun.build({
-    format: "esm",
-    target: "browser",
-    entrypoints: [file.name!],
-    define,
-    external: Object.keys(externalsBundle.importMap),
-  })
-  const output = build.outputs[0]
-  return new Response(output, { headers: { "Content-Type": output.type, "Cache-Control": "no-store" } })
 }
 
 export async function fetch(request: Request): Promise<Response> {
