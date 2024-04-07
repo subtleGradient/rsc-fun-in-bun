@@ -1,4 +1,4 @@
-import React, { Suspense } from "react"
+import React from "react"
 import ReactDOMServer from "react-dom/server"
 
 // BUG: Bun@1.1.2 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
@@ -9,15 +9,12 @@ import ReactDOMServer from "react-dom/server"
 import { arrayToStream } from "@/util/arrayToStream"
 import { concatStreams } from "@/util/compoReadableStream"
 
-import { sleep } from "bun"
 import { ImportMapScript } from "../client/ImportMap"
 import { LinkModulePreloads } from "../client/LinkModulePreloads"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import type { Pathname, RouteMap } from "./types"
-
-const RSC_TYPE = "text/x-component"
 
 function RootLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
   return (
@@ -78,35 +75,6 @@ export const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": fetchHomePageHTML,
-
-  "/rsc/test-suspense": async () => {
-    const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
-
-    async function AsyncView({ sleepForMs }: { sleepForMs: number }) {
-      await sleep(sleepForMs)
-      return <div>slept for {Math.round(sleepForMs)}ms</div>
-    }
-
-    let rscStream = ReactServerDOMServer.renderToReadableStream(
-      <div>
-        hi
-        <Suspense fallback={<div>loading...</div>}>
-          <AsyncView sleepForMs={0} />
-          <AsyncView sleepForMs={10} />
-        </Suspense>
-      </div>,
-      {
-        // ...externalsBundle.webpackMap,
-        // ...clientEntryPointBundle.webpackMap,
-      },
-      {
-        onError: console.error,
-        identifierPrefix: "rsc",
-      },
-    )
-
-    return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, "Cache-Control": "no-store" } })
-  },
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text!(), {

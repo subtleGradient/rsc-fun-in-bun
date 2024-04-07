@@ -1,8 +1,15 @@
+import { routesForRestingRSC } from "./toy-framework/server/routesForRestingRSC.tsx"
 import { verifyReactServer } from "./toy-framework/server/verify-react-server.ts"
 
 if (import.meta.main) {
   verifyReactServer()
   const { routes, fetch } = await import("./toy-framework/server/toy-framework.server.tsx")
+
+  Object.assign(routes, {
+    // TODO: move this to a test file somewhere
+    ...routesForRestingRSC,
+  })
+
   const server = Bun.serve({ fetch })
 
   console.log("Server running at", server.url.href)
