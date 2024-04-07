@@ -1,4 +1,4 @@
-import { verifyReactServer } from "./toy-framework/verify-react-server.ts"
+import { verifyReactServer } from "./toy-framework/server/verify-react-server.ts"
 
 if (import.meta.main) {
   verifyReactServer()

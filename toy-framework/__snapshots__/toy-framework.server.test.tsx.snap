@@ -16,14 +16,14 @@ exports[`toy-framework.server toy-framework.server root / route returns a respon
 <head>
 <title>Hello from /toy-framework.server.tsx</title>
 <link rel="modulepreload" href="/!/polyfillsAndStuff.mjs"/>
-<link rel="modulepreload" href="/!/externals/demo-RSC.clientEntryPoint.externals.mjs"/>
+<link rel="modulepreload" href="/!/externals/clientEntryPoint.externals.mjs"/>
 <link rel="modulepreload" href="/!/externals/react.mjs"/>
 <link rel="modulepreload" href="/!/externals/react-dom.mjs"/>
 <link rel="modulepreload" href="/!/externals/react-dom:client.mjs"/>
 <link rel="modulepreload" href="/!/externals/react-server-dom-webpack:client.mjs"/>
 <link rel="modulepreload" href="/!/externals/react:jsx-dev-runtime.mjs"/>
 <link rel="modulepreload" href="/!/externals/react:jsx-runtime.mjs"/>
-<link rel="modulepreload" href="/!/clientEntryPoint/demo-RSC.clientEntryPoint.mjs"/>
+<link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
 </head>
 <body>
 <h1>Hello from <!-- -->/toy-framework.server.tsx</h1>
@@ -33,9 +33,9 @@ exports[`toy-framework.server toy-framework.server root / route returns a respon
 </div>
 <script type="module" src="/!/polyfillsAndStuff.mjs">
 </script>
-<script type="module" src="/!/externals/demo-RSC.clientEntryPoint.externals.mjs">
+<script type="module" src="/!/externals/clientEntryPoint.externals.mjs">
 </script>
-<script type="module" src="/!/clientEntryPoint/demo-RSC.clientEntryPoint.mjs">
+<script type="module" src="/!/clientEntryPoint/clientEntryPoint.mjs">
 </script>
 </body>
 </HTML>"
