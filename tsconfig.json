@@ -18,6 +18,10 @@
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
 
-    "types": ["react", "react-dom", "react/canary", "react-dom/canary", "react/experimental", "react-dom/experimental"]
+    "types": ["react", "react-dom", "react/canary", "react-dom/canary", "react/experimental", "react-dom/experimental"],
+
+    "paths": {
+      "@/*": ["./*"]
+    }
   }
 }
