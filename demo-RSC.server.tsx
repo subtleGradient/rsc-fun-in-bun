@@ -1,6 +1,7 @@
 import type { BunFile, Server } from "bun"
+import React from "react"
 import ReactDOMServer from "react-dom/server"
-import { ImportMapScript } from "./examples/ImportMap"
+import { ImportMapScript } from "./toy-framework/ImportMap"
 import { arrayToStream } from "./util/arrayToStream"
 import { concatStreams } from "./util/compoReadableStream"
 import { js, tsx } from "./util/js"
@@ -217,7 +218,7 @@ function HomeImportMap() {
 
 function HomeLayout() {
   return (
-    <>
+    <React.StrictMode>
       <head>
         <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
         <LinkModulePreloads />
@@ -235,7 +236,7 @@ function HomeLayout() {
         <script type="module" src={externalsBundle.name!} />
         <script type="module" src={clientEntryPointBundle.name!} />
       </body>
-    </>
+    </React.StrictMode>
   )
 }
 

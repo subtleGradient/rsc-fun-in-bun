@@ -1,4 +1,5 @@
 /// <reference lib="dom" />
+import React from "react"
 import ReactDOMClient from "react-dom/client"
 
 declare global {
@@ -18,4 +19,8 @@ function HomePage() {
   )
 }
 
-window.demo_reactPageRoot.render(<HomePage />)
+window.demo_reactPageRoot.render(
+  <React.StrictMode>
+    <HomePage />
+  </React.StrictMode>,
+)

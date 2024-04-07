@@ -1,7 +1,7 @@
 import { type Server } from "bun"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test"
-import { ImportMapCustom } from "./examples/ImportMap_fromPackage"
 import { browser } from "./test-helpers/puppers"
+import { ImportMapCustom } from "./toy-framework/ImportMap_fromPackage"
 import { arrayToStream } from "./util/arrayToStream"
 import { concatStreams } from "./util/compoReadableStream"
 import { html, js, tsx } from "./util/js"
