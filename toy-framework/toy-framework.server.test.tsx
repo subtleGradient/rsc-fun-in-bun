@@ -36,10 +36,12 @@ describe("toy-framework.server", async () => {
   beforeEach(() => (fetchRef.current = toyFramework.fetch))
   afterEach(() => (fetchRef.current = null))
   describe("toy-framework.server", () => {
-    it("returns a response", async () => {
-      const response = await fetchRef.current!(new Request(serverRef.current!.url.href))
-      expect(response.status).toBe(200)
-      expect(await response.text()).toBe("Hello from RSC!")
+    describe("root / route", () => {
+      it("returns a response", async () => {
+        const response = await fetchRef.current!(new Request(serverRef.current!.url.href))
+        expect(response.status).toBe(200)
+        expect((await response.text()).replaceAll("><", ">\n<")).toMatchSnapshot()
+      })
     })
   })
 })
