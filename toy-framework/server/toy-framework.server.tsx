@@ -11,24 +11,7 @@ import { externalsBundle } from "./externalsBundle"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import type { Pathname, RouteMap } from "./types"
 
-/**
- * TODO: merge {@link HomeImportMap} into {@link HomeLayout} once renderToReadableStream HEAD sorting is fixed
- * The importMap script needs to be loaded before the modulepreload
- * But {@link React.version} 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
- * so this is a workaround for now
- */
-function HomeImportMap() {
-  return (
-    <ImportMapScript
-      imports={{
-        ...externalsBundle.importMap,
-        ...clientEntryPointBundle.importMap,
-      }}
-    />
-  )
-}
-
-function HomeLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
+function RootLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
   return (
     <React.StrictMode>
       <head>
@@ -50,21 +33,31 @@ function HomeLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
   )
 }
 
+/**
+ * TODO: simplifty this once renderToReadableStream HEAD sorting is fixed
+ *
+ * The importMap script needs to be loaded before the modulepreload
+ * But {@link React.version} 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
+ * so this is a workaround for now
+ */
 async function HomePageHTMLStream() {
-  // TODO: avoid concatStreams once renderToReadableStream HEAD sorting is fixed
   // ideally this would just be a single call to renderToReadableStream
-  // but the importMap script needs to be loaded before the modulepreload
-  // but React 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
-  // so this is a workaround for now
   return concatStreams(
     arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
-    await ReactDOMServer.renderToReadableStream(<HomeImportMap />),
     await ReactDOMServer.renderToReadableStream(
-      <HomeLayout routes={routes}>
+      <ImportMapScript
+        imports={{
+          ...externalsBundle.importMap,
+          ...clientEntryPointBundle.importMap,
+        }}
+      />,
+    ),
+    await ReactDOMServer.renderToReadableStream(
+      <RootLayout routes={routes}>
         <script type="module" src={polyfillsAndStuff.name} />
         <script type="module" src={externalsBundle.name!} />
         <script type="module" src={clientEntryPointBundle.name!} />
-      </HomeLayout>,
+      </RootLayout>,
     ),
     arrayToStream(`</HTML>`),
   )
