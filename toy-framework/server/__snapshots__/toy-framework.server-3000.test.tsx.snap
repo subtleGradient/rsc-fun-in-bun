@@ -14,7 +14,7 @@ exports[`toy-framework.server root / route returns a response 1`] = `
   }
 }</script>
 <head>
-<title>Hello from /toy-framework.server.tsx</title>
+<title>Hello from /HTMLPageRootLayout.tsx</title>
 <link rel="modulepreload" href="/!/polyfillsAndStuff.mjs"/>
 <link rel="modulepreload" href="/!/externals/clientEntryPoint.externals.mjs"/>
 <link rel="modulepreload" href="/!/externals/react.mjs"/>
@@ -26,9 +26,9 @@ exports[`toy-framework.server root / route returns a response 1`] = `
 <link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
 </head>
 <body>
-<h1>Hello from <!-- -->/toy-framework.server.tsx</h1>
+<h1>Hello from <!-- -->/HTMLPageRootLayout.tsx</h1>
 <div id="root">
-<div data-id="NOT-generated-by-client">pre-rendered by server in <code>/toy-framework.server.tsx</code>
+<div data-id="NOT-generated-by-client">pre-rendered by server in <code>/HTMLPageRootLayout.tsx</code>
 </div>
 </div>
 <script type="module" src="/!/polyfillsAndStuff.mjs">
@@ -56,11 +56,15 @@ exports[`toy-framework.server /rsc/test-suspense updates asynchronously 1`] = `
 2:D{"name":"AsyncView","env":"Server"}
 3:D{"name":"AsyncView","env":"Server"}
 0:["$","div",null,{"children":["hi",["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":["$L2","$L3"]}]]}]
-2:["$","div",null,{"children":["slept for ",0,"ms"]}]
 "
 `;
 
 exports[`toy-framework.server /rsc/test-suspense updates asynchronously 2`] = `
+"2:["$","div",null,{"children":["slept for ",0,"ms"]}]
+"
+`;
+
+exports[`toy-framework.server /rsc/test-suspense updates asynchronously 3`] = `
 "3:["$","div",null,{"children":["slept for ",10,"ms"]}]
 "
 `;

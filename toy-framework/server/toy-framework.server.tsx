@@ -1,80 +1,21 @@
-import React from "react"
-import ReactDOMServer from "react-dom/server"
-
 // BUG: Bun@1.1.2 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
 // So, I'm using a dynamic import below to avoid triggering the react-server error
 // so that the existing tests won't fail.
 // import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
 
-import { arrayToStream } from "@/util/arrayToStream"
-import { concatStreams } from "@/util/compoReadableStream"
-
-import { ImportMapScript } from "../client/ImportMap"
-import { LinkModulePreloads } from "../client/LinkModulePreloads"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
+import { HTMLPageStream } from "./HTMLPageStream"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import type { Pathname, RouteMap } from "./types"
-
-function RootLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
-  return (
-    <React.StrictMode>
-      <head>
-        <title>{`Hello from ${__filename.replace(__dirname, "")}`}</title>
-        <LinkModulePreloads pathnames={(Object.keys(props.routes) as Pathname[]).filter(it => it.endsWith(".mjs"))} />
-      </head>
-      <body>
-        <h1>Hello from {__filename.replace(__dirname, "")}</h1>
-
-        <div id="root">
-          <div data-id="NOT-generated-by-client">
-            pre-rendered by server in <code>{__filename.replace(__dirname, "")}</code>
-          </div>
-        </div>
-
-        {props.children}
-      </body>
-    </React.StrictMode>
-  )
-}
-
-/**
- * TODO: simplifty this once renderToReadableStream HEAD sorting is fixed
- *
- * The importMap script needs to be loaded before the modulepreload
- * But {@link React.version} 19.0.0-canary-e3ebcd54b-20240405 keeps moving the modulepreload above the importMap script
- * so this is a workaround for now
- */
-async function HomePageHTMLStream() {
-  // ideally this would just be a single call to renderToReadableStream
-  return concatStreams(
-    arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),
-    await ReactDOMServer.renderToReadableStream(
-      <ImportMapScript
-        imports={{
-          ...externalsBundle.importMap,
-          ...clientEntryPointBundle.importMap,
-        }}
-      />,
-    ),
-    await ReactDOMServer.renderToReadableStream(
-      <RootLayout routes={routes}>
-        <script type="module" src={polyfillsAndStuff.name} />
-        <script type="module" src={externalsBundle.name!} />
-        <script type="module" src={clientEntryPointBundle.name!} />
-      </RootLayout>,
-    ),
-    arrayToStream(`</HTML>`),
-  )
-}
-
-const fetchHomePageHTML = async () =>
-  new Response(await HomePageHTMLStream(), { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } })
 
 export const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
-  "/": fetchHomePageHTML,
+  "/": async () =>
+    new Response(await HTMLPageStream({}), {
+      headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+    }),
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text!(), {
