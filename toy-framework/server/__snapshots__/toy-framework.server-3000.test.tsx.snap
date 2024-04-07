@@ -1,0 +1,42 @@
+// Bun Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`toy-framework.server toy-framework.server root / route returns a response 1`] = `
+"<!DOCTYPE HTML>
+<HTML lang=en>
+<script type="importmap">{
+  "imports": {
+    "react": "/!/externals/react.mjs",
+    "react-dom": "/!/externals/react-dom.mjs",
+    "react-dom/client": "/!/externals/react-dom:client.mjs",
+    "react-server-dom-webpack/client": "/!/externals/react-server-dom-webpack:client.mjs",
+    "react/jsx-dev-runtime": "/!/externals/react:jsx-dev-runtime.mjs",
+    "react/jsx-runtime": "/!/externals/react:jsx-runtime.mjs"
+  }
+}</script>
+<head>
+<title>Hello from /toy-framework.server.tsx</title>
+<link rel="modulepreload" href="/!/polyfillsAndStuff.mjs"/>
+<link rel="modulepreload" href="/!/externals/clientEntryPoint.externals.mjs"/>
+<link rel="modulepreload" href="/!/externals/react.mjs"/>
+<link rel="modulepreload" href="/!/externals/react-dom.mjs"/>
+<link rel="modulepreload" href="/!/externals/react-dom:client.mjs"/>
+<link rel="modulepreload" href="/!/externals/react-server-dom-webpack:client.mjs"/>
+<link rel="modulepreload" href="/!/externals/react:jsx-dev-runtime.mjs"/>
+<link rel="modulepreload" href="/!/externals/react:jsx-runtime.mjs"/>
+<link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
+</head>
+<body>
+<h1>Hello from <!-- -->/toy-framework.server.tsx</h1>
+<div id="root">
+<div data-id="NOT-generated-by-client">pre-rendered by server in <code>/toy-framework.server.tsx</code>
+</div>
+</div>
+<script type="module" src="/!/polyfillsAndStuff.mjs">
+</script>
+<script type="module" src="/!/externals/clientEntryPoint.externals.mjs">
+</script>
+<script type="module" src="/!/clientEntryPoint/clientEntryPoint.mjs">
+</script>
+</body>
+</HTML>"
+`;
