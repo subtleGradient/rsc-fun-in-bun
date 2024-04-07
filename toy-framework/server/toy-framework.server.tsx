@@ -1,16 +1,23 @@
-import React from "react"
+import React, { Suspense } from "react"
 import ReactDOMServer from "react-dom/server"
-import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
+
+// BUG: Bun@1.1.2 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
+// So, I'm using a dynamic import below to avoid triggering the react-server error
+// so that the existing tests won't fail.
+// import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
 
 import { arrayToStream } from "@/util/arrayToStream"
 import { concatStreams } from "@/util/compoReadableStream"
 
+import { sleep } from "bun"
 import { ImportMapScript } from "../client/ImportMap"
 import { LinkModulePreloads } from "../client/LinkModulePreloads"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import type { Pathname, RouteMap } from "./types"
+
+const RSC_TYPE = "text/x-component"
 
 function RootLayout(props: { routes: RouteMap; children?: React.ReactNode }) {
   return (
@@ -72,20 +79,49 @@ export const routes: RouteMap = {
 
   "/": fetchHomePageHTML,
 
-  "/rsc": async () =>
-    new Response(
-      renderToReadableStream(
-        <div>hi</div>,
-        {
-          // ...externalsBundle.webpackMap,
-          // ...clientEntryPointBundle.webpackMap,
-        },
-        {
-          onError: console.error,
-          identifierPrefix: "rsc",
-        },
-      ),
-    ),
+  "/rsc": async () => {
+    const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
+
+    async function AsyncView() {
+      const sleeptForMs = Math.random() * 1000
+      await sleep(sleeptForMs)
+      return <div>slept for {Math.round(sleeptForMs)}ms</div>
+    }
+
+    let rscStream = ReactServerDOMServer.renderToReadableStream(
+      <div>
+        hi
+        <Suspense fallback={<div>loading...</div>}>
+          <AsyncView />
+        </Suspense>
+        <Suspense fallback={<div>loading...</div>}>
+          <AsyncView />
+        </Suspense>
+        <Suspense fallback={<div>loading...</div>}>
+          <AsyncView />
+        </Suspense>
+      </div>,
+      {
+        // ...externalsBundle.webpackMap,
+        // ...clientEntryPointBundle.webpackMap,
+      },
+      {
+        onError: console.error,
+        identifierPrefix: "rsc",
+      },
+    )
+
+    const decoder = new TextDecoder()
+    // rscStream = rscStream.pipeThrough(
+    //   new TransformStream({
+    //     transform(chunk, controller) {
+    //       console.log("chunk", decoder.decode(chunk))
+    //       controller.enqueue(`CHONK! (${decoder.decode(chunk)})\n\n`)
+    //     },
+    //   }),
+    // )
+    return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, "Cache-Control": "no-store" } })
+  },
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text!(), {
