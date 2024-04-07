@@ -86,11 +86,6 @@ export async function fetch(request: Request): Promise<Response> {
 
   if (url.pathname in routes) return await routes[url.pathname as Pathname](request)
 
-  // TODO: decide if this is necessary anymore
-  // const file = Bun.file(__dirname + url.pathname)
-  // if (await file.exists()) return await fetchFileThatExists(request, file)
-  /** {@link fetchFileThatExists} */
-
   return new Response("404 Not Found", { status: 404 })
 }
 
