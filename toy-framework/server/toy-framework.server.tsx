@@ -1,7 +1,9 @@
 import React from "react"
 import ReactDOMServer from "react-dom/server"
-import { arrayToStream } from "../../util/arrayToStream"
-import { concatStreams } from "../../util/compoReadableStream"
+
+import { arrayToStream } from "@/util/arrayToStream"
+import { concatStreams } from "@/util/compoReadableStream"
+
 import { ImportMapScript } from "../client/ImportMap"
 import { LinkModulePreloads } from "../client/LinkModulePreloads"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
