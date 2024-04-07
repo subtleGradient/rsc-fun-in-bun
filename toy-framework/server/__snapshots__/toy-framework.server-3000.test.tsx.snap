@@ -1,6 +1,6 @@
 // Bun Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`toy-framework.server toy-framework.server root / route returns a response 1`] = `
+exports[`toy-framework.server root / route returns a response 1`] = `
 "<!DOCTYPE HTML>
 <HTML lang=en>
 <script type="importmap">{
