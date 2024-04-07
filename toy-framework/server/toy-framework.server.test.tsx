@@ -1,6 +1,7 @@
 import { type Server } from "bun"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test"
-import { browser } from "../../test-helpers/puppers.ts"
+import { browser } from "../../test-helpers/puppers"
+import { pickRandomPort } from "../../util/pickRandomPort.ts"
 
 if (!1!) {
   describe("the `await using` keyword", async () => {
@@ -15,11 +16,12 @@ if (!1!) {
 const serverRef = { current: null as null | Server }
 const fetchRef = { current: null as null | Server["fetch"] }
 
-beforeAll(() => {
+beforeAll(async () => {
   fetchRef.current = request => {
     return new Response("Hello from RSC!")
   }
   serverRef.current = Bun.serve({
+    port: await pickRandomPort(),
     async fetch(request: Request): Promise<Response> {
       return await fetchRef.current!.call(this, request)
     },
