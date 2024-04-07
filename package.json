@@ -22,9 +22,9 @@
   },
   "dependencies": {
     "peechy": "^0.4.34",
-    "react": "canary",
-    "react-dom": "canary",
-    "react-server-dom-webpack": "canary",
-    "use-sync-external-store": "canary"
+    "react": "^19.0.0-canary-e3ebcd54b-20240405",
+    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405",
+    "react-server-dom-webpack": "^19.0.0-canary-e3ebcd54b-20240405",
+    "use-sync-external-store": "^1.4.0-canary-e3ebcd54b-20240405"
   }
 }
