@@ -33,6 +33,17 @@ describe("toy-framework.server", () => {
       expect(response.status).toBe(200)
       expect(await response.text()).toMatchSnapshot()
     })
-    it.todo("updates asynchronously")
+    it("updates asynchronously", async done => {
+      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`))
+      // stream the responce anf verify that it sends multiple chunks
+      const decoder = new TextDecoder()
+      const reader = response.body!.getReader()
+      reader.closed.then(done)
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        expect(decoder.decode(value)).toMatchSnapshot()
+      }
+    })
   })
 })

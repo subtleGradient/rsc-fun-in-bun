@@ -52,3 +52,27 @@ exports[`toy-framework.server /rsc/test-suspense returns RSC content 1`] = `
 3:["$","div",null,{"children":["slept for ",69,"ms"]}]
 "
 `;
+
+exports[`toy-framework.server /rsc/test-suspense updates asynchronously 1`] = `
+"1:"$Sreact.suspense"
+2:D{"name":"AsyncView","env":"Server"}
+3:D{"name":"AsyncView","env":"Server"}
+4:D{"name":"AsyncView","env":"Server"}
+0:["$","div",null,{"children":["hi",["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L2"}],["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L3"}],["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L4"}]]}]
+"
+`;
+
+exports[`toy-framework.server /rsc/test-suspense updates asynchronously 2`] = `
+"2:["$","div",null,{"children":["slept for ",4,"ms"]}]
+"
+`;
+
+exports[`toy-framework.server /rsc/test-suspense updates asynchronously 3`] = `
+"4:["$","div",null,{"children":["slept for ",55,"ms"]}]
+"
+`;
+
+exports[`toy-framework.server /rsc/test-suspense updates asynchronously 4`] = `
+"3:["$","div",null,{"children":["slept for ",69,"ms"]}]
+"
+`;
