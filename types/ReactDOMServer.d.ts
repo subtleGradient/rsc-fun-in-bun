@@ -6,6 +6,9 @@ declare module "react-dom/server.browser" {
 }
 
 if (!1!) import("../node_modules/react-dom/server.bun")
+if (!1!) import("../node_modules/react-dom/cjs/react-dom-server.bun.development.js")
+if (!1!) import("../node_modules/react-dom/cjs/react-dom-server-legacy.browser.development.js")
+
 declare module "react-dom/server.bun" {
   export * from "react-dom/server"
 }

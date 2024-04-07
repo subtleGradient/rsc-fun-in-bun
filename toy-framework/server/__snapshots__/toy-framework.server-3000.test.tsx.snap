@@ -56,15 +56,11 @@ exports[`toy-framework.server /rsc/test-suspense updates asynchronously 1`] = `
 2:D{"name":"AsyncView","env":"Server"}
 3:D{"name":"AsyncView","env":"Server"}
 0:["$","div",null,{"children":["hi",["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":["$L2","$L3"]}]]}]
+2:["$","div",null,{"children":["slept for ",0,"ms"]}]
 "
 `;
 
 exports[`toy-framework.server /rsc/test-suspense updates asynchronously 2`] = `
-"2:["$","div",null,{"children":["slept for ",0,"ms"]}]
-"
-`;
-
-exports[`toy-framework.server /rsc/test-suspense updates asynchronously 3`] = `
 "3:["$","div",null,{"children":["slept for ",10,"ms"]}]
 "
 `;

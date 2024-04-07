@@ -1,15 +1,26 @@
 import { sleep } from "bun"
 import { Suspense } from "react"
+import { HTMLPageStream } from "./HTMLPageStream"
 import type { RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
 
 export const routesForRestingRSC: RouteMap = {
-  // "/rsc/test-suspense-render": async function rscSuspenseTestRender(request: Request): Promise<Response> {
-
-  // },
-
   "/rsc/test-suspense": rscSuspenseTest,
+
+  "/rsc/test-suspense-render": async () =>
+    new Response(
+      await HTMLPageStream({
+        children: (
+          <>
+            <h2>Howdy!</h2>
+          </>
+        ),
+      }),
+      {
+        headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+      },
+    ),
 }
 
 async function rscSuspenseTest(request: Request): Promise<Response> {
