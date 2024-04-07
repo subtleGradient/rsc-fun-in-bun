@@ -1,5 +1,6 @@
 import React from "react"
 import ReactDOMServer from "react-dom/server"
+import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
 
 import { arrayToStream } from "@/util/arrayToStream"
 import { concatStreams } from "@/util/compoReadableStream"
@@ -70,6 +71,21 @@ export const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": fetchHomePageHTML,
+
+  "/rsc": async () =>
+    new Response(
+      renderToReadableStream(
+        <div>hi</div>,
+        {
+          // ...externalsBundle.webpackMap,
+          // ...clientEntryPointBundle.webpackMap,
+        },
+        {
+          onError: console.error,
+          identifierPrefix: "rsc",
+        },
+      ),
+    ),
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text!(), {
