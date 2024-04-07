@@ -3,43 +3,14 @@ import React from "react"
 import ReactDOMServer from "react-dom/server"
 import { arrayToStream } from "../../util/arrayToStream"
 import { concatStreams } from "../../util/compoReadableStream"
-import { js, tsx } from "../../util/js"
+import { js } from "../../util/js"
 import { ImportMapScript } from "../client/ImportMap"
+import { define, polyfillsAndStuff } from "./polyfillsAndStuff"
 
 type Pathname = `/${string}`
 type ModuleID = string
 type RouteMap = Record<Pathname, Server["fetch"]>
 type ImportMap = Record<ModuleID, Pathname>
-
-const define: Record<string, string> = {
-  __webpack_require__: "__NOT__webpack_require__",
-  __webpack_modules__: "__NOT__webpack_modules__",
-  __webpack_chunk_load__: "__NOT__webpack_chunk_load__",
-  "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
-  __DEV__: process.env.NODE_ENV! === "development" ? "true" : "false",
-}
-
-/**
- * A virtual file that contains stuff that needs to be loaded before the client entry point.
- */
-const polyfillsAndStuff = {
-  name: "/!/polyfillsAndStuff.mjs",
-  type: "text/javascript",
-  text: async () =>
-    await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(tsx`
-/// <reference lib="dom" />
-const webpackGetChunkFilename = (chunkId: string) => { throw new Error("webpackGetChunkFilename not implemented") }
-
-const __NOT__webpack_modules__ = {}
-const __NOT__webpack_chunk_load__ = (chunkId: string) => { throw new Error("chunk loading not implemented") }
-const __NOT__webpack_require__ = Object.assign(
-  (moduleId: string) => __NOT__webpack_modules__[moduleId].exports, //
-  { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
-)
-
-Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, __NOT__webpack_require__ })
-`),
-}
 
 const externalsBundle = {
   publicPath: "/!/externals/" as Pathname,
@@ -257,7 +228,7 @@ async function HomePageHTMLStream() {
 const fetchHomePageHTML = async () =>
   new Response(await HomePageHTMLStream(), { headers: { "Content-Type": "text/html", "Cache-Control": "no-store" } })
 
-const routes: RouteMap = {
+export const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
 
   "/": fetchHomePageHTML,
@@ -285,29 +256,18 @@ async function fetchFileThatExists(request: Request, file: BunFile) {
 
 export async function fetch(request: Request): Promise<Response> {
   const url = new URL(request.url)
-  console.warn("\t" + url.href)
+  console.warn(request.method, url.href)
 
   if (url.pathname in routes) return await routes[url.pathname as Pathname](request)
 
-  const file = Bun.file(__dirname + url.pathname)
-  if (await file.exists()) return await fetchFileThatExists(request, file)
+  // TODO: decide if this is necessary anymore
+  // const file = Bun.file(__dirname + url.pathname)
+  // if (await file.exists()) return await fetchFileThatExists(request, file)
+  /** {@link fetchFileThatExists} */
 
   return new Response("404 Not Found", { status: 404 })
 }
 
-export default function serve() {
-  return Bun.serve({ fetch })
-}
-
 if (import.meta.main) {
-  const server = serve()
-
-  console.log("Server running at", server.url.href)
-  console.log(
-    "    Responds to these routes:\n",
-    Object.keys(routes)
-      .map(pathname => `\t${server.url.origin}${pathname}`)
-      .join("\n"),
-  )
-  console.log()
+  throw new Error("This module is not meant to be run as a script. Try running the main module instead. See package.json")
 }
