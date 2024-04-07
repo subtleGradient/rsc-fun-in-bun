@@ -25,7 +25,6 @@ beforeAll(() => {
     },
   })
 })
-afterEach(() => (fetchRef.current = null))
 afterAll(() => {
   serverRef.current?.stop()
   serverRef.current = null
@@ -33,8 +32,10 @@ afterAll(() => {
 
 describe("toy-framework.server", async () => {
   const toyFramework = await import("./toy-framework.server.tsx")
+
   beforeEach(() => (fetchRef.current = toyFramework.fetch))
   afterEach(() => (fetchRef.current = null))
+
   describe("toy-framework.server", () => {
     describe("root / route", () => {
       it("returns a response", async () => {
