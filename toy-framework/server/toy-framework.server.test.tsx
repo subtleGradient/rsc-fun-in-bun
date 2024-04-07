@@ -1,7 +1,7 @@
+import { browser } from "@/test-helpers/puppers.ts"
+import { pickRandomPort } from "@/util/pickRandomPort.ts"
 import { type Server } from "bun"
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "bun:test"
-import { browser } from "../../test-helpers/puppers"
-import { pickRandomPort } from "../../util/pickRandomPort.ts"
 
 if (!1!) {
   describe("the `await using` keyword", async () => {
