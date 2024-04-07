@@ -42,6 +42,13 @@ describe("toy-framework.server", async () => {
         expect(response.status).toBe(200)
         expect((await response.text()).replaceAll("><", ">\n<")).toMatchSnapshot()
       })
+
+      it("renders ClientComponent", async () => {
+        await using page = await browser.newPage()
+        page.goto(serverRef.current!.url.href)
+        await page.waitForSelector("#generated-by-client")
+        expect(await page.$eval("#generated-by-client", el => el.textContent)).toBe("Hello from ClientComponent!")
+      })
     })
   })
 })
