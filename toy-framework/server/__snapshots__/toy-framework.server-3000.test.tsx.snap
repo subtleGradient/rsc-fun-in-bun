@@ -40,3 +40,15 @@ exports[`toy-framework.server root / route returns a response 1`] = `
 </body>
 </HTML>"
 `;
+
+exports[`toy-framework.server /rsc/test-suspense returns RSC content 1`] = `
+"1:"$Sreact.suspense"
+2:D{"name":"AsyncView","env":"Server"}
+3:D{"name":"AsyncView","env":"Server"}
+4:D{"name":"AsyncView","env":"Server"}
+0:["$","div",null,{"children":["hi",["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L2"}],["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L3"}],["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":"$L4"}]]}]
+2:["$","div",null,{"children":["slept for ",4,"ms"]}]
+4:["$","div",null,{"children":["slept for ",55,"ms"]}]
+3:["$","div",null,{"children":["slept for ",69,"ms"]}]
+"
+`;

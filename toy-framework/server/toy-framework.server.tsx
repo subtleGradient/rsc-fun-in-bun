@@ -79,26 +79,25 @@ export const routes: RouteMap = {
 
   "/": fetchHomePageHTML,
 
-  "/rsc": async () => {
+  "/rsc/test-suspense": async () => {
     const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
 
-    async function AsyncView() {
-      const sleeptForMs = Math.random() * 1000
-      await sleep(sleeptForMs)
-      return <div>slept for {Math.round(sleeptForMs)}ms</div>
+    async function AsyncView({ sleepForMs }: { sleepForMs: number }) {
+      await sleep(sleepForMs)
+      return <div>slept for {Math.round(sleepForMs)}ms</div>
     }
 
     let rscStream = ReactServerDOMServer.renderToReadableStream(
       <div>
         hi
         <Suspense fallback={<div>loading...</div>}>
-          <AsyncView />
+          <AsyncView sleepForMs={4} />
         </Suspense>
         <Suspense fallback={<div>loading...</div>}>
-          <AsyncView />
+          <AsyncView sleepForMs={69} />
         </Suspense>
         <Suspense fallback={<div>loading...</div>}>
-          <AsyncView />
+          <AsyncView sleepForMs={55} />
         </Suspense>
       </div>,
       {
@@ -111,15 +110,6 @@ export const routes: RouteMap = {
       },
     )
 
-    const decoder = new TextDecoder()
-    // rscStream = rscStream.pipeThrough(
-    //   new TransformStream({
-    //     transform(chunk, controller) {
-    //       console.log("chunk", decoder.decode(chunk))
-    //       controller.enqueue(`CHONK! (${decoder.decode(chunk)})\n\n`)
-    //     },
-    //   }),
-    // )
     return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, "Cache-Control": "no-store" } })
   },
 

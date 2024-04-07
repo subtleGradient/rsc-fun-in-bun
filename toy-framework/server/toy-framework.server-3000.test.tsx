@@ -26,4 +26,13 @@ describe("toy-framework.server", () => {
       expect(await page.$eval("#generated-by-client", el => el.textContent)).toBe("Hello from ClientComponent!")
     })
   })
+
+  describe("/rsc/test-suspense", () => {
+    it("returns RSC content", async () => {
+      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`))
+      expect(response.status).toBe(200)
+      expect(await response.text()).toMatchSnapshot()
+    })
+    it.todo("updates asynchronously")
+  })
 })
