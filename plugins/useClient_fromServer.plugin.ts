@@ -3,6 +3,7 @@
 import { Transpiler, type BunPlugin, type JavaScriptLoader, type OnLoadCallback } from "bun"
 import { registerClientReference } from "react-server-dom-webpack/server.edge"
 import { ReactClientManifest } from "./ReactClientManifest.plugin"
+import { define } from "@/toy-framework/server/polyfillsAndStuff"
 
 function generateClientExport(displayName: string, fileUrl: string) {
   fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
@@ -30,7 +31,7 @@ async function generateClientModuleProxy(modulePath: string) {
     deadCodeElimination: false,
     jsxOptimizationInline: false,
     treeShaking: false,
-    // define,
+    define,
     // exports,
     // loader,
     // logLevel,
