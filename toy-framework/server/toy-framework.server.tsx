@@ -1,10 +1,10 @@
 import { resolve, type BunFile, type Server } from "bun"
 import React from "react"
 import ReactDOMServer from "react-dom/server"
-import { arrayToStream } from "../util/arrayToStream"
-import { concatStreams } from "../util/compoReadableStream"
-import { js, tsx } from "../util/js"
-import { ImportMapScript } from "./ImportMap"
+import { arrayToStream } from "../../util/arrayToStream"
+import { concatStreams } from "../../util/compoReadableStream"
+import { js, tsx } from "../../util/js"
+import { ImportMapScript } from "../client/ImportMap"
 
 type Pathname = `/${string}`
 type ModuleID = string
@@ -43,7 +43,7 @@ Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, _
 
 const externalsBundle = {
   publicPath: "/!/externals/" as Pathname,
-  entrypoints: [await resolve("./client/clientEntryPoint.externals.tsx", __dirname)],
+  entrypoints: [await resolve("../client/clientEntryPoint.externals.tsx", __dirname)],
 
   name: null as string | null,
   importMap: {} as ImportMap,
@@ -132,7 +132,7 @@ const externalsBundle = {
  */
 const clientEntryPointBundle = {
   publicPath: "/!/clientEntryPoint/" as Pathname,
-  entrypoints: [await resolve("./client/clientEntryPoint.tsx", __dirname)],
+  entrypoints: [await resolve("../client/clientEntryPoint.tsx", __dirname)],
 
   name: null as string | null,
   importMap: {} as ImportMap,
