@@ -21,8 +21,18 @@ declare module "react-server-dom-webpack/server.node" {
 declare module "react-server-dom-webpack/server" {
   import type { Readable } from "stream"
 
+  /**
+   * A ClientReferenceManifestEntry is a map of client module IDs to their corresponding exports.
+   */
+  type ClientReferenceManifestEntry = {
+    id: string
+    // chunks is a double indexed array of chunkId / chunkFilename pairs
+    chunks: Array<string>
+    name: string
+  }
+
   type ModulePath = string
-  type BundlerConfig = Record<ModulePath, unknown> // Placeholder type for Bundler Config
+  type BundlerConfig = Record<ModulePath, ClientReferenceManifestEntry> // Placeholder type for Bundler Config
   type ServerComponentResponse = any // Placeholder type for Server Component Response
   type ErrorHandler = (error: Error) => void
   type IdentifierPrefix = string

@@ -15,18 +15,34 @@ export const define: Record<string, string> = {
 export const polyfillsAndStuff = {
   name: "/!/polyfillsAndStuff.mjs",
   type: "text/javascript",
-  text: async () =>
-    await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(tsx`
-/// <reference lib="dom" />
-const webpackGetChunkFilename = (chunkId: string) => { throw new Error("webpackGetChunkFilename not implemented") }
+  text: async () => await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(tsx`(${main})()`),
+}
 
-const __NOT__webpack_modules__ = {}
-const __NOT__webpack_chunk_load__ = (chunkId: string) => { throw new Error("chunk loading not implemented") }
-const __NOT__webpack_require__ = Object.assign(
-  (moduleId: string) => __NOT__webpack_modules__[moduleId].exports, //
-  { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
-)
+declare global {
+  interface Window {
+    __NOT__webpack_modules__: Record<string, { exports: unknown }>
+  }
+}
 
-Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, __NOT__webpack_require__ })
-`),
+async function main() {
+  const webpackGetChunkFilename = (chunkId: string) => {
+    throw new Error("webpackGetChunkFilename not implemented")
+  }
+
+  const __NOT__webpack_modules__: Record<string, { exports: unknown }> = {}
+  const __NOT__webpack_chunk_load__ = (chunkId: string) => {
+    throw new Error("chunk loading not implemented")
+  }
+  const __NOT__webpack_require__ = Object.assign(
+    (moduleId: string) => {
+      console.log("__NOT__webpack_require__", moduleId)
+      if (!(moduleId in __NOT__webpack_modules__))
+        throw new Error(`Module not found: ${moduleId}; Need to add
+          __NOT__webpack_modules__["${moduleId}"] = { exports: ... }`)
+      return __NOT__webpack_modules__[moduleId]?.exports
+    },
+    { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
+  )
+
+  Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, __NOT__webpack_require__ })
 }

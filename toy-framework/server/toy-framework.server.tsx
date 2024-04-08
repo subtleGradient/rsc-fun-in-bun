@@ -18,7 +18,7 @@ export const routes: RouteMap = {
     }),
 
   [polyfillsAndStuff.name!]: async () =>
-    new Response(await polyfillsAndStuff.text!(), {
+    new Response(await polyfillsAndStuff.text(), {
       headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
     }),
 

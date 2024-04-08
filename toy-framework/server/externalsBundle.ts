@@ -68,7 +68,7 @@ export const externalsBundle = {
       splitting: true,
       format: "esm",
       target: "browser",
-      sourcemap: "external",
+      sourcemap: "inline",
       minify: process.env.NODE_ENV === "production",
       define,
       naming: {

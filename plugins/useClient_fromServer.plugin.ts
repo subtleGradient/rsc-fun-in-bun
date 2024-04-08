@@ -1,12 +1,14 @@
 /// <reference types="bun" />
 
-import { Transpiler, type BunPlugin, type JavaScriptLoader, type OnLoadCallback } from "bun"
+import { define } from "@/toy-framework/server/polyfillsAndStuff"
+import { $, Transpiler, type BunPlugin, type JavaScriptLoader } from "bun"
 import { registerClientReference } from "react-server-dom-webpack/server.edge"
 import { ReactClientManifest } from "./ReactClientManifest.plugin"
-import { define } from "@/toy-framework/server/polyfillsAndStuff"
+
+const REPO_ROOT = (await $`git rev-parse --show-toplevel`.text()).trim()
 
 function generateClientExport(displayName: string, fileUrl: string) {
-  fileUrl = fileUrl.replace(__dirname, "").replace(/\\/g, "/")
+  fileUrl = fileUrl.replace(REPO_ROOT, "").replace(/\\/g, "/")
   const $$id = `${fileUrl}#${displayName}`
   ReactClientManifest[$$id] = { id: fileUrl, chunks: [], name: displayName }
   return registerClientReference(Object.assign(ClientComponent_onTheServer, { displayName }), fileUrl, displayName)
