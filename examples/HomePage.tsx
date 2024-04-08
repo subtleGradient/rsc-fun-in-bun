@@ -1,6 +1,6 @@
 import { $ } from "bun"
 import { Timer } from "./Timer.client"
-import { ExampleClientView } from "./example0.client"
+import { ExampleClientComponent } from "./example0.client"
 import { doStuffOnTheServer } from "./example0.server"
 console.debug("executing", import.meta.url)
 
@@ -15,7 +15,7 @@ export function HomePage() {
       <Uname />
       {/* <ServerCode_fromUseClientFile /> */}
       <ServerCode_fromUseServerFile />
-      <ExampleClientView />
+      <ExampleClientComponent />
     </main>
   )
 }

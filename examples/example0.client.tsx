@@ -21,8 +21,13 @@ export async function exampleClientFunction() {
   console.log(results)
 }
 
-export function ExampleClientView() {
+export function ExampleClientComponent() {
   // "use client" is not necessary here, because it's already at the top of the file
   console.assert(typeof window !== "undefined", "This is client-side code, so `window` should be defined.")
-  return <div>ExampleClientView</div>
+  return (
+    <div data-testid="ExampleClientView">
+      ExampleClientView
+      <pre data-testid="ExampleClientView/window">typeof window === "{typeof window}"</pre>
+    </div>
+  )
 }
