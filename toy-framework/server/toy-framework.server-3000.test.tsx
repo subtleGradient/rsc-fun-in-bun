@@ -60,5 +60,12 @@ describe("toy-framework.server", () => {
       expect(response.status).toBe(200)
       expect(await response.text().then(text => text.replaceAll("><", ">\n<"))).toMatchSnapshot()
     })
+
+    it("renders ClientComponent", async () => {
+      await using page = await browser.newPage()
+      page.goto(`http://localhost:3000/rsc/test-suspense-render`)
+      await page.waitForSelector("#AsyncView10")
+      expect(await page.$eval("#AsyncView10", el => el.textContent)).toBe("slept for 10ms")
+    })
   })
 })

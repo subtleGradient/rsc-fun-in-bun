@@ -16,7 +16,7 @@ async function rscSuspenseTest(request: Request): Promise<Response> {
 
   async function AsyncView({ sleepForMs }: { sleepForMs: number }) {
     await sleep(sleepForMs)
-    return <div>slept for {Math.round(sleepForMs)}ms</div>
+    return <div id={`AsyncView${sleepForMs}`}>slept for {Math.round(sleepForMs)}ms</div>
   }
 
   let rscStream = ReactServerDOMServer.renderToReadableStream(
