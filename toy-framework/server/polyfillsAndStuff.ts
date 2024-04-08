@@ -30,9 +30,7 @@ async function main() {
   }
 
   const __NOT__webpack_modules__: Record<string, { exports: unknown }> = {}
-  const __NOT__webpack_chunk_load__ = (chunkId: string) => {
-    throw new Error("chunk loading not implemented")
-  }
+  const __NOT__webpack_chunk_load__ = async (chunkId: string) => await import(chunkId)
   const __NOT__webpack_require__ = Object.assign(
     (moduleId: string) => {
       console.log("__NOT__webpack_require__", moduleId)

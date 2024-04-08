@@ -1,36 +1,115 @@
-import { useClient_fromServer_pluginConfig } from "@/plugins/useClient_fromServer.plugin"
+import { ReactClientManifest, useClient_fromServer_pluginConfig } from "@/plugins/useClient_fromServer.plugin"
 import { js } from "@/util/js"
 import { type ReactElement } from "react"
+import { externalsBundle } from "./externalsBundle"
 import { HTMLPageStream } from "./HTMLPageStream"
-import type { RouteMap } from "./types"
+import { define } from "./polyfillsAndStuff"
+import { routes } from "./toy-framework.server"
+import type { ImportMap, Pathname, RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
+
+const createClientBundle = (entrypoints: Pathname[]) => ({
+  publicPath: "/!/use-client/" as Pathname,
+  entrypoints,
+
+  name: null as string | null,
+  importMap: {} as ImportMap,
+
+  async createRouteMap(): Promise<RouteMap> {
+    this.createRouteMap = async () => routes // memoize
+    const routes: RouteMap = {}
+
+    const { success, logs, outputs } = await this.build()
+
+    if (!success) {
+      logs.forEach(log => console.warn(log))
+      throw new Error("Failed to build client entry point")
+    }
+
+    for (const output of outputs) {
+      const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
+      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
+      routes[pathname] = async () => new Response(output, { headers })
+      if (output.kind === "entry-point") this.name ||= pathname
+    }
+
+    return routes
+  },
+
+  build() {
+    this.build = () => build
+    const build = Bun.build({
+      publicPath: this.publicPath,
+      entrypoints: this.entrypoints,
+      splitting: true,
+      format: "esm",
+      target: "browser",
+      sourcemap: "inline",
+      minify: process.env.NODE_ENV === "production",
+      define,
+      naming: {
+        entry: "[name].mjs",
+        chunk: "[name]-[hash].mjs",
+        asset: "[name]-[hash][ext]",
+      },
+      external: Object.keys(externalsBundle.importMap),
+    })
+    return build
+  },
+})
 
 export const routesForTestingRSC_use_client: RouteMap = {
   "/rsc/test-client": rscClientTest,
   "/rsc/test-client-render": rscClientRender,
 }
 
-async function rscClientTest(request: Request): Promise<Response> {
-  Bun.plugin({
-    ...useClient_fromServer_pluginConfig,
-  })
-  const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
-  const { ExampleClientComponent } = await import("../../examples/example0.client")
+function withClientStuff({ children }: { children: ReactElement }) {
+  withClientStuff
+}
 
-  let rscStream = ReactServerDOMServer.renderToReadableStream(
+
+async function rscClientTest(request: Request): Promise<Response> {
+  Bun.plugin(useClient_fromServer_pluginConfig)
+
+  const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
+  const { ExampleClientComponent } = await import("@/examples/example0.client")
+
+  const $$ids = Object.keys(ReactClientManifest)
+
+  const entrypoints: Pathname[] = []
+
+  for (const $$id of $$ids) {
+    const { chunks, name } = ReactClientManifest[$$id]
+    const [absolutePath] = chunks
+    entrypoints.push(absolutePath as Pathname)
+  }
+  const bundle = createClientBundle(entrypoints)
+  const build = await bundle.build()
+  const entrypointOutputs = build.outputs.forEach(it => it.kind === "entry-point")
+
+  for (const $$id of $$ids) {
+    const { chunks, name } = ReactClientManifest[$$id]
+    const [absolutePath] = chunks as Pathname[]
+    entrypoints.indexOf(absolutePath)
+  }
+
+  // FIXME: this is terrible
+  Object.assign(routes, {
+    ...(await bundle.createRouteMap()),
+  })
+
+  const ui = (
     <div>
       hi
       <ExampleClientComponent />
-    </div>,
+    </div>
+  )
+
+  let rscStream = ReactServerDOMServer.renderToReadableStream(
+    { ui },
     {
-      ["/examples/example0.client.tsx#ExampleClientComponent"]: {
-        name: "ExampleClientComponent",
-        id: "/examples/example0.client.tsx",
-        chunks: [],
-      },
-      // ...externalsBundle.webpackMap,
-      // ...clientEntryPointBundle.webpackMap,
+      ...ReactClientManifest,
     },
     {
       onError: console.error,
@@ -64,11 +143,10 @@ function RSCDemo() {
     const ReactServerDOMClient = (await import("react-server-dom-webpack/client")).default
 
     console.log("react@" + React.version)
-    console.log(ReactServerDOMClient)
 
     const root = ReactDOMClient.createRoot(document.getElementById("rsc-root")!)
 
-    const ui = await ReactServerDOMClient.createFromFetch<ReactElement>(
+    const { ui } = await ReactServerDOMClient.createFromFetch<{ ui: ReactElement }>(
       fetch(new Request("/rsc/test-client", { headers: { Accept: "text/x-component" } })),
       {
         async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
@@ -88,10 +166,10 @@ function RSCDemo() {
       },
     )
 
+    // FIXME: this is a hack to get the client to load the module
     window.__NOT__webpack_modules__["/examples/example0.client.tsx"] = {
-      exports: {
-        ExampleClientComponent: () => <div>hello from client</div>,
-      },
+      // @ts-expect-error - this is a hack to get the client to load the module
+      exports: await import("/!/use-client/example0.client.mjs"),
     }
 
     root.render(ui)

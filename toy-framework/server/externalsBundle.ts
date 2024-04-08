@@ -8,7 +8,9 @@ export const externalsBundle = {
   entrypoints: [await resolve("../client/clientEntryPoint.externals.tsx", __dirname)],
 
   name: null as string | null,
-  importMap: {} as ImportMap,
+  importMap: {
+    bun: "/!/externals:bun.mjs",
+  } as ImportMap,
 
   async createRouteMap(): Promise<RouteMap> {
     this.createRouteMap = async () => routes // memoize

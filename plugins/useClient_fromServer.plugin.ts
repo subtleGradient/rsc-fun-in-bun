@@ -1,17 +1,25 @@
 /// <reference types="bun" />
 
 import { define } from "@/toy-framework/server/polyfillsAndStuff"
+import type { Pathname } from "@/toy-framework/server/types"
 import { $, Transpiler, type BunPlugin, type JavaScriptLoader } from "bun"
 import { registerClientReference } from "react-server-dom-webpack/server.edge"
 import { ReactClientManifest } from "./ReactClientManifest.plugin"
+export { ReactClientManifest }
 
 const REPO_ROOT = (await $`git rev-parse --show-toplevel`.text()).trim()
 
-function generateClientExport(displayName: string, fileUrl: string) {
-  fileUrl = fileUrl.replace(REPO_ROOT, "").replace(/\\/g, "/")
-  const $$id = `${fileUrl}#${displayName}`
-  ReactClientManifest[$$id] = { id: fileUrl, chunks: [], name: displayName }
-  return registerClientReference(Object.assign(ClientComponent_onTheServer, { displayName }), fileUrl, displayName)
+export const genPathnameRef = {
+  /** replace this with your own implementation */
+  current: (relativePath: string, name: string): Pathname => `/!/use-client${relativePath}/${name}.mjs`,
+}
+
+function generateClientExport(name: string, absolutePath: Pathname) {
+  const relativePath = absolutePath.replace(REPO_ROOT, "").replace(/\\/g, "/")
+  const $$id = `${relativePath}#${name}`
+  const manifest = (ReactClientManifest[$$id] = { id: relativePath, chunks: [absolutePath], name })
+  const proxyImplementation = Object.assign(ClientComponent_onTheServer, { displayName: manifest.name })
+  return registerClientReference(proxyImplementation, manifest.id, manifest.name)
 
   function ClientComponent_onTheServer() {
     throw new Error(`'use client' function '${$$id}' called on the server`)
@@ -22,7 +30,7 @@ type ClientExport = ReturnType<typeof generateClientExport>
 type ClientProxyExports = Record<string, ClientExport>
 const clientProxyCache = new Map<string, ClientProxyExports>()
 
-async function generateClientModuleProxy(modulePath: string) {
+async function generateClientModuleProxy(modulePath: Pathname) {
   const transpiler = new Transpiler({
     target: "browser",
     allowBunRuntime: false,
@@ -74,7 +82,7 @@ export const useClient_fromServer_pluginConfig: BunPlugin = {
 
       return {
         loader: "object",
-        exports: await generateClientModuleProxy(args.path),
+        exports: await generateClientModuleProxy(args.path as Pathname),
       }
     })
   },
