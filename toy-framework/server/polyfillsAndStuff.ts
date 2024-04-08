@@ -4,6 +4,7 @@ export const define: Record<string, string> = {
   __webpack_require__: "__NOT__webpack_require__",
   __webpack_modules__: "__NOT__webpack_modules__",
   __webpack_chunk_load__: "__NOT__webpack_chunk_load__",
+
   "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
   __DEV__: process.env.NODE_ENV! === "development" ? "true" : "false",
 }

@@ -128,9 +128,52 @@ declare module "react-server-dom-webpack/client" {
   }
 
   /**
-   * Options for the `createFromReadableStream` and `createFromFetch` functions.
+   * Options for `createFromFetch`.
    */
-  type Options = {
+  type FromFetchOptions = {
+    /**
+     * Callback for making server calls.
+     */
+    callServer?: CallServerCallback
+
+    /**
+     * In the context of react-server-dom-webpack/client,
+     * the {@link createFromFetch} function is designed for client-side rendering of RSC responses that are fetched from a server.
+     * It does not utilize the {@link FromReadableStreamOptions.ssrManifest} option
+     * because createFromFetch assumes the response already contains all necessary module information and chunks.
+     */
+    ssrManifest?: never
+
+    /**
+     * A nonce to be used for any scripts that are injected.
+     */
+    nonce?: string
+
+    /**
+     * A callback that is used to encode a form action.
+     */
+    encodeFormAction?: EncodeFormActionCallback
+
+    /**
+     * A set of temporary references that can be used to pass
+     * React Elements from the server to the client.
+     */
+    temporaryReferences?: TemporaryReferenceSet
+  }
+
+  /**
+   * Options for `createFromReadableStream`.
+   */
+  type FromReadableStreamOptions = {
+    /**
+     * Here's why callServer is not relevant in this context:
+     * {@link createFromReadableStream} is designed for situations where you already have the full Flight response available as a ReadableStream.
+     * This means that all the necessary data, including any server-rendered components and their props, is already present in the stream.
+     *
+     * There's no need to make additional calls to the server to fetch data or execute server-side logic
+     * because everything required to render the components on the client is already included in the stream.
+     */
+    callServer?: never
     /**
      * The SSR manifest.
      */
@@ -173,16 +216,23 @@ declare module "react-server-dom-webpack/client" {
    * @param options Options for the Flight client.
    * @returns A Thenable that resolves to the model of the root component.
    */
-  function createFromReadableStream<T>(stream: ReadableStream, options: Options): Thenable<T>
+  function createFromReadableStream<T>(stream: ReadableStream, options?: FromReadableStreamOptions): Thenable<T>
 
   /**
-   * Creates a Thenable that resolves to the model of the root component.
+   * Creates a Thenable that resolves to the Server Component tree.
    *
-   * @param promiseForResponse A Promise that resolves to a Response object.
-   * @param options Options for the Flight client.
-   * @returns A Thenable that resolves to the model of the root component.
+   * @param {Promise<Response>} promiseForResponse A Promise that resolves to the Response object from the server.
+   * @param {FromFetchOptions} [options] Optional configuration options.
+   * @returns {Thenable<T>} A Thenable that resolves to the Server Component tree.
+   *
+   * @remarks
+   * This function does not allow passing an `ssrManifest` option like some other Flight implementations.
+   *
+   * The necessary module resolution and chunk loading information is automatically handled by the `ReactFlightWebpackPlugin`
+   * during the Webpack build process. Ensure that the plugin is configured in your Webpack setup and that the paths
+   * and filenames of the generated manifest files match the expectations of your Flight client and server code.
    */
-  function createFromFetch<T>(promiseForResponse: Promise<Response>, options: Options): Thenable<T>
+  function createFromFetch<T>(promiseForResponse: Promise<Response>, options?: FromFetchOptions): Thenable<T>
 
   /**
    * Encodes a React element tree into a Flight response.

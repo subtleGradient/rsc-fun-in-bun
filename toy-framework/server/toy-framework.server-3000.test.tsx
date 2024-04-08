@@ -36,10 +36,12 @@ describe("toy-framework.server", () => {
       expect(await response.text()).toMatchSnapshot()
     })
     it("updates asynchronously", async done => {
-      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }))
+      const rscResponse = await fetch(
+        new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }),
+      )
       // stream the responce anf verify that it sends multiple chunks
       const decoder = new TextDecoder()
-      const reader = response.body!.getReader()
+      const reader = rscResponse.body!.getReader()
       reader.closed.then(done)
       let count = 0
       while (true) {
@@ -49,6 +51,14 @@ describe("toy-framework.server", () => {
         count++
       }
       expect(count).toBeGreaterThan(1)
+    })
+  })
+
+  describe("/rsc/test-suspense-render", () => {
+    it("returns RSC content", async () => {
+      const response = await fetch(new Request(`http://localhost:3000/rsc/test-suspense-render`))
+      expect(response.status).toBe(200)
+      expect(await response.text().then(text => text.replaceAll("><", ">\n<"))).toMatchSnapshot()
     })
   })
 })
