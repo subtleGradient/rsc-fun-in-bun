@@ -1,4 +1,4 @@
-import { routesForRestingRSC } from "./toy-framework/server/routesForRestingRSC.tsx"
+import { routesForTestingRSC_suspense } from "./toy-framework/server/routesForTestingRSC-suspense.tsx"
 import { verifyReactServer } from "./toy-framework/server/verify-react-server.ts"
 
 if (import.meta.main) {
@@ -7,7 +7,7 @@ if (import.meta.main) {
 
   Object.assign(routes, {
     // TODO: move this to a test file somewhere
-    ...routesForRestingRSC,
+    ...routesForTestingRSC_suspense,
   })
 
   const server = Bun.serve({ fetch })

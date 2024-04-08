@@ -6,7 +6,7 @@ import type { RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
 
-export const routesForRestingRSC: RouteMap = {
+export const routesForTestingRSC_suspense: RouteMap = {
   "/rsc/test-suspense": rscSuspenseTest,
   "/rsc/test-suspense-render": rscSuspenseRender,
 }
