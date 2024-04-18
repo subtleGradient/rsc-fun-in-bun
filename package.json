@@ -3,7 +3,7 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
-    "bunp": "bun update $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => name).join(` `))')",
+    "bunp": "bun add $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => `${name}@canary`).join(` `))'); bun update",
     "predev": "bun bunp",
     "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
     "test:ui": "PUPPETEER_HEADLESS=true bun test",
