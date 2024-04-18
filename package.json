@@ -22,9 +22,9 @@
   },
   "dependencies": {
     "peechy": "^0.4.34",
-    "react": "^19.0.0-canary-e3ebcd54b-20240405",
-    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405",
-    "react-server-dom-webpack": "^19.0.0-canary-e3ebcd54b-20240405",
-    "use-sync-external-store": "^1.4.0-canary-e3ebcd54b-20240405"
+    "react": "^19.0.0-canary-657428a9e-20240416",
+    "react-dom": "^19.0.0-canary-657428a9e-20240416",
+    "react-server-dom-webpack": "^19.0.0-canary-657428a9e-20240416",
+    "use-sync-external-store": "^1.4.0-canary-657428a9e-20240416"
   }
 }
