@@ -3,11 +3,15 @@ import { describe, expect, it } from "bun:test"
 
 const RSC_TYPE = "text/x-component"
 
-if (!1!) {
+try {
   // trigger the tests to re-run when this file changes
-  // const toyFramework = await import("./toy-framework.server.tsx")
-  const toyFramework = require("./toy-framework.server.tsx")
 
+  // BUG: Bun@1.1.4 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
+  // So, I'm using a dynamic import below to avoid triggering the react-server error
+  await import("@/rsc-fun-in-bun")
+} catch (error) {}
+
+if (!1!) {
   describe("the `await using` keyword", async () => {
     it("disposes of the page auto-magically", async () => {
       await using page = await browser.newPage()
