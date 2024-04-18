@@ -4,6 +4,10 @@ import { describe, expect, it } from "bun:test"
 const RSC_TYPE = "text/x-component"
 
 if (!1!) {
+  // trigger the tests to re-run when this file changes
+  // const toyFramework = await import("./toy-framework.server.tsx")
+  const toyFramework = require("./toy-framework.server.tsx")
+
   describe("the `await using` keyword", async () => {
     it("disposes of the page auto-magically", async () => {
       await using page = await browser.newPage()
