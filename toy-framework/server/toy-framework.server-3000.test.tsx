@@ -1,6 +1,7 @@
 import { browser } from "@/test-helpers/puppers.ts"
 import { describe, expect, it } from "bun:test"
 
+const ROOT_DIRNAME = __dirname.split("/").slice(0, -2).join("/")
 const RSC_TYPE = "text/x-component"
 
 try {
@@ -111,9 +112,33 @@ describe("toy-framework.server", () => {
       expect((await fetch(render_url)).status).toBe(200)
     })
 
-    it.todo("returns RSC content", async () => {
+    it("returns RSC content", async () => {
       const response = await fetch(rsc_url)
-      expect(await response.text()).toMatchSnapshot()
+      const rscText = await response.text()
+      expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
+      // expect(rscText).toMatchSnapshot()
+    })
+
+    it.todo("renders ClientComponent", async () => {
+      console.time("browser.newPage")
+      await using page = await browser.newPage()
+      console.timeEnd("browser.newPage")
+
+      console.time("page.goto")
+      await page.goto(rsc_url)
+      console.timeEnd("page.goto")
+
+      console.time("page.waitForSelector body")
+      await page.waitForSelector("body")
+      console.timeEnd("page.waitForSelector body")
+
+      console.time("page.waitForSelector #ClientComponent")
+      await page.waitForSelector("#ClientComponent")
+      console.timeEnd("page.waitForSelector #ClientComponent")
+
+      console.time("page.$eval")
+      expect(await page.$eval("#ClientComponent", el => el.textContent)).toBe("Hello from ClientComponent!")
+      console.timeEnd("page.$eval")
     })
   })
 })
