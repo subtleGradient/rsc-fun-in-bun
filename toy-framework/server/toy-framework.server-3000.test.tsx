@@ -43,7 +43,7 @@ describe("toy-framework.server", () => {
       const rscResponse = await fetch(
         new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }),
       )
-      // stream the responce anf verify that it sends multiple chunks
+        // stream the responce and verify that it sends multiple chunks
       const decoder = new TextDecoder()
       const reader = rscResponse.body!.getReader()
       reader.closed.then(done)
