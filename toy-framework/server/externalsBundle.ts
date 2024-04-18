@@ -9,7 +9,7 @@ export const externalsBundle = {
 
   name: null as string | null,
   importMap: {
-    bun: "/!/externals:bun.mjs",
+    // bun: "/!/externals:bun.mjs",
   } as ImportMap,
 
   async createRouteMap(): Promise<RouteMap> {
