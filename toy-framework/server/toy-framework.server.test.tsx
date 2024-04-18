@@ -46,7 +46,8 @@ describe("toy-framework.server", async () => {
         expect((await response.text()).replaceAll("><", ">\n<")).toMatchSnapshot()
       })
 
-      it("renders ClientComponent", async () => {
+      /** @see import('toy-framework.server-3000.test.tsx') instead */
+      it.todo("renders ClientComponent", async () => {
         await using page = await browser.newPage()
         page.goto(serverRef.current!.url.href)
         await page.waitForSelector("#generated-by-client")
