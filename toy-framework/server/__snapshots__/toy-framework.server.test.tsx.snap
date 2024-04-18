@@ -5,6 +5,7 @@ exports[`toy-framework.server toy-framework.server root / route returns a respon
 <HTML lang=en>
 <script type="importmap">{
   "imports": {
+    "bun": "/!/externals:bun.mjs",
     "react": "/!/externals/react.mjs",
     "react-dom": "/!/externals/react-dom.mjs",
     "react-dom/client": "/!/externals/react-dom:client.mjs",

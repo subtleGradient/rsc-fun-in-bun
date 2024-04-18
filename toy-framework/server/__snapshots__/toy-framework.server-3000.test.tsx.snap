@@ -5,6 +5,7 @@ exports[`toy-framework.server root / route returns a response 1`] = `
 <HTML lang=en>
 <script type="importmap">{
   "imports": {
+    "bun": "/!/externals:bun.mjs",
     "react": "/!/externals/react.mjs",
     "react-dom": "/!/externals/react-dom.mjs",
     "react-dom/client": "/!/externals/react-dom:client.mjs",
@@ -51,25 +52,12 @@ exports[`toy-framework.server /rsc/test-suspense returns RSC content 1`] = `
 "
 `;
 
-exports[`toy-framework.server /rsc/test-suspense updates asynchronously 1`] = `
-"1:"$Sreact.suspense"
-2:D{"name":"AsyncView","env":"Server"}
-3:D{"name":"AsyncView","env":"Server"}
-0:["$","div",null,{"children":["hi",["$","$1",null,{"fallback":["$","div",null,{"children":"loading..."}],"children":["$L2","$L3"]}]]}]
-2:["$","div",null,{"id":"AsyncView0","children":["slept for ",0,"ms"]}]
-"
-`;
-
-exports[`toy-framework.server /rsc/test-suspense updates asynchronously 2`] = `
-"3:["$","div",null,{"id":"AsyncView10","children":["slept for ",10,"ms"]}]
-"
-`;
-
 exports[`toy-framework.server /rsc/test-suspense-render returns RSC content 1`] = `
 "<!DOCTYPE HTML>
 <HTML lang=en>
 <script type="importmap">{
   "imports": {
+    "bun": "/!/externals:bun.mjs",
     "react": "/!/externals/react.mjs",
     "react-dom": "/!/externals/react-dom.mjs",
     "react-dom/client": "/!/externals/react-dom:client.mjs",
