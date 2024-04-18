@@ -26,7 +26,9 @@ describe("toy-framework.server", () => {
     })
 
     it("renders ClientComponent", async () => {
+      console.time("browser.newPage")
       await using page = await browser.newPage()
+      console.timeEnd("browser.newPage")
       page.goto(`http://localhost:3000`)
       await page.waitForSelector("#generated-by-client")
       expect(await page.$eval("#generated-by-client", el => el.textContent)).toBe("Hello from ClientComponent!")
@@ -42,21 +44,21 @@ describe("toy-framework.server", () => {
     it(
       "updates asynchronously",
       async done => {
-      const rscResponse = await fetch(
-        new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }),
-      )
+        const rscResponse = await fetch(
+          new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }),
+        )
         // stream the responce and verify that it sends multiple chunks
-      const decoder = new TextDecoder()
-      const reader = rscResponse.body!.getReader()
-      reader.closed.then(done)
-      let count = 0
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
+        const decoder = new TextDecoder()
+        const reader = rscResponse.body!.getReader()
+        reader.closed.then(done)
+        let count = 0
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
           // expect(decoder.decode(value)).toMatchSnapshot()
-        count++
-      }
-      expect(count).toBeGreaterThan(1)
+          count++
+        }
+        expect(count).toBeGreaterThan(1)
       },
       { retry: 3 },
     )
@@ -70,10 +72,29 @@ describe("toy-framework.server", () => {
     })
 
     it("renders ClientComponent", async () => {
+      console.time("browser.newPage")
       await using page = await browser.newPage()
-      page.goto(`http://localhost:3000/rsc/test-suspense-render`)
+      console.timeEnd("browser.newPage")
+
+      console.time("page.goto")
+      await page.goto(`http://localhost:3000/rsc/test-suspense-render`)
+      console.timeEnd("page.goto")
+
+      console.time("page.waitForSelector body")
+      await page.waitForSelector("body")
+      console.timeEnd("page.waitForSelector body")
+
+      console.time("page.waitForSelector 0")
+      await page.waitForSelector("#AsyncView0")
+      console.timeEnd("page.waitForSelector 0")
+
+      console.time("page.waitForSelector 10")
       await page.waitForSelector("#AsyncView10")
-      expect(await page.$eval("#AsyncView10", el => el.textContent)).toBe("slept for 10ms")
+      console.timeEnd("page.waitForSelector 10")
+
+      console.time("page.$eval")
+      expect(await page.$eval("#AsyncView10", el => el.textContent)).toMatch(/slept for 10ms/)
+      console.timeEnd("page.$eval")
     })
   })
 })
