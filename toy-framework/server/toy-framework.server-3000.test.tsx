@@ -39,7 +39,9 @@ describe("toy-framework.server", () => {
       expect(response.status).toBe(200)
       expect(await response.text()).toMatchSnapshot()
     })
-    it("updates asynchronously", async done => {
+    it(
+      "updates asynchronously",
+      async done => {
       const rscResponse = await fetch(
         new Request(`http://localhost:3000/rsc/test-suspense`, { headers: { Accept: RSC_TYPE } }),
       )
