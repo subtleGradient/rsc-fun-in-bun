@@ -101,4 +101,19 @@ describe("toy-framework.server", () => {
       console.timeEnd("page.$eval")
     })
   })
+
+  describe("/rsc/test-client-render", () => {
+    const rsc_url = `http://localhost:3000` + "/rsc/test-client"
+    const render_url = `http://localhost:3000` + "/rsc/test-client-render"
+
+    it("exists", async () => {
+      expect((await fetch(rsc_url)).status).toBe(200)
+      expect((await fetch(render_url)).status).toBe(200)
+    })
+
+    it.todo("returns RSC content", async () => {
+      const response = await fetch(rsc_url)
+      expect(await response.text()).toMatchSnapshot()
+    })
+  })
 })
