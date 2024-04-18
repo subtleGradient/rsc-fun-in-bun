@@ -1,4 +1,4 @@
-// BUG: Bun@1.1.2 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
+// BUG: Bun@1.1.4 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
 // So, I'm using a dynamic import below to avoid triggering the react-server error
 // so that the existing tests won't fail.
 // import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
