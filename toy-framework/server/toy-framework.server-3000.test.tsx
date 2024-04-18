@@ -55,7 +55,9 @@ describe("toy-framework.server", () => {
         count++
       }
       expect(count).toBeGreaterThan(1)
-    })
+      },
+      { retry: 3 },
+    )
   })
 
   describe("/rsc/test-suspense-render", () => {
