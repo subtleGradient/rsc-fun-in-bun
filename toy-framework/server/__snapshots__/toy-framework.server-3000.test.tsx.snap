@@ -25,6 +25,7 @@ exports[`toy-framework.server root / route returns a response 1`] = `
 <link rel="modulepreload" href="/!/externals/react:jsx-dev-runtime.mjs"/>
 <link rel="modulepreload" href="/!/externals/react:jsx-runtime.mjs"/>
 <link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
+<link rel="modulepreload" href="/!/use-client/example0.client.mjs"/>
 </head>
 <body>
 <h1>Hello from <!-- -->/HTMLPageRootLayout.tsx</h1>
@@ -77,6 +78,7 @@ exports[`toy-framework.server /rsc/test-suspense-render returns RSC content 1`] 
 <link rel="modulepreload" href="/!/externals/react:jsx-dev-runtime.mjs"/>
 <link rel="modulepreload" href="/!/externals/react:jsx-runtime.mjs"/>
 <link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
+<link rel="modulepreload" href="/!/use-client/example0.client.mjs"/>
 </head>
 <body>
 <h1>Hello from <!-- -->/HTMLPageRootLayout.tsx</h1>
