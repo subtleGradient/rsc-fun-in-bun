@@ -8,6 +8,7 @@
     "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
     "test:ui": "PUPPETEER_HEADLESS=true bun test",
     "test:ui:open": "PUPPETEER_HEADLESS=false bun test",
+    "test:dev": "PUPPETEER_HEADLESS=true bun test --watch --update-snapshots",
     "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
   },
   "devDependencies": {
