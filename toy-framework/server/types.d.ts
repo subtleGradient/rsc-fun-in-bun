@@ -1,26 +1,90 @@
+import type { define } from "@/toy-framework/server/polyfillsAndStuff"
 import { type Server } from "bun"
 
+/** Track stuff that is not done yet */
+export type TODO = any
+
+declare global {
+  declare var __toy_framework__: {
+    manifest: {
+      promise: Promise<IReactClientManifest>
+      resolve?: (manifest: IReactClientManifest) => void
+      reject?: (error: Error) => void
+    }
+    chunkMap: {
+      promise: Promise<ChunkMap>
+      resolve?: (chunkMap: ChunkMap) => void
+      reject?: (error: Error) => void
+    }
+  }
+
+  declare var __NOT__webpack_modules__: Record<ModuleID, ModuleIsh>
+  declare var __NOT__webpack_chunk_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<TODO>
+  declare var __NOT__webpack_require__: RequireFun & {
+    m: TODO
+    c: webpackGetChunkFilename
+    d: TODO
+    n: TODO
+    o: TODO
+    p: TODO
+    s: TODO
+  }
+}
+
+declare global {
+  /** @deprecated -- this will be replaced with {@link __NOT__webpack_modules__} in the bundlization, see {@link define} */
+  declare const __webpack_modules__: typeof __NOT__webpack_modules__
+  /** @deprecated -- this will be replaced with {@link __NOT__webpack_chunk_load__} in the bundlization, see {@link define} */
+  declare const __webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
+  /** @deprecated -- this will be replaced with {@link __NOT__webpack_require__} in the bundlization, see {@link define} */
+  declare const __webpack_require__: typeof __NOT__webpack_require__
+
+  interface Window {
+    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_modules__}, it's cleaner */
+    __NOT__webpack_modules__: typeof __NOT__webpack_modules__
+    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_chunk_load__}, it's cleaner */
+    __NOT__webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
+    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_require__}, it's cleaner */
+    __NOT__webpack_require__: typeof __NOT__webpack_require__
+
+    /** @deprecated -- this will be replaced with {@link __NOT__webpack_modules__} in the bundlization, see {@link define} */
+    __webpack_modules__: typeof __NOT__webpack_modules__
+    /** @deprecated -- this will be replaced with {@link __NOT__webpack_chunk_load__} in the bundlization, see {@link define} */
+    __webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
+    /** @deprecated -- this will be replaced with {@link __NOT__webpack_require__} in the bundlization, see {@link define} */
+    __webpack_require__: typeof __NOT__webpack_require__
+  }
+}
+
+export type RequireFun = (id: ModuleID) => ModuleIsh["exports"]
+type webpackGetChunkFilename = (chunkId: ChunkId) => null | ChunkFilename
+
+type ModuleIsh = { exports: TODO }
+
 export type Pathname = `/${string}`
-export type ModuleID = string
+
+/** unique id for a loadable module like a {@link ChunkId} */
+export type ModuleID = (number | string) & { __moduleId__?: void }
+
 export type RouteMap = Record<Pathname, Server["fetch"]>
+
 export type ImportMap = Record<ModuleID, Pathname>
 
 /** unique id for a loadable dependency */
 export type ChunkId = (string | number) & { __chunkId__?: void }
 
-/** filename of a chunk */
+/** loadable URL or partial URL for a chunk */
 export type ChunkFilename = string & { __chunkFilename__?: void }
 
-/** unique id for a loadable client module like a {@link ChunkId} */
-export type ClientModuleId = (number | string) & { __moduleId__?: void }
+type ChunkMap = Record<ChunkId, ChunkFilename>
 
 /** name of something exported from a client module */
 export type ClientModuleExportName = string & { __ClientModuleExportName__?: void }
 
 /** $$id attribute of a Client Reference or Server Reference */
-export type ReactReference$$id = `${ClientModuleId}#${ClientModuleExportName}`
+export type ReactReference$$id = `${ModuleID}#${ClientModuleExportName}`
 
-export type ReactClientManifestRecord = { id: ClientModuleId; chunks: DependencyChunks; name: ClientModuleExportName }
+export type ReactClientManifestRecord = { id: ModuleID; chunks: DependencyChunks; name: ClientModuleExportName }
 
 export type IReactClientManifest = Record<ReactReference$$id, ReactClientManifestRecord>
 
@@ -54,7 +118,7 @@ export type DependencyChunks =
 
 // example of a bit from a decoded text/x-component stream from v0.dev
 // prettier-ignore
-const v0_example: [id: ClientModuleId, chunks: DependencyChunks, name: ClientModuleExportName] = [
+const v0_example: [id: ModuleID, chunks: DependencyChunks, name: ClientModuleExportName] = [
   68249,
   [
     5145, "static/chunks/fbdd6141-c636f43e020ddf6c.js",
