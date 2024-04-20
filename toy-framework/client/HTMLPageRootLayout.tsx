@@ -1,3 +1,4 @@
+import { css } from "@/util/js"
 import React from "react"
 import type { Pathname, RouteMap } from "../server/types"
 import { LinkModulePreloads } from "./LinkModulePreloads"
@@ -10,6 +11,15 @@ export function HTMLPageRootLayout(props: { routes?: RouteMap; children?: React.
         {props.routes && (
           <LinkModulePreloads pathnames={(Object.keys(props.routes) as Pathname[]).filter(it => it.endsWith(".mjs"))} />
         )}
+        <style>{css`
+          /* dark mode */
+          @media (prefers-color-scheme: dark) {
+            body {
+              background-color: #333;
+              color: #ddd;
+            }
+          }
+        `}</style>
       </head>
       <body>
         <h1>Hello from {__filename.replace(__dirname, "")}</h1>
