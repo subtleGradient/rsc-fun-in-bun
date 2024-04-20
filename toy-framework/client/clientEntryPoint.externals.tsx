@@ -1,18 +1,11 @@
 /// <reference lib="dom" />
+
 import React from "react"
 import ReactDOM from "react-dom"
 import ReactDOMClient from "react-dom/client"
 import * as ReactServerDOMClient from "react-server-dom-webpack/client"
 import { jsxDEV } from "react/jsx-dev-runtime"
 import { Fragment } from "react/jsx-runtime"
-
-declare global {
-  interface Window {
-    __NOT__webpack_modules__: Record<string, { exports: unknown }>
-  }
-}
-
-const { __NOT__webpack_modules__ } = window
 
 __NOT__webpack_modules__["react"] = { exports: React }
 __NOT__webpack_modules__["react-dom"] = { exports: ReactDOM }
