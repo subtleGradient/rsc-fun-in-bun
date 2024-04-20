@@ -119,12 +119,6 @@ async function rscClientRender() {
   })
 }
 
-declare global {
-  interface Window {
-    __NOT__webpack_modules__: Record<string, { exports: unknown }>
-  }
-}
-
 function RSCDemo() {
   async function main(rsc_url: string) {
     const { jsxDEV } = await import("react/jsx-dev-runtime")
