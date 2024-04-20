@@ -1,5 +1,6 @@
 import { browser } from "@/test-helpers/puppers.ts"
 import { describe, expect, it } from "bun:test"
+import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
 
 const ROOT_DIRNAME = __dirname.split("/").slice(0, -2).join("/")
 const RSC_TYPE = "text/x-component"
@@ -103,24 +104,30 @@ describe("toy-framework.server", () => {
     })
   })
 
-  describe("/rsc/test-client-render", () => {
-    const rsc_url = `http://localhost:3000` + "/rsc/test-client"
-    const render_url = `http://localhost:3000` + "/rsc/test-client-render"
+  describe(routesForTestingRSC_use_client_paths.render, () => {
+    const rsc_url = `http://localhost:3000${routesForTestingRSC_use_client_paths.rsc}`
+    const render_url = `http://localhost:3000${routesForTestingRSC_use_client_paths.render}`
 
     it("exists", async () => {
       expect((await fetch(rsc_url)).status).toBe(200)
       expect((await fetch(render_url)).status).toBe(200)
     })
 
-    it("RSC mentions ClientComponent by name", async () => {
-      const response = await fetch(rsc_url)
-      const rscText = await response.text()
-      const { ExampleClientComponent } = await import("@/examples/example0.client")
-      expect(rscText).toMatch(ExampleClientComponent.name)
-      expect(rscText).toMatch("examples/example0.client")
+    describe("RSC payload", () => {
+      it("mentions ClientComponent by name", async () => {
+        const response = await fetch(rsc_url)
+        const rscText = await response.text()
+        // const { ExampleClientComponent } = await import("@/examples/example0.client")
+        expect(rscText).toMatch("ExampleClientComponent")
+        expect(rscText).toMatch("examples/example0.client")
+      })
 
-      // expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
-      // expect(rscText).toMatchSnapshot()
+      it("should not include absolute paths", async () => {
+        const response = await fetch(rsc_url)
+        const rscText = await response.text()
+
+        expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
+      })
     })
 
     it.todo("renders ClientComponent", async () => {
@@ -146,5 +153,3 @@ describe("toy-framework.server", () => {
     })
   })
 })
-
-ShadowRealm

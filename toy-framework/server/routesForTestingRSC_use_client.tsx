@@ -4,6 +4,7 @@ import { type ReactElement } from "react"
 import { externalsBundle } from "./externalsBundle"
 import { HTMLPageStream } from "./HTMLPageStream"
 import { define } from "./polyfillsAndStuff"
+import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
 import { routes } from "./toy-framework.server"
 import type { ImportMap, Pathname, RouteMap } from "./types"
 
@@ -60,14 +61,9 @@ const createClientBundle = (entrypoints: Pathname[]) => ({
 })
 
 export const routesForTestingRSC_use_client: RouteMap = {
-  "/rsc/test-client": rscClientTest,
-  "/rsc/test-client-render": rscClientRender,
+  [routesForTestingRSC_use_client_paths.rsc]: rscClientTest,
+  [routesForTestingRSC_use_client_paths.render]: rscClientRender,
 }
-
-function withClientStuff({ children }: { children: ReactElement }) {
-  withClientStuff
-}
-
 
 async function rscClientTest(request: Request): Promise<Response> {
   Bun.plugin(useClient_fromServer_pluginConfig)
@@ -94,6 +90,12 @@ async function rscClientTest(request: Request): Promise<Response> {
     entrypoints.indexOf(absolutePath)
   }
 
+  for (const $$id of $$ids) {
+    const { chunks, name } = ReactClientManifest[$$id]
+    // chunks.length = 0
+    // chunks.push("lulz")
+  }
+
   // FIXME: this is terrible
   Object.assign(routes, {
     ...(await bundle.createRouteMap()),
@@ -102,6 +104,7 @@ async function rscClientTest(request: Request): Promise<Response> {
   const ui = (
     <div>
       hi
+      <ExampleClientComponent />
       <ExampleClientComponent />
     </div>
   )
@@ -178,7 +181,12 @@ function RSCDemo() {
     <>
       <h2>Howdy!</h2>
       <h3>testing RSC</h3>
-      <div id="rsc-root"></div>
+      <div id="rsc-root">
+        <div data-id="NOT-generated-by-client">
+          pre-rendered by server in <code>{__filename.replace(__dirname, "")}</code>
+        </div>
+      </div>
+
       <script type="module" dangerouslySetInnerHTML={{ __html: js`;(${main})();` }} />
     </>
   )
