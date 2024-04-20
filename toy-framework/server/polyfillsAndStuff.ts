@@ -1,5 +1,5 @@
-import type { ChunkId, ReactClientManifestRecord } from "@/plugins/ReactClientManifest.plugin"
 import { tsx } from "../../util/js"
+import type { ChunkId, ModuleID, ReactClientManifestRecord } from "./types"
 
 export const define: Record<string, string> = {
   __webpack_require__: "__NOT__webpack_require__",
@@ -22,6 +22,8 @@ export const polyfillsAndStuff = {
 declare global {
   interface Window {
     __NOT__webpack_modules__: Record<string, { exports: unknown }>
+    __NOT__webpack_chunk_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<unknown>
+    __NOT__webpack_require__: (moduleId: ModuleID) => unknown
   }
 }
 

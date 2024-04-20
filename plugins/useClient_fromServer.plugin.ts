@@ -1,15 +1,10 @@
 /// <reference types="bun" />
 
 import { define } from "@/toy-framework/server/polyfillsAndStuff"
-import type { Pathname } from "@/toy-framework/server/types"
+import type { ClientModuleExportName, Pathname, ReactClientManifestRecord } from "@/toy-framework/server/types"
 import { $, type BunPlugin, type JavaScriptLoader } from "bun"
 import ReactServerDOMServer from "react-server-dom-webpack/server.edge"
-import {
-  ReactClientManifest,
-  type ClientModuleExportName,
-  type ReactClientManifestRecord,
-} from "./ReactClientManifest.plugin"
-export { ReactClientManifest }
+import { ReactClientManifest } from "./ReactClientManifest"
 
 /**
  * This is a bun plugin for a react-server environment.
@@ -101,7 +96,7 @@ async function generateClientModuleProxy(modulePath: Pathname): Promise<ClientMo
   const theClientModuleProxy = ReactServerDOMServer.createClientModuleProxy(`file://${modulePath}`)
 
   clientModuleProxy = {}
-  
+
   const moduleSourceOriginal = await Bun.file(modulePath).text()
   const ext = modulePath.split(".").pop() as JavaScriptLoader
   const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)

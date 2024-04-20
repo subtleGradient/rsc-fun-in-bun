@@ -26,13 +26,18 @@ declare module "react-server-dom-webpack/server" {
    * A ClientReferenceManifestEntry is a map of client module IDs to their corresponding exports.
    */
   type ClientReferenceManifestEntry = {
-    id: string
+    id: number | string
     // chunks is a double indexed array of chunkId / chunkFilename pairs
-    chunks: Array<string>
+    chunks:
+      | []
+      | [chunkId: number | string, chunkFilename: string]
+      | [chunkId: number | string, chunkFilename: string,
+         chunkId: number | string, chunkFilename: string] // prettier-ignore
+      | [chunkId: number | string, chunkFilename: string, ...Array<number | string>]
     name: string
   }
 
-  type ModulePath = string
+  type ModulePath = number | string
   type BundlerConfig = Record<ModulePath, ClientReferenceManifestEntry> // Placeholder type for Bundler Config
   type ServerComponentResponse = any // Placeholder type for Server Component Response
   type ErrorHandler = (error: Error) => void

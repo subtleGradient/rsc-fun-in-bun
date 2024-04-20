@@ -1,4 +1,5 @@
-import { ReactClientManifest, useClient_fromServer_pluginConfig } from "@/plugins/useClient_fromServer.plugin"
+import { ReactClientManifest } from "@/plugins/ReactClientManifest"
+import { useClient_fromServer_pluginConfig } from "@/plugins/useClient_fromServer.plugin"
 import { js } from "@/util/js"
 import { type ReactElement } from "react"
 import { externalsBundle } from "./externalsBundle"
