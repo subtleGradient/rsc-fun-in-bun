@@ -18,7 +18,7 @@ export type ReactReference$$id = `${ClientModuleId}#${ClientModuleExportName}`
 export type ReactClientManifestRecord = { id: ClientModuleId; chunks: DependencyChunks; name: ClientModuleExportName }
 export const ReactClientManifest: Record<ReactReference$$id, ReactClientManifestRecord> = {}
 
-/** @deprecated */
+/** @deprecated -- not sure if this is a good idea anymore 🤷‍♂️ */
 export const ReactClientManifest_pluginConfig: BunPlugin = {
   name: "React Client Manifest",
   setup(build) {
@@ -59,6 +59,7 @@ const v0_example: [id: ClientModuleId, chunks: DependencyChunks, name: ClientMod
 ]
 
 type ChunkPair = [ChunkId, ChunkFilename]
+
 type ChunkPair2 = [...ChunkPair, ...ChunkPair]
 type DependencyChunks =
   | []
