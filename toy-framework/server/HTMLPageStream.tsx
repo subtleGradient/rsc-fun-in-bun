@@ -30,7 +30,7 @@ export async function HTMLPageStream({ children }: { children?: React.ReactNode 
     ),
     await ReactDOMServer.renderToReadableStream(
       <HTMLPageRootLayout routes={routes}>
-        <script type="module" src={polyfillsAndStuff.name} />
+        <script src={polyfillsAndStuff.name} />
         <script type="module" src={externalsBundle.name!} />
         <script type="module" src={clientEntryPointBundle.name!} />
         {children}
