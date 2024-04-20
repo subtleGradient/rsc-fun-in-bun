@@ -1,13 +1,35 @@
 import { tsx } from "../../util/js"
-import type { ChunkId, ModuleID, ReactClientManifestRecord } from "./types"
+import type { ChunkFilename, ChunkId, RequireFun } from "./types"
+const __DEV__ = process.env.NODE_ENV !== "production"
+
+const toy = {
+  require: "__NOT__webpack_require__",
+  modules: "__NOT__webpack_modules__",
+  chunkLoad: "__NOT__webpack_chunk_load__",
+} as const
+
+// verify that these globals are defined with the correct names
+{
+  global[toy.require]
+  global[toy.modules]
+  global[toy.chunkLoad]
+}
 
 export const define: Record<string, string> = {
-  __webpack_require__: "__NOT__webpack_require__",
-  __webpack_modules__: "__NOT__webpack_modules__",
-  __webpack_chunk_load__: "__NOT__webpack_chunk_load__",
+  /** see {@link __NOT__webpack_modules__} */
+  __webpack_modules__: toy.modules,
+  "window.__webpack_modules__": toy.modules,
+
+  /** see {@link __NOT__webpack_chunk_load__} */
+  __webpack_chunk_load__: toy.chunkLoad,
+  "window.__webpack_chunk_load__": toy.chunkLoad,
+
+  /** see {@link __NOT__webpack_require__} */
+  __webpack_require__: toy.require,
+  "window.__webpack_require__": toy.require,
 
   "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
-  __DEV__: process.env.NODE_ENV! === "development" ? "true" : "false",
+  __DEV__: __DEV__ ? "true" : "false",
 }
 
 /**
@@ -16,47 +38,66 @@ export const define: Record<string, string> = {
 export const polyfillsAndStuff = {
   name: "/!/polyfillsAndStuff.mjs",
   type: "text/javascript",
-  text: async () => await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(tsx`(${main})()`),
+  text: async () =>
+    await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(
+      tsx`{${!__DEV__ ? "" : tsx`(${verify_define})(${toy})`}}{(${clientEntryPoint_environment_dependencies})()}`,
+    ),
 }
 
-declare global {
-  interface Window {
-    __NOT__webpack_modules__: Record<string, { exports: unknown }>
-    __NOT__webpack_chunk_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<unknown>
-    __NOT__webpack_require__: (moduleId: ModuleID) => unknown
-  }
-}
-
-async function main() {
-  const webpackGetChunkFilename = (chunkId: string) => {
-    throw new Error("webpackGetChunkFilename not implemented")
-  }
-
-  const __NOT__webpack_modules__: Record<string, { exports: unknown }> = {}
-  const __NOT__webpack_chunk_load__ = async (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => {
-    console.log("__NOT__webpack_chunk_load__", chunkId)
-    return new Proxy(
-      {},
-      {
-        get(_, key, __) {
-          throw new Error(`Chunk not found: ${chunkId}; Need to add
-          __NOT__webpack_modules__["${chunkId}"] = { exports: ... }`)
-        },
-      },
-    )
-    // return await import(chunkId as string)
-  }
-  const __NOT__webpack_require__ = Object.assign(
-    (moduleId: string) => {
-      console.log("__NOT__webpack_require__", moduleId)
-      if (!(moduleId in __NOT__webpack_modules__))
-        throw new Error(`Module not found: ${moduleId}; Need to add
-          __NOT__webpack_modules__["${moduleId}"] = { exports: ... }`)
-
-      return __NOT__webpack_modules__[moduleId]?.exports
-    },
-    { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },
+/** verify that the bundlizer correctly replaced strings */
+function verify_define({ chunkLoad, modules, require }: typeof toy) {
+  console.assert(
+    !(() => process.env.NODE_ENV).toString().match(/process.env.NODE_ENV/),
+    "🚨 Something is broken with bundlization",
   )
+  console.assert(!(() => __webpack_require__).toString().includes(`"`))
+  console.assert(!(() => window.__webpack_require__).toString().includes(`"`))
+  console.assert((() => __webpack_require__).toString().includes(require))
+  console.assert((() => window.__webpack_require__).toString().includes(require))
+  console.assert((() => __webpack_modules__).toString().includes(modules))
+  console.assert((() => window.__webpack_modules__).toString().includes(modules))
+  console.assert((() => __webpack_chunk_load__).toString().includes(chunkLoad))
+  console.assert((() => window.__webpack_chunk_load__).toString().includes(chunkLoad))
+  console.log("🚀 bundlization verified")
+}
 
-  Object.assign(window, { __NOT__webpack_modules__, __NOT__webpack_chunk_load__, __NOT__webpack_require__ })
+function clientEntryPoint_environment_dependencies() {
+  console.log("🚀 polyfillsAndStuff")
+
+  __NOT__webpack_modules__ = {}
+
+  __NOT__webpack_chunk_load__ = async chunkId => {
+    console.log("__NOT__webpack_chunk_load__", chunkId)
+    const chunkURL = __NOT__webpack_require__.c(chunkId)
+    if (!chunkURL) throw new Error(`😰 Chunk not found: ${chunkId} in manifest.`)
+    return await import(chunkURL)
+  }
+
+  const requireFun: RequireFun = moduleId => {
+    console.log("__NOT__webpack_require__", moduleId)
+    if (!(moduleId in __NOT__webpack_modules__)) throw new Error(`Module not found: ${moduleId}`)
+    return __NOT__webpack_modules__[moduleId]?.exports
+  }
+
+  function getChunkFilename(chunkId: ChunkId): null | ChunkFilename {
+    throw new Error("not implemented")
+    // const $$ids = Object.keys(__toy_framework__ReactClientManifest) as (keyof IReactClientManifest)[]
+    // for (const $$id of $$ids) {
+    //   const { chunks } = __toy_framework__ReactClientManifest[$$id]
+    //   const chunkIndex = (chunks as ChunkId[]).indexOf(chunkId)
+    //   const chunkFilename = chunks[chunkIndex + 1] as ChunkFilename
+    //   if (chunkFilename) return chunkFilename
+    // }
+    // return null
+  }
+
+  __NOT__webpack_require__ = Object.assign(requireFun, {
+    m: {},
+    c: getChunkFilename,
+    d: {},
+    n: {},
+    o: {},
+    p: {},
+    s: {},
+  })
 }
