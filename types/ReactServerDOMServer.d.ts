@@ -19,6 +19,7 @@ declare module "react-server-dom-webpack/server.node" {
 }
 
 declare module "react-server-dom-webpack/server" {
+  import type { ReactReference$$id } from "@/plugins/ReactClientManifest.plugin.js"
   import type { Readable } from "stream"
 
   /**
@@ -97,9 +98,9 @@ declare module "react-server-dom-webpack/server" {
    */
   export function registerClientReference<T extends object>(
     proxyImplementation: T,
-    id: string,
+    id: number | string,
     exportName: string,
-  ): T & { $$typeof: symbol; $$id: string; $$async: boolean }
+  ): T & { $$typeof: symbol; $$id: ReactReference$$id; $$async: boolean }
 
   /**
    * Registers a server-side reference.
@@ -111,7 +112,7 @@ declare module "react-server-dom-webpack/server" {
     reference: T,
     id: string,
     exportName: string | null,
-  ): T & { $$typeof: symbol; $$id: string; $$bound: null }
+  ): T & { $$typeof: symbol; $$id: ReactReference$$id; $$bound: null }
 
   /**
    * Options for rendering to a pipeable stream.

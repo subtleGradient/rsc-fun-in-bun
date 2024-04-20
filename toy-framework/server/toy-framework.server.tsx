@@ -5,6 +5,7 @@
 
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
+import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import type { Pathname, RouteMap } from "./types"
@@ -14,12 +15,12 @@ export const routes: RouteMap = {
 
   "/": async () =>
     new Response(await HTMLPageStream({}), {
-      headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+      headers: { "Content-Type": "text/html", ...noCacheHeaders },
     }),
 
   [polyfillsAndStuff.name!]: async () =>
     new Response(await polyfillsAndStuff.text(), {
-      headers: { "Content-Type": polyfillsAndStuff.type!, "Cache-Control": "no-store" },
+      headers: { "Content-Type": polyfillsAndStuff.type!, ...noCacheHeaders },
     }),
 
   ...(await externalsBundle.createRouteMap()),

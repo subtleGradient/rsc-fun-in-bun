@@ -2,6 +2,7 @@ import { resolve } from "bun"
 import { externalsBundle } from "./externalsBundle"
 import { define } from "./polyfillsAndStuff"
 import type { ImportMap, Pathname, RouteMap } from "./types"
+import { noCacheHeaders } from "./headers"
 
 /**
  * A virtual folder that exposes the virtual client entry point files to the server.
@@ -26,7 +27,7 @@ export const clientEntryPointBundle = {
 
     for (const output of outputs) {
       const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
+      const headers = { "Content-Type": output.type, ...noCacheHeaders }
       routes[pathname] = async () => new Response(output, { headers })
       if (output.kind === "entry-point") this.name ||= pathname
     }

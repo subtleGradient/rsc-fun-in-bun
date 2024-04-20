@@ -2,6 +2,7 @@ import { ReactClientManifest, useClient_fromServer_pluginConfig } from "@/plugin
 import { js } from "@/util/js"
 import { type ReactElement } from "react"
 import { externalsBundle } from "./externalsBundle"
+import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
 import { define } from "./polyfillsAndStuff"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
@@ -30,7 +31,7 @@ const createClientBundle = (entrypoints: Pathname[]) => ({
 
     for (const output of outputs) {
       const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
+      const headers = { "Content-Type": output.type, ...noCacheHeaders }
       routes[pathname] = async () => new Response(output, { headers })
       if (output.kind === "entry-point") this.name ||= pathname
     }
@@ -71,36 +72,24 @@ async function rscClientTest(request: Request): Promise<Response> {
   const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
   const { ExampleClientComponent } = await import("@/examples/example0.client")
 
-  const $$ids = Object.keys(ReactClientManifest)
+  const $$ids = Object.keys(ReactClientManifest) as (keyof typeof ReactClientManifest)[]
 
-  const entrypoints: Pathname[] = []
+  if (!1!) {
+    const entrypoints: Pathname[] = []
 
-  for (const $$id of $$ids) {
-    const { chunks, name } = ReactClientManifest[$$id]
-    const [absolutePath] = chunks
-    entrypoints.push(absolutePath as Pathname)
+    for (const $$id of $$ids) {
+      const clientManifest = ReactClientManifest[$$id]
+      entrypoints.push(...(clientManifest.chunks as Pathname[]))
+    }
+    const clientBundle = createClientBundle(entrypoints)
+    const clientBundleBuild = await clientBundle.build()
+    const entrypointOutputs = clientBundleBuild.outputs.forEach(it => it.kind === "entry-point")
+
+    // FIXME: this is terrible
+    Object.assign(routes, {
+      ...(await clientBundle.createRouteMap()),
+    })
   }
-  const bundle = createClientBundle(entrypoints)
-  const build = await bundle.build()
-  const entrypointOutputs = build.outputs.forEach(it => it.kind === "entry-point")
-
-  for (const $$id of $$ids) {
-    const { chunks, name } = ReactClientManifest[$$id]
-    const [absolutePath] = chunks as Pathname[]
-    entrypoints.indexOf(absolutePath)
-  }
-
-  for (const $$id of $$ids) {
-    const { chunks, name } = ReactClientManifest[$$id]
-    // chunks.length = 0
-    // chunks.push("lulz")
-  }
-
-  // FIXME: this is terrible
-  Object.assign(routes, {
-    ...(await bundle.createRouteMap()),
-  })
-
   const ui = (
     <div>
       hi
@@ -110,7 +99,7 @@ async function rscClientTest(request: Request): Promise<Response> {
   )
 
   let rscStream = ReactServerDOMServer.renderToReadableStream(
-    { ui },
+    { ui, ReactClientManifest },
     {
       ...ReactClientManifest,
     },
@@ -120,12 +109,12 @@ async function rscClientTest(request: Request): Promise<Response> {
     },
   )
 
-  return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, "Cache-Control": "no-store" } })
+  return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, ...noCacheHeaders } })
 }
 
 async function rscClientRender() {
   return new Response(await HTMLPageStream({ children: <RSCDemo /> }), {
-    headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "text/html", ...noCacheHeaders },
   })
 }
 
@@ -136,7 +125,7 @@ declare global {
 }
 
 function RSCDemo() {
-  async function main() {
+  async function main(rsc_url: string) {
     const { jsxDEV } = await import("react/jsx-dev-runtime")
 
     console.log("running", import.meta.url)
@@ -147,34 +136,38 @@ function RSCDemo() {
 
     console.log("react@" + React.version)
 
-    const root = ReactDOMClient.createRoot(document.getElementById("rsc-root")!)
+    const promisedResponse = fetch(new Request(rsc_url, { headers: { Accept: "text/x-component" } }))
 
-    const { ui } = await ReactServerDOMClient.createFromFetch<{ ui: ReactElement }>(
-      fetch(new Request("/rsc/test-client", { headers: { Accept: "text/x-component" } })),
-      {
-        async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
-          // console.log("calling server", id, args)
-          // return "server response" as T
-          throw new Error("not implemented")
-        },
-
-        encodeFormAction<A>(id: any, args: Promise<A>) {
-          return {
-            name: "my-awesome-form",
-            action: "/rsc/test-suspense",
-            method: "POST",
-            data: new FormData(),
-          }
-        },
+    const { ui, ReactClientManifest: rcm } = await ReactServerDOMClient.createFromFetch<{
+      ui: ReactElement
+      ReactClientManifest: typeof ReactClientManifest
+    }>(promisedResponse, {
+      async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
+        // console.log("calling server", id, args)
+        // return "server response" as T
+        throw new Error("not implemented")
       },
-    )
+
+      encodeFormAction<A>(id: any, args: Promise<A>) {
+        return {
+          name: "my-awesome-form",
+          action: "/rsc/test-suspense",
+          method: "POST",
+          data: new FormData(),
+        }
+      },
+    })
+
+    console.log("ReactClientManifest", rcm)
 
     // FIXME: this is a hack to get the client to load the module
-    window.__NOT__webpack_modules__["/examples/example0.client.tsx"] = {
-      // @ts-expect-error - this is a hack to get the client to load the module
-      exports: await import("/!/use-client/example0.client.mjs"),
-    }
+    // window.__NOT__webpack_modules__["/examples/example0.client.tsx"] = {
+    //   // @ts-expect-error - this is a hack to get the client to load the module
+    //   exports: await import("/!/use-client/example0.client.mjs"),
+    // }
 
+    const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
+    const root = ReactDOMClient.createRoot(rscRootElement)
     root.render(ui)
   }
   return (
@@ -187,7 +180,10 @@ function RSCDemo() {
         </div>
       </div>
 
-      <script type="module" dangerouslySetInnerHTML={{ __html: js`;(${main})();` }} />
+      <script
+        type="module"
+        dangerouslySetInnerHTML={{ __html: js`;(${main})(...${[routesForTestingRSC_use_client_paths.rsc]});` }}
+      />
     </>
   )
 }

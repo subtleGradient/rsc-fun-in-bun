@@ -1,6 +1,7 @@
 import { js } from "@/util/js"
 import { sleep } from "bun"
 import { Suspense, type ReactElement } from "react"
+import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
 import type { RouteMap } from "./types"
 
@@ -37,12 +38,12 @@ async function rscSuspenseTest(request: Request): Promise<Response> {
     },
   )
 
-  return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, "Cache-Control": "no-store" } })
+  return new Response(rscStream, { headers: { "Content-Type": RSC_TYPE, ...noCacheHeaders } })
 }
 
 async function rscSuspenseRender() {
   return new Response(await HTMLPageStream({ children: <RSCDemo /> }), {
-    headers: { "Content-Type": "text/html", "Cache-Control": "no-store" },
+    headers: { "Content-Type": "text/html", ...noCacheHeaders },
   })
 }
 

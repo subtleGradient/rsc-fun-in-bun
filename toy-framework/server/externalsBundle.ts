@@ -1,5 +1,6 @@
 import { resolve } from "bun"
 import { js } from "../../util/js"
+import { noCacheHeaders } from "./headers"
 import { define } from "./polyfillsAndStuff"
 import type { ImportMap, Pathname, RouteMap } from "./types"
 
@@ -25,7 +26,7 @@ export const externalsBundle = {
 
     for (const output of outputs) {
       const pathname = `${this.publicPath}${output.path}`.replace("/./", "/") as Pathname
-      const headers = { "Content-Type": output.type, "Cache-Control": "no-store" }
+      const headers = { "Content-Type": output.type, ...noCacheHeaders }
       routes[pathname] = async () => new Response(output, { headers })
       if (output.kind === "entry-point") this.name ||= pathname
     }
@@ -54,7 +55,7 @@ export const externalsBundle = {
           `
       }
       const pathname = `${this.publicPath}${moduleId.replaceAll("/", ":")}.mjs` as Pathname
-      const headers = { "Content-Type": "text/javascript", "Cache-Control": "no-store" }
+      const headers = { "Content-Type": "text/javascript", ...noCacheHeaders }
       routes[pathname] = async () => new Response(await transpiler.transform(source, "js"), { headers })
       this.importMap[moduleId] = pathname
     }

@@ -1,3 +1,4 @@
+import type { ChunkId, ReactClientManifestRecord } from "@/plugins/ReactClientManifest.plugin"
 import { tsx } from "../../util/js"
 
 export const define: Record<string, string> = {
@@ -30,13 +31,26 @@ async function main() {
   }
 
   const __NOT__webpack_modules__: Record<string, { exports: unknown }> = {}
-  const __NOT__webpack_chunk_load__ = async (chunkId: string) => await import(chunkId)
+  const __NOT__webpack_chunk_load__ = async (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => {
+    console.log("__NOT__webpack_chunk_load__", chunkId)
+    return new Proxy(
+      {},
+      {
+        get(_, key, __) {
+          throw new Error(`Chunk not found: ${chunkId}; Need to add
+          __NOT__webpack_modules__["${chunkId}"] = { exports: ... }`)
+        },
+      },
+    )
+    // return await import(chunkId as string)
+  }
   const __NOT__webpack_require__ = Object.assign(
     (moduleId: string) => {
       console.log("__NOT__webpack_require__", moduleId)
       if (!(moduleId in __NOT__webpack_modules__))
         throw new Error(`Module not found: ${moduleId}; Need to add
           __NOT__webpack_modules__["${moduleId}"] = { exports: ... }`)
+
       return __NOT__webpack_modules__[moduleId]?.exports
     },
     { m: {}, c: webpackGetChunkFilename, d: {}, n: {}, o: {}, p: {}, s: {} },

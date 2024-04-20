@@ -2,71 +2,29 @@
 
 import { define } from "@/toy-framework/server/polyfillsAndStuff"
 import type { Pathname } from "@/toy-framework/server/types"
-import { $, Transpiler, type BunPlugin, type JavaScriptLoader } from "bun"
-import { registerClientReference } from "react-server-dom-webpack/server.edge"
-import { ReactClientManifest } from "./ReactClientManifest.plugin"
+import { $, type BunPlugin, type JavaScriptLoader } from "bun"
+import ReactServerDOMServer from "react-server-dom-webpack/server.edge"
+import {
+  ReactClientManifest,
+  type ClientModuleExportName,
+  type ReactClientManifestRecord,
+} from "./ReactClientManifest.plugin"
 export { ReactClientManifest }
 
-const REPO_ROOT = (await $`git rev-parse --show-toplevel`.text()).trim()
-
-export const genPathnameRef = {
-  /** replace this with your own implementation */
-  current: (relativePath: string, name: string): Pathname => `/!/use-client${relativePath}/${name}.mjs`,
-}
-
-function generateClientExport(name: string, absolutePath: Pathname) {
-  const relativePath = absolutePath.replace(REPO_ROOT, "").replace(/\\/g, "/")
-  const $$id = `${relativePath}#${name}`
-  const manifest = (ReactClientManifest[$$id] = { id: relativePath, chunks: [absolutePath], name })
-  const proxyImplementation = Object.assign(ClientComponent_onTheServer, { displayName: manifest.name })
-  return registerClientReference(proxyImplementation, manifest.id, manifest.name)
-
-  function ClientComponent_onTheServer() {
-    throw new Error(`'use client' function '${$$id}' called on the server`)
-  }
-}
-
-type ClientExport = ReturnType<typeof generateClientExport>
-type ClientProxyExports = Record<string, ClientExport>
-const clientProxyCache = new Map<string, ClientProxyExports>()
-
-async function generateClientModuleProxy(modulePath: Pathname) {
-  const transpiler = new Transpiler({
-    target: "browser",
-    allowBunRuntime: false,
-    minifyWhitespace: false,
-    inline: false,
-    autoImportJSX: true,
-    trimUnusedImports: false,
-    deadCodeElimination: false,
-    jsxOptimizationInline: false,
-    treeShaking: false,
-    define,
-    // exports,
-    // loader,
-    // logLevel,
-    // macro,
-    // tsconfig,
-  })
-
-  let exports = clientProxyCache.get(modulePath)
-  if (!exports) {
-    exports = {}
-    const moduleSourceOriginal = await Bun.file(modulePath).text()
-    const ext = modulePath.split(".").pop() as JavaScriptLoader
-    const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)
-    const moduleIO = transpiler.scan(moduleSourceTransformed)
-
-    moduleIO.exports.forEach(key => {
-      exports![key] = generateClientExport(key, modulePath)
-    })
-
-    clientProxyCache.set(modulePath, exports)
-  }
-
-  return exports
-}
-
+/**
+ * This is a bun plugin for a react-server environment.
+ *
+ * In a react-server environment,
+ * import client-only code (files with a "use client" directive at the top),
+ * get a ClientModuleProxy via {@link generateClientModuleProxy} instead of the real client component.
+ *
+ * {@link generateClientReference}
+ * Each export in the client module is replaced with a proxy function that throws an error when called on the server.
+ *
+ * The proxy...
+ * - throws an error if called on the server.
+ *
+ */
 export const useClient_fromServer_pluginConfig: BunPlugin = {
   name: "React RSC use client (server)",
   target: "bun",
@@ -86,4 +44,76 @@ export const useClient_fromServer_pluginConfig: BunPlugin = {
       }
     })
   },
+}
+
+const REPO_ROOT = (await $`git rev-parse --show-toplevel`.text()).trim()
+
+export const genPathnameRef = {
+  /** replace this with your own implementation */
+  current: (relativePath: string, name: string): Pathname => `/!/use-client${relativePath}/${name}.mjs`,
+}
+
+function generateClientReference(exportName: ClientModuleExportName, absolutePath: Pathname) {
+  const relativePath = absolutePath.replace(REPO_ROOT, "").replace(/\\/g, "/")
+  const manifest: ReactClientManifestRecord = {
+    id: relativePath,
+    chunks: [-1, relativePath], // will be replaced with the real chunkId and chunkFilename pairs later
+    name: exportName,
+  }
+  const proxyImplementation = Object.assign(ClientComponent_onTheServer, { displayName: manifest.name })
+  const clientReference = ReactServerDOMServer.registerClientReference(proxyImplementation, manifest.id, manifest.name)
+  ReactClientManifest[clientReference.$$id] = manifest
+  return clientReference
+
+  function ClientComponent_onTheServer() {
+    throw new Error(
+      `'use client' function '${relativePath}#${exportName}' called on the server! This function should only be called on the client. If you're trying to generate HTML for SSR, you'll need to make sure this bun plugin (${__filename.replace(REPO_ROOT, "")}) is disabled.`,
+    )
+  }
+}
+
+type ClientReference = ReturnType<typeof generateClientReference>
+type ClientModuleProxy = Record<ClientModuleExportName, ClientReference>
+const cacheClientModuleProxy_byModulePath = new Map<Pathname, ClientModuleProxy>()
+
+async function generateClientModuleProxy(modulePath: Pathname): Promise<ClientModuleProxy> {
+  let clientModuleProxy = cacheClientModuleProxy_byModulePath.get(modulePath)
+  if (clientModuleProxy) return clientModuleProxy
+
+  const transpiler = new Bun.Transpiler({
+    target: "browser",
+    allowBunRuntime: false,
+    minifyWhitespace: false,
+    inline: false,
+    autoImportJSX: true,
+    trimUnusedImports: false,
+    deadCodeElimination: false,
+    jsxOptimizationInline: false,
+    treeShaking: false,
+    define,
+    // exports,
+    // loader,
+    // logLevel,
+    // macro,
+    // tsconfig,
+  })
+
+  const theClientModuleProxy = ReactServerDOMServer.createClientModuleProxy(`file://${modulePath}`)
+
+  clientModuleProxy = {}
+  
+  const moduleSourceOriginal = await Bun.file(modulePath).text()
+  const ext = modulePath.split(".").pop() as JavaScriptLoader
+  const moduleSourceTransformed = await transpiler.transform(moduleSourceOriginal, ext)
+  const moduleIO = transpiler.scan(moduleSourceTransformed)
+
+  moduleIO.exports.forEach((exportName: ClientModuleExportName) => {
+    clientModuleProxy[exportName] = generateClientReference(exportName, modulePath)
+  })
+
+  cacheClientModuleProxy_byModulePath.set(modulePath, clientModuleProxy)
+
+  console.log({ modulePath, theClientModuleProxy, exports: clientModuleProxy })
+
+  return clientModuleProxy
 }

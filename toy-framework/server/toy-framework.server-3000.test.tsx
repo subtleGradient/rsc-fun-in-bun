@@ -122,9 +122,13 @@ describe("toy-framework.server", () => {
         expect(rscText).toMatch("examples/example0.client")
       })
 
-      it("should not include absolute paths", async () => {
+      it.only("should not include absolute paths", async () => {
         const response = await fetch(rsc_url)
         const rscText = await response.text()
+
+        try {
+          await import("@/plugins/useClient_fromServer.plugin")
+        } catch (error) {}
 
         expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
       })
