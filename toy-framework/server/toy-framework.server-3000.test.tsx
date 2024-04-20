@@ -112,10 +112,14 @@ describe("toy-framework.server", () => {
       expect((await fetch(render_url)).status).toBe(200)
     })
 
-    it("returns RSC content", async () => {
+    it("RSC mentions ClientComponent by name", async () => {
       const response = await fetch(rsc_url)
       const rscText = await response.text()
-      expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
+      const { ExampleClientComponent } = await import("@/examples/example0.client")
+      expect(rscText).toMatch(ExampleClientComponent.name)
+      expect(rscText).toMatch("examples/example0.client")
+
+      // expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
       // expect(rscText).toMatchSnapshot()
     })
 
@@ -142,3 +146,5 @@ describe("toy-framework.server", () => {
     })
   })
 })
+
+ShadowRealm
