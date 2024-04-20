@@ -3,9 +3,12 @@ import type { ChunkFilename, ChunkId, RequireFun } from "./types"
 const __DEV__ = process.env.NODE_ENV !== "production"
 
 const toy = {
-  require: "__NOT__webpack_require__",
-  modules: "__NOT__webpack_modules__",
-  chunkLoad: "__NOT__webpack_chunk_load__",
+  /** see {@link __toy_framework_require__} */
+  require: "__toy_framework_require__",
+  /** see {@link __toy_framework_modules__} */
+  modules: "__toy_framework_modules__",
+  /** see {@link __toy_framework_load__} */
+  chunkLoad: "__toy_framework_load__",
 } as const
 
 // verify that these globals are defined with the correct names
@@ -16,15 +19,15 @@ const toy = {
 }
 
 export const define: Record<string, string> = {
-  /** see {@link __NOT__webpack_modules__} */
+  /** see {@link __toy_framework_modules__} */
   __webpack_modules__: toy.modules,
   "window.__webpack_modules__": toy.modules,
 
-  /** see {@link __NOT__webpack_chunk_load__} */
+  /** see {@link __toy_framework_load__} */
   __webpack_chunk_load__: toy.chunkLoad,
   "window.__webpack_chunk_load__": toy.chunkLoad,
 
-  /** see {@link __NOT__webpack_require__} */
+  /** see {@link __toy_framework_require__} */
   __webpack_require__: toy.require,
   "window.__webpack_require__": toy.require,
 
@@ -64,19 +67,19 @@ function verify_define({ chunkLoad, modules, require }: typeof toy) {
 function clientEntryPoint_environment_dependencies() {
   console.log("🚀 polyfillsAndStuff")
 
-  __NOT__webpack_modules__ = {}
+  __toy_framework_modules__ = {}
 
-  __NOT__webpack_chunk_load__ = async chunkId => {
+  __toy_framework_load__ = async chunkId => {
     console.log("__NOT__webpack_chunk_load__", chunkId)
-    const chunkURL = __NOT__webpack_require__.c(chunkId)
+    const chunkURL = __toy_framework_require__.c(chunkId)
     if (!chunkURL) throw new Error(`😰 Chunk not found: ${chunkId} in manifest.`)
     return await import(chunkURL)
   }
 
   const requireFun: RequireFun = moduleId => {
     console.log("__NOT__webpack_require__", moduleId)
-    if (!(moduleId in __NOT__webpack_modules__)) throw new Error(`Module not found: ${moduleId}`)
-    return __NOT__webpack_modules__[moduleId]?.exports
+    if (!(moduleId in __toy_framework_modules__)) throw new Error(`Module not found: ${moduleId}`)
+    return __toy_framework_modules__[moduleId]?.exports
   }
 
   function getChunkFilename(chunkId: ChunkId): null | ChunkFilename {
@@ -91,7 +94,7 @@ function clientEntryPoint_environment_dependencies() {
     // return null
   }
 
-  __NOT__webpack_require__ = Object.assign(requireFun, {
+  __toy_framework_require__ = Object.assign(requireFun, {
     m: {},
     c: getChunkFilename,
     d: {},

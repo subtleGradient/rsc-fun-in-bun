@@ -18,9 +18,9 @@ declare global {
     }
   }
 
-  declare var __NOT__webpack_modules__: Record<ModuleID, ModuleIsh>
-  declare var __NOT__webpack_chunk_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<TODO>
-  declare var __NOT__webpack_require__: RequireFun & {
+  declare var __toy_framework_modules__: Record<ModuleID, ModuleIsh>
+  declare var __toy_framework_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<TODO>
+  declare var __toy_framework_require__: RequireFun & {
     m: TODO
     c: webpackGetChunkFilename
     d: TODO
@@ -32,27 +32,27 @@ declare global {
 }
 
 declare global {
-  /** @deprecated -- this will be replaced with {@link __NOT__webpack_modules__} in the bundlization, see {@link define} */
-  declare const __webpack_modules__: typeof __NOT__webpack_modules__
-  /** @deprecated -- this will be replaced with {@link __NOT__webpack_chunk_load__} in the bundlization, see {@link define} */
-  declare const __webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
-  /** @deprecated -- this will be replaced with {@link __NOT__webpack_require__} in the bundlization, see {@link define} */
-  declare const __webpack_require__: typeof __NOT__webpack_require__
+  /** @deprecated -- this will be replaced with {@link __toy_framework_modules__} in the bundlization, see {@link define} */
+  declare const __webpack_modules__: typeof __toy_framework_modules__
+  /** @deprecated -- this will be replaced with {@link __toy_framework_load__} in the bundlization, see {@link define} */
+  declare const __webpack_chunk_load__: typeof __toy_framework_load__
+  /** @deprecated -- this will be replaced with {@link __toy_framework_require__} in the bundlization, see {@link define} */
+  declare const __webpack_require__: typeof __toy_framework_require__
 
   interface Window {
-    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_modules__}, it's cleaner */
-    __NOT__webpack_modules__: typeof __NOT__webpack_modules__
-    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_chunk_load__}, it's cleaner */
-    __NOT__webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
-    /** @deprecated -- drop the `window.`, just {@link __NOT__webpack_require__}, it's cleaner */
-    __NOT__webpack_require__: typeof __NOT__webpack_require__
+    /** @deprecated -- drop the `window.`, just {@link __toy_framework_modules__}, it's cleaner */
+    __NOT__webpack_modules__: typeof __toy_framework_modules__
+    /** @deprecated -- drop the `window.`, just {@link __toy_framework_load__}, it's cleaner */
+    __NOT__webpack_chunk_load__: typeof __toy_framework_load__
+    /** @deprecated -- drop the `window.`, just {@link __toy_framework_require__}, it's cleaner */
+    __NOT__webpack_require__: typeof __toy_framework_require__
 
-    /** @deprecated -- this will be replaced with {@link __NOT__webpack_modules__} in the bundlization, see {@link define} */
-    __webpack_modules__: typeof __NOT__webpack_modules__
-    /** @deprecated -- this will be replaced with {@link __NOT__webpack_chunk_load__} in the bundlization, see {@link define} */
-    __webpack_chunk_load__: typeof __NOT__webpack_chunk_load__
-    /** @deprecated -- this will be replaced with {@link __NOT__webpack_require__} in the bundlization, see {@link define} */
-    __webpack_require__: typeof __NOT__webpack_require__
+    /** @deprecated -- this will be replaced with {@link __toy_framework_modules__} in the bundlization, see {@link define} */
+    __webpack_modules__: typeof __toy_framework_modules__
+    /** @deprecated -- this will be replaced with {@link __toy_framework_load__} in the bundlization, see {@link define} */
+    __webpack_chunk_load__: typeof __toy_framework_load__
+    /** @deprecated -- this will be replaced with {@link __toy_framework_require__} in the bundlization, see {@link define} */
+    __webpack_require__: typeof __toy_framework_require__
   }
 }
 
