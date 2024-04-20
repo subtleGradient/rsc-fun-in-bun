@@ -1,3 +1,4 @@
+export const css = String.raw
 export const ts = js
 export const tsx = js
 export const jsx = js
