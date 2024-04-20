@@ -25,6 +25,15 @@ exports[`toy-framework.server toy-framework.server root / route returns a respon
 <link rel="modulepreload" href="/!/externals/react:jsx-dev-runtime.mjs"/>
 <link rel="modulepreload" href="/!/externals/react:jsx-runtime.mjs"/>
 <link rel="modulepreload" href="/!/clientEntryPoint/clientEntryPoint.mjs"/>
+<style>
+          /* dark mode */
+          @media (prefers-color-scheme: dark) {
+            body {
+              background-color: #333;
+              color: #ddd;
+            }
+          }
+        </style>
 </head>
 <body>
 <h1>Hello from <!-- -->/HTMLPageRootLayout.tsx</h1>
