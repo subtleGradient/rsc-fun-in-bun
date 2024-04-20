@@ -1,35 +1,38 @@
 import { tsx } from "../../util/js"
-import type { ChunkFilename, ChunkId, RequireFun } from "./types"
+import type { ChunkFilename, ChunkId, RequireFun, ToyFrameworkNames } from "./types"
 const __DEV__ = process.env.NODE_ENV !== "production"
 
-const toy = {
-  /** see {@link __toy_framework_require__} */
+const names: ToyFrameworkNames = {
+  /** see {@link __toy_framework__.displayName} */
+  framework: "__toy_framework__",
+  /** see {@link __toy_framework_require__.displayName} */
   require: "__toy_framework_require__",
-  /** see {@link __toy_framework_modules__} */
+  /** see {@link __toy_framework_modules__.displayName} */
   modules: "__toy_framework_modules__",
-  /** see {@link __toy_framework_load__} */
+  /** see {@link __toy_framework_load__.displayName} */
   chunkLoad: "__toy_framework_load__",
-} as const
+}
 
 // verify that these globals are defined with the correct names
 {
-  global[toy.require]
-  global[toy.modules]
-  global[toy.chunkLoad]
+  global[names.framework]
+  global[names.require]
+  global[names.modules]
+  global[names.chunkLoad]
 }
 
 export const define: Record<string, string> = {
   /** see {@link __toy_framework_modules__} */
-  __webpack_modules__: toy.modules,
-  "window.__webpack_modules__": toy.modules,
+  __webpack_modules__: names.modules,
+  "window.__webpack_modules__": names.modules,
 
   /** see {@link __toy_framework_load__} */
-  __webpack_chunk_load__: toy.chunkLoad,
-  "window.__webpack_chunk_load__": toy.chunkLoad,
+  __webpack_chunk_load__: names.chunkLoad,
+  "window.__webpack_chunk_load__": names.chunkLoad,
 
   /** see {@link __toy_framework_require__} */
-  __webpack_require__: toy.require,
-  "window.__webpack_require__": toy.require,
+  __webpack_require__: names.require,
+  "window.__webpack_require__": names.require,
 
   "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
   __DEV__: __DEV__ ? "true" : "false",
@@ -43,12 +46,12 @@ export const polyfillsAndStuff = {
   type: "text/javascript",
   text: async () =>
     await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(
-      tsx`{${!__DEV__ ? "" : tsx`(${verify_define})(${toy})`}}{(${clientEntryPoint_environment_dependencies})()}`,
+      tsx`{${!__DEV__ ? "" : tsx`(${verify_define})(${names})`}}{(${clientEntryPoint_environment_dependencies})()}`,
     ),
 }
 
 /** verify that the bundlizer correctly replaced strings */
-function verify_define({ chunkLoad, modules, require }: typeof toy) {
+function verify_define({ chunkLoad, modules, require }: ToyFrameworkNames) {
   console.assert(
     !(() => process.env.NODE_ENV).toString().match(/process.env.NODE_ENV/),
     "🚨 Something is broken with bundlization",
@@ -70,14 +73,14 @@ function clientEntryPoint_environment_dependencies() {
   __toy_framework_modules__ = {}
 
   __toy_framework_load__ = async chunkId => {
-    console.log("__NOT__webpack_chunk_load__", chunkId)
+    if (__DEV__) console.log("loading chunk by id", chunkId)
     const chunkURL = __toy_framework_require__.c(chunkId)
     if (!chunkURL) throw new Error(`😰 Chunk not found: ${chunkId} in manifest.`)
     return await import(chunkURL)
   }
 
   const requireFun: RequireFun = moduleId => {
-    console.log("__NOT__webpack_require__", moduleId)
+    if (__DEV__) console.log("requiring module by id", moduleId)
     if (!(moduleId in __toy_framework_modules__)) throw new Error(`Module not found: ${moduleId}`)
     return __toy_framework_modules__[moduleId]?.exports
   }

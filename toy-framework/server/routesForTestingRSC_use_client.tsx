@@ -155,12 +155,6 @@ function RSCDemo() {
 
     console.log("ReactClientManifest", rcm)
 
-    // FIXME: this is a hack to get the client to load the module
-    // window.__NOT__webpack_modules__["/examples/example0.client.tsx"] = {
-    //   // @ts-expect-error - this is a hack to get the client to load the module
-    //   exports: await import("/!/use-client/example0.client.mjs"),
-    // }
-
     const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
     const root = ReactDOMClient.createRoot(rscRootElement)
     root.render(ui)

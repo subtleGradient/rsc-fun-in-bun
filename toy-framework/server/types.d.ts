@@ -4,8 +4,20 @@ import { type Server } from "bun"
 /** Track stuff that is not done yet */
 export type TODO = any
 
+type RequiredNonNullable<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>
+}
+
+export type ToyFrameworkNames = RequiredNonNullable<{
+  framework: typeof __toy_framework__.displayName
+  require: typeof __toy_framework_require__.displayName
+  modules: typeof __toy_framework_modules__.displayName
+  chunkLoad: typeof __toy_framework_load__.displayName
+}>
+
 declare global {
   declare var __toy_framework__: {
+    displayName?: "__toy_framework__"
     manifest: {
       promise: Promise<IReactClientManifest>
       resolve?: (manifest: IReactClientManifest) => void
@@ -18,17 +30,21 @@ declare global {
     }
   }
 
-  declare var __toy_framework_modules__: Record<ModuleID, ModuleIsh>
-  declare var __toy_framework_load__: (chunkId: ChunkId & ReactClientManifestRecord["chunks"][0]) => Promise<TODO>
-  declare var __toy_framework_require__: RequireFun & {
-    m: TODO
-    c: webpackGetChunkFilename
-    d: TODO
-    n: TODO
-    o: TODO
-    p: TODO
-    s: TODO
-  }
+  declare var __toy_framework_modules__: { displayName?: "__toy_framework_modules__" } & Record<ModuleID, ModuleIsh>
+
+  declare var __toy_framework_load__: { displayName?: "__toy_framework_load__" } & ((
+    chunkId: ChunkId & ReactClientManifestRecord["chunks"][0],
+  ) => Promise<TODO>)
+
+  declare var __toy_framework_require__: { displayName?: "__toy_framework_require__" } & RequireFun & {
+      m: TODO
+      c: getChunkFilename
+      d: TODO
+      n: TODO
+      o: TODO
+      p: TODO
+      s: TODO
+    }
 }
 
 declare global {
@@ -41,11 +57,11 @@ declare global {
 
   interface Window {
     /** @deprecated -- drop the `window.`, just {@link __toy_framework_modules__}, it's cleaner */
-    __NOT__webpack_modules__: typeof __toy_framework_modules__
+    __toy_framework_modules__: typeof __toy_framework_modules__
     /** @deprecated -- drop the `window.`, just {@link __toy_framework_load__}, it's cleaner */
-    __NOT__webpack_chunk_load__: typeof __toy_framework_load__
+    __toy_framework_load__: typeof __toy_framework_load__
     /** @deprecated -- drop the `window.`, just {@link __toy_framework_require__}, it's cleaner */
-    __NOT__webpack_require__: typeof __toy_framework_require__
+    __toy_framework_require__: typeof __toy_framework_require__
 
     /** @deprecated -- this will be replaced with {@link __toy_framework_modules__} in the bundlization, see {@link define} */
     __webpack_modules__: typeof __toy_framework_modules__
@@ -57,7 +73,7 @@ declare global {
 }
 
 export type RequireFun = (id: ModuleID) => ModuleIsh["exports"]
-type webpackGetChunkFilename = (chunkId: ChunkId) => null | ChunkFilename
+type getChunkFilename = (chunkId: ChunkId) => null | ChunkFilename
 
 type ModuleIsh = { exports: TODO }
 
