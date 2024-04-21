@@ -1,8 +1,8 @@
 import { resolve } from "bun"
-import { js } from "../../util/js"
+import type { ImportMap, Pathname, RouteMap } from "../types"
 import { noCacheHeaders } from "./headers"
 import { define } from "./polyfillsAndStuff"
-import type { ImportMap, Pathname, RouteMap } from "./types"
+import { js } from "./string-template"
 
 export const externalsBundle = {
   publicPath: "/!/externals/" as Pathname,

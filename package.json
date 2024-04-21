@@ -14,7 +14,9 @@
   },
   "imports": {
     "#toy-framework/*": "./toy-framework/*",
-    "#plugins/*": "./plugins/*"
+    "#plugins/*": "./plugins/*",
+    "#util/*": "./*",
+    "#/*": "./*"
   },
   "devDependencies": {
     "@types/bun": "latest",

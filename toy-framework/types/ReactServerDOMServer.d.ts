@@ -1,25 +1,25 @@
 // so you can quick jump to the code
-if (!1!) import("../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js")
+if (!1!) import("../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js")
 declare module "react-server-dom-webpack/server.browser" {
   export * from "react-server-dom-webpack/server.edge"
 }
 
 // so you can quick jump to the code
-if (!1!) import("../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.edge.development.js")
+if (!1!) import("../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.edge.development.js")
 declare module "react-server-dom-webpack/server.edge" {
   export * from "react-server-dom-webpack/server"
   export const renderToPipeableStream: never
 }
 
 // so you can quick jump to the code
-if (!1!) import("../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.development.js")
+if (!1!) import("../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.development.js")
 declare module "react-server-dom-webpack/server.node" {
   export * from "react-server-dom-webpack/server"
   export const renderToPipeableStream: never
 }
 
 declare module "react-server-dom-webpack/server" {
-  import type { ReactReference$$id } from "#plugins/ReactClientManifest.plugin.js"
+  import type { ReactReference$$id } from "#toy-framework/plugins/ReactClientManifest.plugin.js"
   import type { Readable } from "stream"
 
   /**

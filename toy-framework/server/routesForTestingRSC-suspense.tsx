@@ -1,9 +1,9 @@
-import { js } from "@/util/js"
+import { js } from "#toy-framework/server/string-template.ts"
 import { sleep } from "bun"
 import { Suspense, type ReactElement } from "react"
+import type { RouteMap } from "../types"
 import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
-import type { RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
 

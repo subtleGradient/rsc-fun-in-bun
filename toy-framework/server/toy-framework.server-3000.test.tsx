@@ -10,7 +10,7 @@ try {
 
   // BUG: Bun@1.1.4 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
   // So, I'm using a dynamic import below to avoid triggering the react-server error
-  await import("@/rsc-fun-in-bun")
+  await import("../../rsc-fun-in-bun")
 } catch (error) {}
 
 if (!1!) {
@@ -127,7 +127,7 @@ describe("toy-framework.server", () => {
         const rscText = await response.text()
 
         try {
-          await import("#plugins/useClient_fromServer.plugin.ts")
+          await import("#toy-framework/plugins/useClient_fromServer.plugin.ts")
         } catch (error) {}
 
         expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths

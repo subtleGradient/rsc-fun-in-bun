@@ -1,4 +1,4 @@
-import type { Pathname } from "../server/types"
+import type { Pathname } from "../types"
 
 export function LinkModulePreloads({ pathnames }: { pathnames: Pathname[] }) {
   return (

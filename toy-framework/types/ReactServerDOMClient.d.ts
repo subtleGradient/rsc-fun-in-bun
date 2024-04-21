@@ -1,5 +1,5 @@
 // so you can quick jump to the code
-if (!1!) import("../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
+if (!1!) import("../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
 
 declare module "react-server-dom-webpack/client" {
   import type { Thenable } from "react"

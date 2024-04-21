@@ -1,5 +1,5 @@
-import { tsx } from "../../util/js"
-import type { ChunkFilename, ChunkId, ChunkMap, IReactClientManifest, PWRV, RequireFun, ToyFrameworkNames } from "./types"
+import type { ChunkFilename, ChunkId, ChunkMap, IReactClientManifest, PWRV, RequireFun, ToyFrameworkNames } from "../types"
+import { tsx } from "./string-template"
 const __DEV__ = process.env.NODE_ENV !== "production"
 
 const names: ToyFrameworkNames = {

@@ -1,8 +1,8 @@
 import { resolve } from "bun"
+import type { ImportMap, Pathname, RouteMap } from "../types"
 import { externalsBundle } from "./externalsBundle"
-import { define } from "./polyfillsAndStuff"
-import type { ImportMap, Pathname, RouteMap } from "./types"
 import { noCacheHeaders } from "./headers"
+import { define } from "./polyfillsAndStuff"
 
 /**
  * A virtual folder that exposes the virtual client entry point files to the server.

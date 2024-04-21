@@ -21,8 +21,9 @@
     "types": ["react", "react-dom", "react/canary", "react-dom/canary", "react/experimental", "react-dom/experimental"],
 
     "paths": {
-      "@/*": ["./*"],
-      "@pages/*": ["./pages/*"],
+      "@/test-helpers/*": ["./test-helpers/*"],
+      "@/util/*": ["./util/*"],
+      "@/examples/*": ["./examples/*"]
     }
   }
 }

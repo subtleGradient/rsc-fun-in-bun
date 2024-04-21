@@ -1,14 +1,14 @@
-import { ReactClientManifest } from "#plugins/ReactClientManifest.ts"
-import { useClient_fromServer_pluginConfig } from "#plugins/useClient_fromServer.plugin.ts"
-import { js } from "@/util/js"
+import { ReactClientManifest } from "#toy-framework/plugins/ReactClientManifest.ts"
+import { useClient_fromServer_pluginConfig } from "#toy-framework/plugins/useClient_fromServer.plugin.ts"
+import { js } from "#toy-framework/server/string-template.ts"
 import { type ReactElement } from "react"
+import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "../types"
 import { externalsBundle } from "./externalsBundle"
 import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
 import { define } from "./polyfillsAndStuff"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
 import { routes } from "./toy-framework.server"
-import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
 

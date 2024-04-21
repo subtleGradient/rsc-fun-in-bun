@@ -3,12 +3,12 @@
 // so that the existing tests won't fail.
 // import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
 
+import type { Pathname, RouteMap } from "../types"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
 import { noCacheHeaders } from "./headers"
 import { HTMLPageStream } from "./HTMLPageStream"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
-import type { Pathname, RouteMap } from "./types"
 
 export const routes: RouteMap = {
   "/favicon.ico": async () => new Response("i dunno bro 🤷‍♂️", { status: 404 }),
