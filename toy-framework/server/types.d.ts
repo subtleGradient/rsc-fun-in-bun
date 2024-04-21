@@ -1,5 +1,6 @@
 import type { define } from "@/toy-framework/server/polyfillsAndStuff"
 import { type Server } from "bun"
+import type { Thenable } from "react"
 
 /** Track stuff that is not done yet */
 export type TODO = any
@@ -15,19 +16,13 @@ export type ToyFrameworkNames = RequiredNonNullable<{
   chunkLoad: typeof __toy_framework_load__.displayName
 }>
 
+export type PWRV<T> = ReturnType<typeof Promise.withResolvers<T>> & Thenable<T>
+
 declare global {
   declare var __toy_framework__: {
     displayName?: "__toy_framework__"
-    manifest: {
-      promise: Promise<IReactClientManifest>
-      resolve?: (manifest: IReactClientManifest) => void
-      reject?: (error: Error) => void
-    }
-    chunkMap: {
-      promise: Promise<ChunkMap>
-      resolve?: (chunkMap: ChunkMap) => void
-      reject?: (error: Error) => void
-    }
+    manifest: PWRV<IReactClientManifest>
+    chunkMap: PWRV<ChunkMap>
   }
 
   declare var __toy_framework_modules__: { displayName?: "__toy_framework_modules__" } & Record<ModuleID, ModuleIsh>

@@ -1,5 +1,5 @@
 import { tsx } from "../../util/js"
-import type { ChunkFilename, ChunkId, RequireFun, ToyFrameworkNames } from "./types"
+import type { ChunkFilename, ChunkId, ChunkMap, IReactClientManifest, PWRV, RequireFun, ToyFrameworkNames } from "./types"
 const __DEV__ = process.env.NODE_ENV !== "production"
 
 const names: ToyFrameworkNames = {
@@ -68,12 +68,49 @@ function verify_define({ chunkLoad, modules, require }: ToyFrameworkNames) {
 }
 
 function clientEntryPoint_environment_dependencies() {
+  // TODO: move to separate file
+  {
+    const Promise_withResolvers = <T>() => {
+      let resolve!: (value: T | PromiseLike<T>) => void
+      let reject!: (reason?: unknown) => void
+      const promise = new Promise<T>((resolver, rejector) => ([resolve, reject] = [resolver, rejector]))
+      return { promise, resolve, reject } as const
+    }
+
+    if (!("withResolvers" in Promise)) {
+      Object.defineProperty(Promise, "withResolvers", { value: Promise_withResolvers })
+    }
+  }
+
+  // TODO: move to separate file
+  function makePWRV<T>(): PWRV<T> {
+    const resolvers = Promise.withResolvers<T>()
+    const pwrv: PWRV<T> = Object.assign(resolvers.promise, resolvers)
+    Object.assign<PWRV<T>, Partial<PWRV<T>>>(pwrv, { status: "pending" as const })
+    pwrv.then(
+      value => Object.assign<PWRV<T>, Partial<PWRV<T>>>(pwrv, { status: "fulfilled" as const, value }),
+      reason => Object.assign<PWRV<T>, Partial<PWRV<T>>>(pwrv, { status: "rejected" as const, reason }),
+    )
+    if (__DEV__)
+      pwrv.then(
+        value => console.log("🚀 PWRV resolved", pwrv),
+        reason => console.error("🚨 PWRV rejected", pwrv),
+      )
+    return pwrv
+  }
+
   console.log("🚀 polyfillsAndStuff")
+
+  __toy_framework__ = {
+    manifest: makePWRV<IReactClientManifest>(),
+    chunkMap: makePWRV<ChunkMap>(),
+  }
 
   __toy_framework_modules__ = {}
 
   __toy_framework_load__ = async chunkId => {
     if (__DEV__) console.log("loading chunk by id", chunkId)
+    await __toy_framework__.manifest
     const chunkURL = __toy_framework_require__.c(chunkId)
     if (!chunkURL) throw new Error(`😰 Chunk not found: ${chunkId} in manifest.`)
     return await import(chunkURL)
@@ -86,15 +123,17 @@ function clientEntryPoint_environment_dependencies() {
   }
 
   function getChunkFilename(chunkId: ChunkId): null | ChunkFilename {
-    throw new Error("not implemented")
-    // const $$ids = Object.keys(__toy_framework__ReactClientManifest) as (keyof IReactClientManifest)[]
-    // for (const $$id of $$ids) {
-    //   const { chunks } = __toy_framework__ReactClientManifest[$$id]
-    //   const chunkIndex = (chunks as ChunkId[]).indexOf(chunkId)
-    //   const chunkFilename = chunks[chunkIndex + 1] as ChunkFilename
-    //   if (chunkFilename) return chunkFilename
-    // }
-    // return null
+    // throw new Error("not implemented")
+    console.debug("manifest", __toy_framework__.manifest)
+    if (__toy_framework__.manifest.status !== "fulfilled") throw new Error("getChunkFilename; Manifest not loaded")
+    const $$ids = Object.keys(__toy_framework__.manifest.value!) as (keyof IReactClientManifest)[]
+    for (const $$id of $$ids) {
+      const { chunks } = __toy_framework__.manifest.value![$$id]
+      const chunkIndex = (chunks as ChunkId[]).indexOf(chunkId)
+      const chunkFilename = chunks[chunkIndex + 1] as ChunkFilename
+      if (chunkFilename) return chunkFilename
+    }
+    return null
   }
 
   __toy_framework_require__ = Object.assign(requireFun, {

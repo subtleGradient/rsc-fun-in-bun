@@ -8,7 +8,7 @@ import { HTMLPageStream } from "./HTMLPageStream"
 import { define } from "./polyfillsAndStuff"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
 import { routes } from "./toy-framework.server"
-import type { ImportMap, Pathname, RouteMap } from "./types"
+import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "./types"
 
 const RSC_TYPE = "text/x-component"
 
@@ -135,7 +135,7 @@ function RSCDemo() {
 
     const { ui, ReactClientManifest: rcm } = await ReactServerDOMClient.createFromFetch<{
       ui: ReactElement
-      ReactClientManifest: typeof ReactClientManifest
+      ReactClientManifest: IReactClientManifest
     }>(promisedResponse, {
       async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
         // console.log("calling server", id, args)
@@ -154,10 +154,16 @@ function RSCDemo() {
     })
 
     console.log("ReactClientManifest", rcm)
+    __toy_framework__.manifest.resolve!(rcm)
 
-    const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
-    const root = ReactDOMClient.createRoot(rscRootElement)
-    root.render(ui)
+    __toy_framework__.manifest.promise.then(() => {
+      // console.assert(__toy_framework__.manifest.status === "fulfilled")
+      // if (!(__toy_framework__.manifest.status === "fulfilled")) throw new Error("manifest not fulfilled?!")
+      console.log("manifest fulfilled", __toy_framework__.manifest)
+      const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
+      const root = ReactDOMClient.createRoot(rscRootElement)
+      root.render(ui)
+    })
   }
   return (
     <>
