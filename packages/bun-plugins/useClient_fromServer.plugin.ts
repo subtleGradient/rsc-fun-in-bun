@@ -1,8 +1,8 @@
 /// <reference types="bun" />
 
 // import { define } from "#toy-framework/server/polyfillsAndStuff"
-import { define } from "#toy-framework/server/polyfillsAndStuff.ts"
-import type { ClientModuleExportName, Pathname, ReactClientManifestRecord } from "#toy-framework/types/index.d.ts"
+import { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
+import type { ClientModuleExportName, Pathname, ReactClientManifestRecord } from "@rsc-fun-in-bun/toy-framework/types"
 import { $, type BunPlugin, type JavaScriptLoader } from "bun"
 import ReactServerDOMServer from "react-server-dom-webpack/server.edge"
 import { ReactClientManifest } from "./ReactClientManifest"

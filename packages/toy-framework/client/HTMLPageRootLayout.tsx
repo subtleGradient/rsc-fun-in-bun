@@ -1,7 +1,7 @@
-import { css } from "#toy-framework/server/string-template.ts"
-import React from "react"
-import type { Pathname, RouteMap } from "../types"
-import { LinkModulePreloads } from "./LinkModulePreloads"
+import React from "react";
+import { css } from "../server/string-template.js";
+import type { Pathname, RouteMap } from "../types";
+import { LinkModulePreloads } from "./LinkModulePreloads";
 
 export function HTMLPageRootLayout(props: { routes?: RouteMap; children?: React.ReactNode }) {
   return (

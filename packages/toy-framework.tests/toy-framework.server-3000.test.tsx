@@ -1,6 +1,7 @@
-import { browser } from "@/test-helpers/puppers.ts"
+/// <reference lib="dom" />
 import { describe, expect, it } from "bun:test"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
+import { browser } from "./test-helpers/puppers.ts"
 
 const ROOT_DIRNAME = __dirname.split("/").slice(0, -2).join("/")
 const RSC_TYPE = "text/x-component"
@@ -10,7 +11,7 @@ try {
 
   // BUG: Bun@1.1.4 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
   // So, I'm using a dynamic import below to avoid triggering the react-server error
-  await import("../../rsc-fun-in-bun")
+  await import("./test-server.ts")
 } catch (error) {}
 
 if (!1!) {
@@ -127,7 +128,7 @@ describe("toy-framework.server", () => {
         const rscText = await response.text()
 
         try {
-          await import("#toy-framework/plugins/useClient_fromServer.plugin.ts")
+          // await import("#toy-framework/plugins/useClient_fromServer.plugin.ts")
         } catch (error) {}
 
         expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
@@ -152,7 +153,7 @@ describe("toy-framework.server", () => {
       console.timeEnd("page.waitForSelector #ClientComponent")
 
       console.time("page.$eval")
-      expect(await page.$eval("#ClientComponent", el => el.textContent)).toBe("Hello from ClientComponent!")
+      expect(await page.$eval("#ClientComponent", (el) => el.textContent)).toBe("Hello from ClientComponent!")
       console.timeEnd("page.$eval")
     })
   })

@@ -1,0 +1,42 @@
+{
+  "name": "@rsc-fun-in-bun/toy-framework.tests",
+  "module": "test-server.ts",
+  "type": "module",
+  "scripts": {
+    "test:open": "PUPPETEER_HEADLESS=false bun test",
+    "test:headless": "PUPPETEER_HEADLESS=true bun test",
+    "dev:test": "bun test:headless --watch --update-snapshots",
+    "dev": "bun --conditions=react-server --inspect --watch test-server.ts"
+  },
+  "imports": {
+    "#toy-framework/bunfig-preload": {
+      "react-server": "@rsc-fun-in-bun/toy-framework/bunfig-preload.react-server.ts",
+      "default": "@rsc-fun-in-bun/toy-framework/bunfig-preload.ts"
+    },
+    "#package": "./package.json",
+    "#toy-framework/*": "./toy-framework/*",
+    "#plugins/*": "./plugins/*",
+    "#util/*": "./*",
+    "#/*": "./*"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/react": "^18.2.56",
+    "@types/react-dom": "^18.2.19",
+    "@types/use-sync-external-store": "^0.0.6",
+    "bun-plugin-server-components": "^0.0.1-alpha.0",
+    "prettier": "latest",
+    "puppeteer-core": "^22.6.1",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "peechy": "^0.4.34",
+    "react": "^19.0.0-canary-33a32441e9-20240418",
+    "react-dom": "^19.0.0-canary-33a32441e9-20240418",
+    "react-server-dom-webpack": "^19.0.0-canary-33a32441e9-20240418",
+    "use-sync-external-store": "^1.4.0-canary-33a32441e9-20240418"
+  },
+  "dependencies that need hacks": {
+    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405"
+  }
+}

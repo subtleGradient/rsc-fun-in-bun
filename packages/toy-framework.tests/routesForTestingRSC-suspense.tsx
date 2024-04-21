@@ -1,9 +1,9 @@
-import { js } from "#toy-framework/server/string-template.ts"
+import { noCacheHeaders } from "@rsc-fun-in-bun/toy-framework/server/headers"
+import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
+import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"
+import type { RouteMap } from "@rsc-fun-in-bun/toy-framework/types"
 import { sleep } from "bun"
 import { Suspense, type ReactElement } from "react"
-import type { RouteMap } from "../types"
-import { noCacheHeaders } from "./headers"
-import { HTMLPageStream } from "./HTMLPageStream"
 
 const RSC_TYPE = "text/x-component"
 

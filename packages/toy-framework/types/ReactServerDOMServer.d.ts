@@ -1,3 +1,5 @@
+import type { ReactReference$$id } from "./index.js"
+
 // so you can quick jump to the code
 if (!1!) import("../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js")
 declare module "react-server-dom-webpack/server.browser" {
@@ -19,7 +21,6 @@ declare module "react-server-dom-webpack/server.node" {
 }
 
 declare module "react-server-dom-webpack/server" {
-  import type { ReactReference$$id } from "#toy-framework/plugins/ReactClientManifest.plugin.js"
   import type { Readable } from "stream"
 
   /**
