@@ -3,16 +3,20 @@
   "module": "rsc-fun-in-bun.ts",
   "type": "module",
   "scripts": {
-    "bunp": "bun add $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => `${name}@canary`).join(` `))'); bun update",
+    "bunp": "bun add $(bun --conditions=react-server --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => `${name}@canary`).join(` `))'); bun update",
     "predev": "bun bunp",
-    "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
     "test:open": "PUPPETEER_HEADLESS=false bun test",
     "test:headless": "PUPPETEER_HEADLESS=true bun test",
     "dev:test": "bun test:headless --watch --update-snapshots",
     "dev:tsc": "bun tsc --noEmit --watch",
-    "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
+    "dev": "bun --conditions=react-server --inspect --watch rsc-fun-in-bun.ts"
   },
   "imports": {
+    "#toy-framework/bunfig-preload": {
+      "react-server": "./toy-framework/bunfig-preload.react-server.ts",
+      "default": "./toy-framework/bunfig-preload.ts"
+    },
+    "#package": "./package.json",
     "#toy-framework/*": "./toy-framework/*",
     "#plugins/*": "./plugins/*",
     "#util/*": "./*",
@@ -34,5 +38,8 @@
     "react-dom": "^19.0.0-canary-33a32441e9-20240418",
     "react-server-dom-webpack": "^19.0.0-canary-33a32441e9-20240418",
     "use-sync-external-store": "^1.4.0-canary-33a32441e9-20240418"
+  },
+  "dependencies that need hacks": {
+    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405"
   }
 }

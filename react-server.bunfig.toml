@@ -1,4 +1,0 @@
-preload = [
-  "#toy-framework/server/verify-react-server.ts",
-  "#toy-framework/plugins/useClient_fromServer.plugin.ts",
-]
