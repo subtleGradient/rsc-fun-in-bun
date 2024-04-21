@@ -2,7 +2,7 @@ import { routesForTestingRSC_suspense } from "#toy-framework/server/routesForTes
 import { routesForTestingRSC_use_client } from "#toy-framework/server/routesForTestingRSC_use_client.tsx"
 
 if (import.meta.main) {
-  await import("#toy-framework/server/verify-react-server.ts")
+  await import("#toy-framework/server/verify.react-server.ts")
 
   const { routes, fetch } = await import("#toy-framework/server/toy-framework.server.tsx")
 
