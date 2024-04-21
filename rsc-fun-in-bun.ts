@@ -1,10 +1,10 @@
-import { routesForTestingRSC_suspense } from "./toy-framework/server/routesForTestingRSC-suspense.tsx"
-import { routesForTestingRSC_use_client } from "./toy-framework/server/routesForTestingRSC_use_client.tsx"
+import { routesForTestingRSC_suspense } from "#toy-framework/server/routesForTestingRSC-suspense.tsx"
+import { routesForTestingRSC_use_client } from "#toy-framework/server/routesForTestingRSC_use_client.tsx"
 
 if (import.meta.main) {
-  await import("./toy-framework/server/verify-react-server.ts")
+  await import("#toy-framework/server/verify-react-server.ts")
 
-  const { routes, fetch } = await import("./toy-framework/server/toy-framework.server.tsx")
+  const { routes, fetch } = await import("#toy-framework/server/toy-framework.server.tsx")
 
   Object.assign(routes, {
     // TODO: move this to a test file somewhere
@@ -22,4 +22,9 @@ if (import.meta.main) {
       .join("\n"),
   )
   console.log()
+} else {
+  console.log(
+    `This module ${import.meta.url} is not meant to be run as a script. Try running the main module instead. See package.json`,
+    import.meta.main,
+  )
 }

@@ -6,10 +6,15 @@
     "bunp": "bun add $(bun --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => `${name}@canary`).join(` `))'); bun update",
     "predev": "bun bunp",
     "react-server": "bun --config=react-server.bunfig.toml --conditions=react-server",
-    "test:ui": "PUPPETEER_HEADLESS=true bun test",
-    "test:ui:open": "PUPPETEER_HEADLESS=false bun test",
-    "test:dev": "PUPPETEER_HEADLESS=true bun test --watch --update-snapshots",
+    "test:open": "PUPPETEER_HEADLESS=false bun test",
+    "test:headless": "PUPPETEER_HEADLESS=true bun test",
+    "dev:test": "bun test:headless --watch --update-snapshots",
+    "dev:tsc": "bun tsc --noEmit --watch",
     "dev": "bun run react-server --inspect --watch rsc-fun-in-bun.ts"
+  },
+  "imports": {
+    "#toy-framework/*": "./toy-framework/*",
+    "#plugins/*": "./plugins/*"
   },
   "devDependencies": {
     "@types/bun": "latest",
@@ -19,7 +24,7 @@
     "bun-plugin-server-components": "^0.0.1-alpha.0",
     "prettier": "latest",
     "puppeteer-core": "^22.6.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "peechy": "^0.4.34",

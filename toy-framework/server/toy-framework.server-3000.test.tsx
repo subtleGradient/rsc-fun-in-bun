@@ -127,7 +127,7 @@ describe("toy-framework.server", () => {
         const rscText = await response.text()
 
         try {
-          await import("@/plugins/useClient_fromServer.plugin")
+          await import("#plugins/useClient_fromServer.plugin.ts")
         } catch (error) {}
 
         expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths

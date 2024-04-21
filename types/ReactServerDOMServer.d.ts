@@ -19,7 +19,7 @@ declare module "react-server-dom-webpack/server.node" {
 }
 
 declare module "react-server-dom-webpack/server" {
-  import type { ReactReference$$id } from "@/plugins/ReactClientManifest.plugin.js"
+  import type { ReactReference$$id } from "#plugins/ReactClientManifest.plugin.js"
   import type { Readable } from "stream"
 
   /**
