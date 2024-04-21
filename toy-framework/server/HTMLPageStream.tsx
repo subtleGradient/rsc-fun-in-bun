@@ -1,5 +1,5 @@
-import { arrayToStream } from "@/util/arrayToStream"
-import { concatStreams } from "@/util/compoReadableStream"
+import { arrayToStream } from "#util/util/arrayToStream.ts"
+import { concatStreams } from "#util/util/concatStreams.ts"
 import React from "react"
 import ReactDOMServer from "react-dom/server"
 import { HTMLPageRootLayout } from "../client/HTMLPageRootLayout"
