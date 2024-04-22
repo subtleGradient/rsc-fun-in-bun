@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import { describe, expect, it } from "bun:test"
+import { beforeEach, describe, expect, it, mock } from "bun:test"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths.tsx"
 import { browser } from "./test-helpers/puppers.ts"
 
@@ -126,34 +126,57 @@ describe("toy-framework.server", () => {
         const response = await fetch(rsc_url)
         const rscText = await response.text()
 
-        try {
-          // await import("#toy-framework/plugins/useClient_fromServer.plugin.ts")
-        } catch (error) {}
+        // handy link to the plugin file
+        if (!1!) await import("@rsc-fun-in-bun/bun-plugins/useClient_fromServer.plugin.ts")
 
         expect(rscText).not.toMatch(ROOT_DIRNAME) // no absolute paths
       })
     })
 
-    it.todo("renders ClientComponent", async () => {
-      console.time("browser.newPage")
-      await using page = await browser.newPage()
-      console.timeEnd("browser.newPage")
+    describe("rendered page", () => {
+      const onError = mock((error: unknown) => console.error("PAGE error:", error))
+      beforeEach(() => onError.mockClear())
+      // afterEach(() => onError.mockClear())
 
-      console.time("page.goto")
-      await page.goto(rsc_url)
-      console.timeEnd("page.goto")
+      it("loads with no errors", async () => {
+        await using page = await browser.newPage()
+        page.on("pageerror", onError)
 
-      console.time("page.waitForSelector body")
-      await page.waitForSelector("body")
-      console.timeEnd("page.waitForSelector body")
+        await page.goto(render_url)
+        await page.waitForNetworkIdle({ idleTime: 10 })
+        expect(onError).not.toHaveBeenCalled()
+      })
 
-      console.time("page.waitForSelector #ClientComponent")
-      await page.waitForSelector("#ClientComponent")
-      console.timeEnd("page.waitForSelector #ClientComponent")
+      it("dynamically loads and renders RSC", async () => {
+        await using page = await browser.newPage()
 
-      console.time("page.$eval")
-      expect(await page.$eval("#ClientComponent", el => el.textContent)).toBe("Hello from ClientComponent!")
-      console.timeEnd("page.$eval")
+        // page.on("*", stuff => console.debug("PAGE stuff:", stuff))
+        // page.on("requestfinished", request => console.debug("PAGE requestfinished:", request.url()))
+
+        await page.goto(render_url)
+
+        // RSC not rendered yet
+        const button = await page.waitForSelector(`#rsc-root [data-id="NOT-generated-by-client"] button`)
+        expect(await page.$eval(`#rsc-root`, el => el.textContent)).toMatch(/pre-rendered by server/)
+
+        button!.click()
+
+        // RSC rendered
+        await page.waitForFunction(() => !document.querySelector(`#rsc-root [data-id="NOT-generated-by-client"]`))
+        expect(await page.$eval(`#rsc-root`, el => el.textContent)).not.toMatch(/pre-rendered by server/)
+      })
+
+      it.todo("renders Client components", async () => {
+        await using page = await browser.newPage()
+        await page.goto(render_url)
+
+        // RSC not rendered yet
+        const button = await page.waitForSelector(`#rsc-root [data-id="NOT-generated-by-client"] button`)
+        button!.click()
+
+        // verify that client components are rendered
+        throw new Error("not implemented")
+      })
     })
   })
 })

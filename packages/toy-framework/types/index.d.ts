@@ -19,6 +19,8 @@ export type ToyFrameworkNames = RequiredNonNullable<{
 export type PWRV<T> = ReturnType<typeof Promise.withResolvers<T>> & Thenable<T>
 
 declare global {
+  declare var __DEV__: boolean
+
   declare var __toy_framework__: {
     displayName?: "__toy_framework__"
     manifest: PWRV<IReactClientManifest>

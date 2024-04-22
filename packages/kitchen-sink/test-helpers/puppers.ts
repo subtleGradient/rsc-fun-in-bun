@@ -18,11 +18,19 @@ declare module "puppeteer-core" {
 }
 
 Browser.prototype[Symbol.asyncDispose] = async function () {
-  if (this.connected) await this.close()
+  try {
+    if (this.connected) await this.close()
+  } catch (e) {
+    console.warn("Browser.prototype[Symbol.asyncDispose]", e)
+  }
 }
 
 Page.prototype[Symbol.asyncDispose] = async function () {
-  if (!this.isClosed()) await this.close({ runBeforeUnload: false })
+  try {
+    if (!this.isClosed()) await this.close({ runBeforeUnload: false })
+  } catch (e) {
+    console.warn("Page.prototype[Symbol.asyncDispose]", e)
+  }
 }
 
 Object.defineProperties(Page.prototype, {

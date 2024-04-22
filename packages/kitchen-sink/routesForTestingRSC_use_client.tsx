@@ -7,7 +7,6 @@ import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStr
 import { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
 import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"
 import { routes } from "@rsc-fun-in-bun/toy-framework/server/toy-framework.server"
-import { verify } from "@rsc-fun-in-bun/toy-framework/server/verify.react-server"
 import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "@rsc-fun-in-bun/toy-framework/types"
 import type { ReactElement } from "react"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
@@ -122,51 +121,51 @@ async function rscClientRender() {
 }
 
 function RSCDemo() {
-  async function main(rsc_url: string) {
-    const { jsxDEV } = await import("react/jsx-dev-runtime")
+  function main(rsc_url: string) {
+    const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
+    rscRootElement.querySelector("button")!.addEventListener("click", async () => {
+      const { jsxDEV } = await import("react/jsx-dev-runtime")
 
-    console.log("running", import.meta.url)
+      console.log("running", import.meta.url)
 
-    await verify()
+      const React = (await import("react")).default
+      const ReactDOMClient = (await import("react-dom/client")).default
+      const ReactServerDOMClient = (await import("react-server-dom-webpack/client")).default
 
-    const React = (await import("react")).default
-    const ReactDOMClient = (await import("react-dom/client")).default
-    const ReactServerDOMClient = (await import("react-server-dom-webpack/client")).default
+      console.log("react@" + React.version)
 
-    console.log("react@" + React.version)
+      const promisedResponse = fetch(new Request(rsc_url, { headers: { Accept: "text/x-component" } }))
 
-    const promisedResponse = fetch(new Request(rsc_url, { headers: { Accept: "text/x-component" } }))
+      const { ui, ReactClientManifest: rcm } = await ReactServerDOMClient.createFromFetch<{
+        ui: ReactElement
+        ReactClientManifest: IReactClientManifest
+      }>(promisedResponse, {
+        async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
+          // console.log("calling server", id, args)
+          // return "server response" as T
+          throw new Error("not implemented")
+        },
 
-    const { ui, ReactClientManifest: rcm } = await ReactServerDOMClient.createFromFetch<{
-      ui: ReactElement
-      ReactClientManifest: IReactClientManifest
-    }>(promisedResponse, {
-      async callServer<A = unknown, T = unknown>(id: any, args: A): Promise<T> {
-        // console.log("calling server", id, args)
-        // return "server response" as T
-        throw new Error("not implemented")
-      },
+        encodeFormAction<A>(id: any, args: Promise<A>) {
+          return {
+            name: "my-awesome-form",
+            action: "/rsc/test-suspense",
+            method: "POST",
+            data: new FormData(),
+          }
+        },
+      })
 
-      encodeFormAction<A>(id: any, args: Promise<A>) {
-        return {
-          name: "my-awesome-form",
-          action: "/rsc/test-suspense",
-          method: "POST",
-          data: new FormData(),
-        }
-      },
-    })
+      console.log("ReactClientManifest", rcm)
+      __toy_framework__.manifest.resolve!(rcm)
 
-    console.log("ReactClientManifest", rcm)
-    __toy_framework__.manifest.resolve!(rcm)
-
-    __toy_framework__.manifest.promise.then(() => {
-      // console.assert(__toy_framework__.manifest.status === "fulfilled")
-      // if (!(__toy_framework__.manifest.status === "fulfilled")) throw new Error("manifest not fulfilled?!")
-      console.log("manifest fulfilled", __toy_framework__.manifest)
-      const rscRootElement = document.getElementById("rsc-root") as HTMLDivElement
-      const root = ReactDOMClient.createRoot(rscRootElement)
-      root.render(ui)
+      __toy_framework__.manifest.promise.then(() => {
+        // console.assert(__toy_framework__.manifest.status === "fulfilled")
+        // if (!(__toy_framework__.manifest.status === "fulfilled")) throw new Error("manifest not fulfilled?!")
+        console.log("manifest fulfilled", __toy_framework__.manifest)
+        const root = ReactDOMClient.createRoot(rscRootElement)
+        root.render(ui)
+      })
     })
   }
   return (
@@ -176,6 +175,7 @@ function RSCDemo() {
       <div id="rsc-root">
         <div data-id="NOT-generated-by-client">
           pre-rendered by server in <code>{__filename.replace(__dirname, "")}</code>
+          <button>Load RSC!</button>
         </div>
       </div>
 

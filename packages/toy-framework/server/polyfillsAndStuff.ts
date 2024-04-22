@@ -1,5 +1,5 @@
 import type { ChunkFilename, ChunkId, ChunkMap, IReactClientManifest, PWRV, RequireFun, ToyFrameworkNames } from "../types"
-import { tsx } from "./string-template"
+import { js } from "./string-template"
 const __DEV__ = process.env.NODE_ENV !== "production"
 
 const names: ToyFrameworkNames = {
@@ -35,6 +35,7 @@ export const define: Record<string, string> = {
   "window.__webpack_require__": names.require,
 
   "process.env.NODE_ENV": process.env.NODE_ENV! === "production" ? '"production"' : '"development"',
+
   __DEV__: __DEV__ ? "true" : "false",
 }
 
@@ -46,7 +47,8 @@ export const polyfillsAndStuff = {
   type: "text/javascript",
   text: async () =>
     await new Bun.Transpiler({ target: "browser", loader: "tsx", define }).transform(
-      tsx`{${!__DEV__ ? "" : tsx`(${verify_define})(${names})`}}{(${clientEntryPoint_environment_dependencies})()}`,
+      js`{${!__DEV__ ? "" : js`(${verify_define})(${names})`}}` + //
+        js`{(${clientEntryPoint_environment_dependencies})()}`,
     ),
 }
 
