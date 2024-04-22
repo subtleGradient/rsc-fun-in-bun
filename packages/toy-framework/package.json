@@ -29,6 +29,6 @@
     "react-server-dom-webpack": "canary"
   },
   "dependencies that need hacks": {
-    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405"
+    "react-dom": "19.0.0-canary-fd0da3eef-20240404"
   }
 }

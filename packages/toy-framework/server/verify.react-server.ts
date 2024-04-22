@@ -81,8 +81,7 @@ async function hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
 
   if (!("ReactCurrentCache" in ReactSharedInternals)) {
     console.warn(`
-      TL;DR — react-dom/server is broken with --conditions=react-server. But this hack should fix it.
-      See ${__filename.replace(__dirname, "")} for details.
+      TL;DR — This hack should fix it. react-dom/server is broken with --conditions=react-server.
 
       DETAILS:
       react-dom/server expects 'ReactCurrentCache' to be in 'ReactSharedInternals'.
@@ -92,7 +91,10 @@ async function hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
       This was true as of:
         react-dom@${Package["dependencies that need hacks"]["react-dom"]} <-- a version that needed this fix
         react-dom@${Package.peerDependencies["react-dom"]} <- the version you're using
-      `)
+        react-dom@${(await import("react")).version} <- the version you're using
+
+      (See ${__filename.replace(__dirname, "")} for details)
+        `)
   }
   // adding ReactCurrentCache back to ReactSharedInternals to unbreak react-dom/server
   ReactSharedInternals.ReactCurrentCache ??= ReactCurrentCache
