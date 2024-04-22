@@ -1,8 +1,3 @@
-// BUG: Bun@1.1.4 does not support --conditions in tests yet https://github.com/oven-sh/bun/issues/10036
-// So, I'm using a dynamic import below to avoid triggering the react-server error
-// so that the existing tests won't fail.
-// import { renderToReadableStream } from "react-server-dom-webpack/server.edge"
-
 import type { Pathname, RouteMap } from "../types"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"

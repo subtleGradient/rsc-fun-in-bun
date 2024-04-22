@@ -24,10 +24,14 @@ type ReactInnards = {
   __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: ReactServerSharedInternals
 }
 
-/** this needs to run before react-dom/server is imported */
+/** @deprecated -- you may want {@link unbreakReactDOMServer} instead */
 export async function verify() {
   await verifyReactServerDOMServer()
-  await hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED()
+  await verifyReactDOMServer()
+}
+
+export async function unbreakReactDOMServer() {
+  await hackReactDOMServer()
   await verifyReactDOMServer()
 }
 
@@ -36,7 +40,9 @@ async function verifyReactServerDOMServer() {
   const proxy = ReactServerDOMServer.createClientModuleProxy("file://some/path/Client.tsx")
 }
 
-async function hackReactDOMServer() {}
+async function hackReactDOMServer() {
+  await hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED()
+}
 
 async function verifyReactDOMServer() {
   const ReactDOMServer = await import("react-dom/server")

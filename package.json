@@ -12,7 +12,7 @@
     "test:headless": "PUPPETEER_HEADLESS=true bun test",
     "dev:test": "bun test:headless --watch --update-snapshots",
     "dev:tsc": "bun tsc --noEmit --watch",
-    "dev": "bun --filter '*' dev"
+    "dev": "bun --filter '**' dev"
   },
   "dependencies": {
     "react": "^19.0.0-canary-33a32441e9-20240418",

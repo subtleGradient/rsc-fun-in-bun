@@ -6,7 +6,7 @@
     "test:open": "PUPPETEER_HEADLESS=false bun test",
     "test:headless": "PUPPETEER_HEADLESS=true bun test",
     "dev:test": "bun test:headless --watch --update-snapshots",
-    "dev": "bun dev:test"
+    "dev": "bun run --conditions=react-server --watch ."
   },
   "imports": {
     "#package": "./package.json"

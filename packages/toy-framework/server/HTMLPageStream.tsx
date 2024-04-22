@@ -1,13 +1,13 @@
-import { arrayToStream } from "#util/util/arrayToStream.ts"
-import { concatStreams } from "#util/util/concatStreams.ts"
 import React from "react"
-import ReactDOMServer from "react-dom/server"
 import { HTMLPageRootLayout } from "../client/HTMLPageRootLayout"
 import { ImportMapScript } from "../client/ImportMap"
+import { arrayToStream } from "../util/arrayToStream"
+import { concatStreams } from "../util/concatStreams"
 import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import { routes } from "./toy-framework.server"
+import { unbreakReactDOMServer } from "./verify.react-server"
 
 /**
  * TODO: simplifty this once renderToReadableStream HEAD sorting is fixed
@@ -17,6 +17,9 @@ import { routes } from "./toy-framework.server"
  * so this is a workaround for now
  */
 export async function HTMLPageStream({ children }: { children?: React.ReactNode }) {
+  await unbreakReactDOMServer()
+  const ReactDOMServer = await import("react-dom/server")
+
   // ideally this would just be a single call to renderToReadableStream
   return concatStreams(
     arrayToStream(`<!DOCTYPE HTML><HTML lang=en>`),

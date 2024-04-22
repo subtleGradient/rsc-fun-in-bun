@@ -7,6 +7,7 @@ import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStr
 import { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
 import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"
 import { routes } from "@rsc-fun-in-bun/toy-framework/server/toy-framework.server"
+import { verify } from "@rsc-fun-in-bun/toy-framework/server/verify.react-server"
 import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "@rsc-fun-in-bun/toy-framework/types"
 import type { ReactElement } from "react"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
@@ -125,6 +126,8 @@ function RSCDemo() {
     const { jsxDEV } = await import("react/jsx-dev-runtime")
 
     console.log("running", import.meta.url)
+
+    await verify()
 
     const React = (await import("react")).default
     const ReactDOMClient = (await import("react-dom/client")).default

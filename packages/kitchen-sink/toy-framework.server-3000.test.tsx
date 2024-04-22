@@ -152,7 +152,7 @@ describe("toy-framework.server", () => {
       console.timeEnd("page.waitForSelector #ClientComponent")
 
       console.time("page.$eval")
-      expect(await page.$eval("#ClientComponent", (el) => el.textContent)).toBe("Hello from ClientComponent!")
+      expect(await page.$eval("#ClientComponent", el => el.textContent)).toBe("Hello from ClientComponent!")
       console.timeEnd("page.$eval")
     })
   })

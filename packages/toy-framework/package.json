@@ -8,15 +8,7 @@
     "dev": "echo 'hi from toy-framework'"
   },
   "imports": {
-    "#toy-framework/bunfig-preload": {
-      "react-server": "./bunfig-preload.react-server.ts",
-      "default": "./bunfig-preload.ts"
-    },
-    "#package": "./package.json",
-    "#toy-framework/*": "./*",
-    "#plugins/*": "./plugins/*",
-    "#util/*": "./*",
-    "#/*": "./*"
+    "#package": "./package.json"
   },
   "devDependencies": {
     "@types/bun": "latest",
