@@ -166,16 +166,32 @@ describe("toy-framework.server", () => {
         expect(await page.$eval(`#rsc-root`, el => el.textContent)).not.toMatch(/pre-rendered by server/)
       })
 
-      it.todo("renders Client components", async () => {
-        await using page = await browser.newPage()
-        await page.goto(render_url)
+      describe("Client components", () => {
+        it.todo("loads with no errors", async () => {
+          await using page = await browser.newPage()
 
-        // RSC not rendered yet
-        const button = await page.waitForSelector(`#rsc-root [data-id="NOT-generated-by-client"] button`)
-        button!.click()
+          await page.goto(render_url)
 
-        // verify that client components are rendered
-        throw new Error("not implemented")
+          const button = await page.waitForSelector(`#rsc-root [data-id="NOT-generated-by-client"] button`)
+
+          page.on("pageerror", onError)
+          button!.click()
+
+          await page.waitForNetworkIdle({ idleTime: 10 })
+          expect(onError).not.toHaveBeenCalled()
+        })
+
+        it.todo("renders Client components", async () => {
+          await using page = await browser.newPage()
+          await page.goto(render_url)
+
+          // RSC not rendered yet
+          const button = await page.waitForSelector(`#rsc-root [data-id="NOT-generated-by-client"] button`)
+          button!.click()
+
+          // verify that client components are rendered
+          throw new Error("not implemented")
+        })
       })
     })
   })
