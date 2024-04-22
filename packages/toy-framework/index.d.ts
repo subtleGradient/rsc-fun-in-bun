@@ -6,7 +6,9 @@
 /// <reference types="react-dom/canary" />
 /// <reference types="react-dom/experimental" />
 
-/// <reference types="react-server-dom-webpack" />
+/// <reference path="./types/ReactDOMServer.d.ts" />
+/// <reference path="./types/ReactServerDOMClient.d.ts" />
+/// <reference path="./types/ReactServerDOMServer.d.ts" />
 
-export { default } from "./types"
 export * from "./types"
+export { default } from "./types"

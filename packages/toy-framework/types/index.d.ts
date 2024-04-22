@@ -1,4 +1,4 @@
-import type { define } from "#toy-framework/server/polyfillsAndStuff"
+import type { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
 import { type Server } from "bun"
 import type { Thenable } from "react"
 

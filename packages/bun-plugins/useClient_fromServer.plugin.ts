@@ -1,5 +1,5 @@
-/// <reference types="bun" />
 /// <reference types="@rsc-fun-in-bun/toy-framework" />
+/// <reference types="bun" />
 
 // import { define } from "#toy-framework/server/polyfillsAndStuff"
 import { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
