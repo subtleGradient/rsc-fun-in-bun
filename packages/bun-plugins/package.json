@@ -2,7 +2,11 @@
   "name": "@rsc-fun-in-bun/bun-plugins",
   "version": "0.2.0",
   "type": "module",
+  "scripts": {
+    "dev": "echo 'hi from plugins!'"
+  },
   "devDependencies": {
+    "peechy": "^0.4.34",
     "@types/bun": "latest",
     "@types/react": "^18.2.56",
     "@types/react-dom": "^18.2.19",

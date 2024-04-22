@@ -2,5 +2,22 @@
   "name": "toy-framework-monorepo",
   "private": true,
   "version": "0.2.0",
-  "workspaces": ["packages/*"]
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "bunp": "bun add $(bun --conditions=react-server --print 'Bun.file(`./package.json`).json().then(p => ({...p.devDependencies,...p.dependencies})).then(Object.entries).then(it => it.filter(([,version]) => version.includes(`canary`)).map(([name]) => `${name}@canary`).join(` `))'); bun update",
+    "predev": "bun bunp",
+    "test:open": "PUPPETEER_HEADLESS=false bun test",
+    "test:headless": "PUPPETEER_HEADLESS=true bun test",
+    "dev:test": "bun test:headless --watch --update-snapshots",
+    "dev:tsc": "bun tsc --noEmit --watch",
+    "dev": "bun --filter '*' dev"
+  },
+  "dependencies": {
+    "react": "^19.0.0-canary-33a32441e9-20240418",
+    "react-dom": "^19.0.0-canary-33a32441e9-20240418",
+    "react-server-dom-webpack": "^19.0.0-canary-33a32441e9-20240418",
+    "use-sync-external-store": "^1.4.0-canary-33a32441e9-20240418"
+  }
 }

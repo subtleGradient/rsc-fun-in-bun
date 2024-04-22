@@ -1,0 +1,10 @@
+{
+  "name": "@rsc-fun-in-bun/bun-api",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "echo 'hi from bun-api'"
+  },
+  "dependencies": {
+    "peechy": "^0.4.34"
+  }
+}

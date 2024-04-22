@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 import { describe, expect, it } from "bun:test"
-import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
+import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths.tsx"
 import { browser } from "./test-helpers/puppers.ts"
 
 const ROOT_DIRNAME = __dirname.split("/").slice(0, -2).join("/")
@@ -11,7 +11,7 @@ try {
 
   // BUG: Bun@1.1.4 does not support --conditions yet https://github.com/oven-sh/bun/issues/10036
   // So, I'm using a dynamic import below to avoid triggering the react-server error
-  await import("./test-server.ts")
+  await import("./kitchen-sink.ts")
 } catch (error) {}
 
 if (!1!) {
@@ -118,7 +118,6 @@ describe("toy-framework.server", () => {
       it("mentions ClientComponent by name", async () => {
         const response = await fetch(rsc_url)
         const rscText = await response.text()
-        // const { ExampleClientComponent } = await import("@/examples/example0.client")
         expect(rscText).toMatch("ExampleClientComponent")
         expect(rscText).toMatch("examples/example0.client")
       })

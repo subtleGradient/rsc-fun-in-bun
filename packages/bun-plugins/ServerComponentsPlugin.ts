@@ -39,9 +39,10 @@ declare module "bun" {
   }
 }
 
+import { decodeClientServerModuleManifest } from "@rsc-fun-in-bun/bun-api/schema"
+
 // @ts-expect-error -- missing types
 import { ByteBuffer } from "peechy/bb"
-import { decodeClientServerModuleManifest } from "../../bun-api/schema"
 
 /** parse components-manifest.blob */
 async function parseComponentsManifest(manifest?: Blob) {

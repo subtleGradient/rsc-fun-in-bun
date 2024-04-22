@@ -72,7 +72,7 @@ async function rscClientTest(request: Request): Promise<Response> {
   Bun.plugin(useClient_fromServer_pluginConfig)
 
   const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
-  const { ExampleClientComponent } = await import("@/examples/example0.client")
+  const { ExampleClientComponent } = await import("./examples/example0.client")
 
   const $$ids = Object.keys(ReactClientManifest) as (keyof typeof ReactClientManifest)[]
 

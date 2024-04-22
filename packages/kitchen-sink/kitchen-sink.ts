@@ -2,8 +2,8 @@ import { fetch, routes } from "@rsc-fun-in-bun/toy-framework/server/toy-framewor
 import { routesForTestingRSC_suspense } from "./routesForTestingRSC-suspense.tsx"
 import { routesForTestingRSC_use_client } from "./routesForTestingRSC_use_client.tsx"
 
-if (import.meta.main) {
-
+// if (import.meta.main)
+{
   Object.assign(routes, {
     // TODO: move this to a test file somewhere
     ...routesForTestingRSC_suspense,
@@ -20,9 +20,4 @@ if (import.meta.main) {
       .join("\n"),
   )
   console.log()
-} else {
-  console.log(
-    `This module ${import.meta.url} is not meant to be run as a script. Try running the main module instead. See package.json`,
-    import.meta.main,
-  )
 }
