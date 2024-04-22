@@ -85,7 +85,7 @@ async function hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
       
       This was true as of:
         react-dom@${Package["dependencies that need hacks"]["react-dom"]} <-- a version that needed this fix
-        react-dom@${Package.dependencies["react-dom"]} <- the version you're using
+        react-dom@${Package.peerDependencies["react-dom"]} <- the version you're using
       `)
   }
   // adding ReactCurrentCache back to ReactSharedInternals to unbreak react-dom/server

@@ -1,8 +1,9 @@
 {
   "name": "@rsc-fun-in-bun/toy-framework",
   "version": "0.2.0",
-  "module": "rsc-fun-in-bun.ts",
   "type": "module",
+  "module": "rsc-fun-in-bun.ts",
+  "types": "index.d.ts",
   "scripts": {
     "dev": "echo 'hi from toy-framework'"
   },
@@ -34,5 +35,8 @@
     "react": "canary",
     "react-dom": "canary",
     "react-server-dom-webpack": "canary"
+  },
+  "dependencies that need hacks": {
+    "react-dom": "^19.0.0-canary-e3ebcd54b-20240405"
   }
 }

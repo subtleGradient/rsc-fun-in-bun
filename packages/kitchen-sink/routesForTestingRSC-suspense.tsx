@@ -1,3 +1,5 @@
+/// <reference types="@rsc-fun-in-bun/toy-framework" />
+
 import { noCacheHeaders } from "@rsc-fun-in-bun/toy-framework/server/headers"
 import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
 import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"

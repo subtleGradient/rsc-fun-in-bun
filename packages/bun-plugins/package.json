@@ -6,6 +6,7 @@
     "dev": "echo 'hi from plugins!'"
   },
   "devDependencies": {
+    "@types/react-server-dom-webpack": "workspace:*",
     "peechy": "^0.4.34",
     "@types/bun": "latest",
     "@types/react": "^18.2.56",
