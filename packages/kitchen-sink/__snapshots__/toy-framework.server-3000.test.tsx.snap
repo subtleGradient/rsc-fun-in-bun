@@ -41,7 +41,7 @@ exports[`toy-framework.server root / route returns a response 1`] = `
 <div data-id="NOT-generated-by-client">pre-rendered by server in <code>/HTMLPageRootLayout.tsx</code>
 </div>
 </div>
-<script type="module" src="/!/polyfillsAndStuff.mjs">
+<script src="/!/polyfillsAndStuff.mjs">
 </script>
 <script type="module" src="/!/externals/clientEntryPoint.externals.mjs">
 </script>
@@ -102,7 +102,7 @@ exports[`toy-framework.server /rsc/test-suspense-render returns RSC content 1`] 
 <div data-id="NOT-generated-by-client">pre-rendered by server in <code>/HTMLPageRootLayout.tsx</code>
 </div>
 </div>
-<script type="module" src="/!/polyfillsAndStuff.mjs">
+<script src="/!/polyfillsAndStuff.mjs">
 </script>
 <script type="module" src="/!/externals/clientEntryPoint.externals.mjs">
 </script>
@@ -116,20 +116,16 @@ exports[`toy-framework.server /rsc/test-suspense-render returns RSC content 1`] 
     console.log("running", import.meta.url);
     const React = (await import("react")).default;
     console.log("react@" + React.version);
-    const ReactDOMClient = (await import("react-dom/client")).default;
-    const ReactServerDOMClient = (await import("react-server-dom-webpack/client")).default;
+    const ReactDOMClient = (await import("react-dom/client")).default, ReactServerDOMClient = (await import("react-server-dom-webpack/client")).default;
     console.log(ReactServerDOMClient);
-    const rscResponse = await fetch(new Request(\`/rsc/test-suspense\`, { headers: { Accept: "text/x-component" } }));
-    const decoder = new TextDecoder;
-    const reader = rscResponse.body.getReader();
-    while (true) {
+    const rscResponse = await fetch(new Request("/rsc/test-suspense", { headers: { Accept: "text/x-component" } })), decoder = new TextDecoder, reader = rscResponse.body.getReader();
+    while (!0) {
       const { done, value } = await reader.read();
       if (done)
         break;
       console.log(decoder.decode(value));
     }
-    const root = ReactDOMClient.createRoot(document.getElementById("rsc-root"));
-    const ui = await ReactServerDOMClient.createFromFetch(fetch(new Request(\`/rsc/test-suspense\`, { headers: { Accept: "text/x-component" } })), {
+    const root = ReactDOMClient.createRoot(document.getElementById("rsc-root")), ui = await ReactServerDOMClient.createFromFetch(fetch(new Request("/rsc/test-suspense", { headers: { Accept: "text/x-component" } })), {
       async callServer(id, args) {
         throw new Error("not implemented");
       },
