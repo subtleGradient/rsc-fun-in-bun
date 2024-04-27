@@ -5,6 +5,7 @@
     "module": "ESNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
+    "jsxImportSource": "#FIXME",
     "allowJs": true,
 
     /* Bundler mode */
@@ -16,6 +17,10 @@
     /* Linting */
     "strict": true,
     "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
+    "paths": {
+      "#FIXME/*": ["./FIXME/*"]
+    }
   }
 }
