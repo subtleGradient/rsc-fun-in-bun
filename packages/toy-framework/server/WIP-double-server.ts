@@ -2,14 +2,15 @@ function assert(test: unknown, reason: string) {
   if (!test) throw new Error(reason)
 }
 async function isReactServerEnvironment() {
-  assert(typeof window === "undefined", "window should not be defined in react server environment")
   const React = require("react")
   const INTERNALS_KEY = Object.keys(React).find(k => k.includes("INTERNALS"))
   assert(!INTERNALS_KEY?.includes("CLIENT"), "React internals key should not include CLIENT")
   assert(INTERNALS_KEY?.includes("SERVER"), "React internals key should include SERVER")
+  // assert(typeof window === "undefined", "window should not be defined in react server environment")
 }
 
-isReactServerEnvironment().then(reactServer, regularServer)
+const isChildProcess = async () => assert(!!process.send, "process.send should be defined in child process")
+const returns = (value: unknown) => () => value
 
 async function regularServer() {
   assert(typeof window === "undefined", "window should not be defined in regular server environment")
@@ -17,17 +18,6 @@ async function regularServer() {
   const { default: ReactDOMServer } = await import("react-dom/server")
   const { default: ReactServerDOMClient } = await import("react-server-dom-webpack/client.edge")
   console.log({ ReactDOMServer: !!ReactDOMServer, ReactServerDOMClient: !!ReactServerDOMClient })
-
-  // https://bun.sh/guides/process/ipc
-  if (!process.send) {
-    const child = Bun.spawn([process.execPath, "--conditions=react-server", __filename], {
-      ipc(message, subprocess) {
-        console.log("IPC message:", message)
-        subprocess.send("pong")
-      },
-    })
-    child.send("ping")
-  }
 }
 
 async function reactServer() {
@@ -35,41 +25,34 @@ async function reactServer() {
   console.log("is react-server")
   const { default: ReactServerDOMServer } = await import("react-server-dom-webpack/server")
   console.log({ ReactServerDOMServer: !!ReactServerDOMServer })
-
-  // https://bun.sh/guides/process/ipc
-  if (!process.send) {
-    const child = Bun.spawn([process.execPath, __filename], {
-      ipc(message, subprocess) {
-        console.log("IPC message:", message)
-        subprocess.send("pong")
-      },
-    })
-    child.send("ping")
-  }
 }
 
-if (process.send) {
-  process.send?.("hi")
-  Object.assign(console, { log: (...args: unknown[]) => process.send?.(["CONSOLE", ...args]) })
+async function parentProcess() {
+  console.log("is parent process")
+  assert(!process.send, "process.send should NOT be defined in child process")
+  const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
+
+  const child = Bun.spawn([process.execPath, isReactServer ? "" : "--conditions=react-server", __filename], {
+    stdio: ["ignore", "inherit", "inherit"],
+    // https://bun.sh/guides/process/ipc
+    ipc(message, subprocess) {
+      console.log("from child:", message)
+      subprocess.send("reply from parent")
+    },
+  })
+
+  child.send("hi from parent")
 }
 
-// import JSX from "react/jsx-runtime"
-// import React from "react"
-// const INTERNALS_KEY = Object.keys(React).find(k => k.includes("INTERNALS"))
-// console.log(React.version, __filename, INTERNALS_KEY)
+async function childProcess() {
+  console.log("is child process")
+  assert(!!process.send, "process.send should be defined in child process")
+  process.send!("hi from child")
+  process.on("message", message => {
+    console.log("from parent:", message)
+    // process.send!("reply from child") // this will cause an infinite loop
+  })
+}
 
-// import path from "path"
-// const reactPath = Bun.resolveSync("react", "")
-
-// console.log(path.dirname(reactPath))
-
-// const realm = new ShadowRealm()
-
-// console.log(realm.importValue(Bun.resolveSync("react", ""), "React"))
-// console.log(realm)
-
-// import ReactServerDOMClient from "react-server-dom-webpack/client"
-// console.log(ReactServerDOMClient)
-
-// import ReactServerDOMServer from "react-server-dom-webpack/server"
-// ReactServerDOMServer.renderToReadableStream
+isChildProcess().then(childProcess, parentProcess)
+isReactServerEnvironment().then(reactServer, regularServer)
