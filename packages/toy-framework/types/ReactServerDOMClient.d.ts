@@ -1,6 +1,49 @@
 // so you can quick jump to the code
-if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
+// prettier-ignore
+{
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.edge.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.node.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.node.unbundled.development.js")
 
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js")
+}
+
+if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.node.unbundled.development.js") // prettier-ignore
+declare module "react-server-dom-webpack/client.node.unbundled" {
+  export { createFromNodeStream, createServerReference } from "react-server-dom-webpack/client"
+}
+
+if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.node.development.js")
+declare module "react-server-dom-webpack/client.node" {
+  export { createFromNodeStream, createServerReference } from "react-server-dom-webpack/client"
+}
+
+if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.edge.development.js")
+declare module "react-server-dom-webpack/client.edge" {
+  export {
+    createFromFetch,
+    createFromReadableStream,
+    createServerReference,
+    createTemporaryReferenceSet,
+    encodeReply,
+  } from "react-server-dom-webpack/client"
+}
+
+if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
+declare module "react-server-dom-webpack/client.browser" {
+  export {
+    createFromFetch,
+    createFromReadableStream,
+    createServerReference,
+    createTemporaryReferenceSet,
+    encodeReply,
+  } from "react-server-dom-webpack/client"
+}
+
+// so you can quick jump to the code
+if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-client.browser.development.js")
 declare module "react-server-dom-webpack/client" {
   import type { Thenable } from "react"
   /**
