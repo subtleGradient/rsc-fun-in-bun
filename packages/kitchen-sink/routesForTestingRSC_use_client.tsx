@@ -1,3 +1,5 @@
+import React from "react"
+
 import { ReactClientManifest } from "@rsc-fun-in-bun/bun-plugins/ReactClientManifest"
 import { useClient_fromServer_pluginConfig } from "@rsc-fun-in-bun/bun-plugins/useClient_fromServer.plugin"
 
@@ -10,6 +12,12 @@ import { routes } from "@rsc-fun-in-bun/toy-framework/server/toy-framework.serve
 import type { ImportMap, IReactClientManifest, Pathname, RouteMap } from "@rsc-fun-in-bun/toy-framework/types"
 import type { ReactElement } from "react"
 import { routesForTestingRSC_use_client_paths } from "./routesForTestingRSC_use_client_paths"
+
+console.log(
+  React.version,
+  __filename,
+  Object.keys(React).find(k => k.includes("INTERNALS")),
+)
 
 const RSC_TYPE = "text/x-component"
 
@@ -71,7 +79,7 @@ export const routesForTestingRSC_use_client: RouteMap = {
 async function rscClientTest(request: Request): Promise<Response> {
   Bun.plugin(useClient_fromServer_pluginConfig)
 
-  const ReactServerDOMServer = await import("react-server-dom-webpack/server.browser")
+  const ReactServerDOMServer = await import("react-server-dom-webpack/server.edge")
   const { ExampleClientComponent } = await import("./examples/example0.client")
 
   const $$ids = Object.keys(ReactClientManifest) as (keyof typeof ReactClientManifest)[]
@@ -102,9 +110,7 @@ async function rscClientTest(request: Request): Promise<Response> {
 
   let rscStream = ReactServerDOMServer.renderToReadableStream(
     {
-      get ui() {
-        return <UI />
-      },
+      ui: <UI />,
       ReactClientManifest,
     },
     {
