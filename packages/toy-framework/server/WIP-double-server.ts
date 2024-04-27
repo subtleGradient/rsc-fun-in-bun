@@ -88,7 +88,10 @@ async function childProcess() {
   })
 
   const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
-  const sockName = `/tmp/${isReactServer ? "isReactServer" : "isNotReactServer"}.sock`
+
+  const sockName = `${process.env.TMPDIR ?? "/tmp/"}${isReactServer ? "react-server" : "not-react-server"}.${Date.now().toString(26)}.${process.ppid}.${process.pid}.sock`
+  process.on("exit", () => fs.unlinkSync(sockName))
+
   const server = Bun.serve({
     unix: sockName, // path to socket
     fetch(req) {
@@ -98,6 +101,7 @@ async function childProcess() {
   process.send!({ childSockName: sockName })
   // console.log("server started at", server.url.href)
 }
+import fs from "fs"
 
 function main() {
   isChildProcess().then(childProcess, parentProcess)
