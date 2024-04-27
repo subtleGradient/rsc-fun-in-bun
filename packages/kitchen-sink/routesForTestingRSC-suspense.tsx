@@ -1,7 +1,7 @@
 /// <reference types="@rsc-fun-in-bun/toy-framework" />
 
 import { noCacheHeaders } from "@rsc-fun-in-bun/toy-framework/server/headers"
-import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
+import { HTMLPageStream__BROKEN_IN_REACT_SERVER_19BETA } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
 import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"
 import type { RouteMap } from "@rsc-fun-in-bun/toy-framework/types"
 import { sleep } from "bun"
@@ -44,7 +44,7 @@ async function rscSuspenseTest(request: Request): Promise<Response> {
 }
 
 async function rscSuspenseRender() {
-  return new Response(await HTMLPageStream({ children: <RSCDemo /> }), {
+  return new Response(await HTMLPageStream__BROKEN_IN_REACT_SERVER_19BETA({ children: <RSCDemo /> }), {
     headers: { "Content-Type": "text/html", ...noCacheHeaders },
   })
 }

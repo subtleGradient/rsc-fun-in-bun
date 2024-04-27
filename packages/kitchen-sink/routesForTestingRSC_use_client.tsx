@@ -5,7 +5,7 @@ import { useClient_fromServer_pluginConfig } from "@rsc-fun-in-bun/bun-plugins/u
 
 import { externalsBundle } from "@rsc-fun-in-bun/toy-framework/server/externalsBundle"
 import { noCacheHeaders } from "@rsc-fun-in-bun/toy-framework/server/headers"
-import { HTMLPageStream } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
+import { HTMLPageStream__BROKEN_IN_REACT_SERVER_19BETA } from "@rsc-fun-in-bun/toy-framework/server/HTMLPageStream"
 import { define } from "@rsc-fun-in-bun/toy-framework/server/polyfillsAndStuff"
 import { js } from "@rsc-fun-in-bun/toy-framework/server/string-template"
 import { routes } from "@rsc-fun-in-bun/toy-framework/server/toy-framework.server"
@@ -126,7 +126,7 @@ async function rscClientTest(request: Request): Promise<Response> {
 }
 
 async function rscClientRender() {
-  return new Response(await HTMLPageStream({ children: <RSCDemo /> }), {
+  return new Response(await HTMLPageStream__BROKEN_IN_REACT_SERVER_19BETA({ children: <RSCDemo /> }), {
     headers: { "Content-Type": "text/html", ...noCacheHeaders },
   })
 }
