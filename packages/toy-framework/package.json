@@ -11,19 +11,19 @@
     "#package": "./package.json"
   },
   "devDependencies": {
-    "@types/bun": "latest",
-    "@types/react": "^18.2.56",
-    "@types/react-dom": "^18.2.19",
-    "@types/use-sync-external-store": "^0.0.6",
     "bun-plugin-server-components": "^0.0.1-alpha.0",
-    "prettier": "latest",
-    "puppeteer-core": "^22.6.1",
-    "typescript": "^5.4.5"
+    "puppeteer-core": "^22.6.1"
   },
   "dependencies": {
     "peechy": "^0.4.34"
   },
   "peerDependencies": {
+    "@types/bun": "latest",
+    "prettier": "latest",
+    "typescript": "^5",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "@types/use-sync-external-store": "^0.0.6",
     "react": "canary",
     "react-dom": "canary",
     "react-server-dom-webpack": "canary"

@@ -7,7 +7,6 @@ import { clientEntryPointBundle } from "./clientEntryPointBundle"
 import { externalsBundle } from "./externalsBundle"
 import { polyfillsAndStuff } from "./polyfillsAndStuff"
 import { routes } from "./toy-framework.server"
-import { unbreakReactDOMServer } from "./verify.react-server"
 
 /**
  * TODO: simplifty this once renderToReadableStream HEAD sorting is fixed
@@ -17,7 +16,7 @@ import { unbreakReactDOMServer } from "./verify.react-server"
  * so this is a workaround for now
  */
 export async function HTMLPageStream({ children }: { children?: React.ReactNode }) {
-  await unbreakReactDOMServer()
+  // FIXME(@subtleGradient): ReactDOMServer doesn't work in react-server
   const ReactDOMServer = await import("react-dom/server")
 
   // ideally this would just be a single call to renderToReadableStream

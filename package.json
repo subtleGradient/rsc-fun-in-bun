@@ -17,6 +17,14 @@
     "dev:tsc": "bun tsc --noEmit --watch",
     "dev": "bun --filter '**' dev"
   },
+  "resolutions": {
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
+    "react": "beta",
+    "react-dom": "beta",
+    "react-server-dom-webpack": "beta",
+    "use-sync-external-store": "beta"
+  },
   "overrides": {
     "@types/react": "npm:types-react@beta",
     "@types/react-dom": "npm:types-react-dom@beta",
@@ -26,13 +34,10 @@
     "use-sync-external-store": "beta"
   },
   "dependencies": {
+    "@types/react-dom": "npm:types-react-dom@beta",
     "react": "beta",
     "react-dom": "beta",
     "react-server-dom-webpack": "beta",
     "use-sync-external-store": "beta"
-  },
-  "devDependencies": {
-    "@types/react": "npm:types-react@beta",
-    "@types/react-dom": "npm:types-react-dom@beta"
   }
 }
