@@ -1,3 +1,5 @@
+/// <reference types="bun" />
+
 function assert(test: unknown, reason: string) {
   if (!test) throw new Error(reason)
 }
@@ -36,23 +38,70 @@ async function parentProcess() {
     stdio: ["ignore", "inherit", "inherit"],
     // https://bun.sh/guides/process/ipc
     ipc(message, subprocess) {
-      console.log("from child:", message)
+      console.log("IPC from child:", message)
       subprocess.send("reply from parent")
+
+      if (message.childSockName) {
+        childSockName = message.childSockName
+      }
     },
   })
 
+  const server = Bun.serve({
+    port: isReactServer ? 3000 : 3001,
+    async fetch(req) {
+      const url = new URL(req.url)
+      const conditions = url.searchParams.getAll("conditions")
+      const wantsReactServer = conditions.includes("react-server")
+      const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
+
+      if (wantsReactServer != isReactServer)
+        return fetch(url, {
+          ...req,
+
+          // https://bun.sh/guides/http/fetch-unix
+          // @ts-expect-error -- missing types for unix option
+          unix: childSockName,
+        })
+
+      return new Response(`hi from parent server at ${req.url}`)
+    },
+  })
+  console.log("server started at", server.url.href)
+
+  const childUrlFromParent = new URL(server.url.href)
+  childUrlFromParent.searchParams.append("conditions", isReactServer ? "NOT-react-server" : "react-server")
+  console.log("can also handle", childUrlFromParent.href)
+
   child.send("hi from parent")
 }
+
+let childSockName: string
 
 async function childProcess() {
   console.log("is child process")
   assert(!!process.send, "process.send should be defined in child process")
   process.send!("hi from child")
   process.on("message", message => {
-    console.log("from parent:", message)
+    console.log("IPC from parent:", message)
     // process.send!("reply from child") // this will cause an infinite loop
   })
+
+  const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
+  const sockName = `/tmp/${isReactServer ? "isReactServer" : "isNotReactServer"}.sock`
+  const server = Bun.serve({
+    unix: sockName, // path to socket
+    fetch(req) {
+      return new Response(`hi from child server at ${req.url}`)
+    },
+  })
+  process.send!({ childSockName: sockName })
+  // console.log("server started at", server.url.href)
 }
 
-isChildProcess().then(childProcess, parentProcess)
-isReactServerEnvironment().then(reactServer, regularServer)
+function main() {
+  isChildProcess().then(childProcess, parentProcess)
+  isReactServerEnvironment().then(reactServer, regularServer)
+}
+
+main()
