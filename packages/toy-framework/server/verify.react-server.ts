@@ -63,22 +63,30 @@ async function hackReactDOMServer() {
 }
 
 async function verifyReactDOMServer() {
-  const ReactDOMServer = await import("react-dom/server")
-  ReactDOMServer.renderToString(React.createElement("div"))
+  try {
+    const ReactDOMServer = await import("react-dom/server")
+    ReactDOMServer.renderToString(React.createElement("div"))
+  } catch (error) {
+    console.error("Error verifying ReactDOMServer")
+    throw error
+  }
 }
 
+// NOTE(@subtleGradient): I forget why I ever needed this, but here it is just in case I ever remember
 async function verifyReactDOM() {
-  const ReactDOM = await import("react-dom")
-  const ReactDOMSharedInternals = (ReactDOM as any).__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED
+  const ReactDOM = (await import("react-dom")) as any
+  const ReactDOMSharedInternals = ReactDOM[ReactSharedInternalsKey19] || ReactDOM[ReactSharedInternalsKey18]
   if (!ReactDOMSharedInternals?.ReactDOMCurrentDispatcher?.current)
-    console.warn("ReactDOMCurrentDispatcher.current should be defined")
+    console.warn(
+      `ReactDOMCurrentDispatcher.current should be defined, but it is not.
+      You may need to upgrade ${__filename}`,
+    )
 
-  if (!("render" in ReactDOM))
+  if ("render" in ReactDOM)
     console.warn(
       "ReactDOMServer.render should NOT be defined on the server",
-      "You may need to run with --conditions=react-server or upgrade bun",
+      `You may need to run with --conditions=react-server or upgrade ${__filename}`,
     )
-  else;
 }
 
 /**
