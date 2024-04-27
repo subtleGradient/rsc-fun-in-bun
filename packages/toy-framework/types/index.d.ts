@@ -19,6 +19,15 @@ export type ToyFrameworkNames = RequiredNonNullable<{
 export type PWRV<T> = ReturnType<typeof Promise.withResolvers<T>> & Thenable<T>
 
 declare global {
+  declare var __REACT_DEVTOOLS_GLOBAL_HOOK__:
+    | undefined
+    | {
+        registerInternalModuleStart: (error: Error) => void
+        registerInternalModuleStop: (error: Error) => void
+      }
+}
+
+declare global {
   declare var __DEV__: boolean
 
   declare var __toy_framework__: {

@@ -2,6 +2,10 @@ import Package from "#package"
 import ReactNormal from "react"
 const React = ReactNormal as typeof ReactNormal & ReactInnards
 
+// https://react.dev/blog/2024/04/25/react-19-upgrade-guide#libraries-depending-on-react-internals-may-block-upgrades
+const WarningSuffix19 = `_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE`
+const WarningSuffix18 = `_DO_NOT_USE_OR_YOU_WILL_BE_FIRED`
+
 type ReactCurrentCache = {
   current: null | {
     getCacheSignal: () => unknown
@@ -19,12 +23,24 @@ type ReactServerSharedInternals = {
   ReactCurrentCache: ReactCurrentCache
 }
 
-type ReactInnards = {
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: never
-  __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: never
-  // __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals_default | ReactSharedInternals_react_server
-  // __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: ReactServerSharedInternals
-}
+const ReactServerSharedInternalsKey18 = `__SECRET_SERVER_INTERNALS${WarningSuffix18}` as const
+const ReactServerSharedInternalsKey19 = `__SECRET_SERVER_INTERNALS${WarningSuffix19}` as const
+const ReactSharedInternalsKey18 = `__SECRET_INTERNALS${WarningSuffix18}` as const
+const ReactSharedInternalsKey19 = `__SECRET_INTERNALS${WarningSuffix19}` as const
+
+type ReactInnards =
+  | {
+      [ReactSharedInternalsKey18]?: never
+      [ReactSharedInternalsKey19]: ReactSharedInternals_default | ReactSharedInternals_react_server
+      [ReactServerSharedInternalsKey18]?: never
+      [ReactServerSharedInternalsKey19]?: ReactServerSharedInternals
+    }
+  | {
+      [ReactSharedInternalsKey18]: ReactSharedInternals_default | ReactSharedInternals_react_server
+      [ReactSharedInternalsKey19]?: never
+      [ReactServerSharedInternalsKey18]?: ReactServerSharedInternals
+      [ReactServerSharedInternalsKey19]?: never
+    }
 
 /** @deprecated -- you may want {@link unbreakReactDOMServer} instead */
 export async function verify() {
@@ -43,7 +59,7 @@ async function verifyReactServerDOMServer() {
 }
 
 async function hackReactDOMServer() {
-  await hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED()
+  await hack__SECRET_INTERNALS()
 }
 
 async function verifyReactDOMServer() {
@@ -73,14 +89,13 @@ async function verifyReactDOM() {
  *
  * But don't blame me when this definitely breaks in the future :P
  */
-async function hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
+async function hack__SECRET_INTERNALS() {
   if (!Package["dependencies that need hacks"]["react-dom"]) {
     console.warn("This version of react-dom does not need this hack")
     return
   }
 
-  const { ReactSharedInternals, ReactServerSharedInternals, ReactCurrentCache } =
-    get__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED()
+  const { ReactSharedInternals, ReactServerSharedInternals, ReactCurrentCache } = get__SECRET_INTERNALS()
 
   if (!("ReactCurrentCache" in ReactSharedInternals)) {
     console.warn(`
@@ -97,35 +112,60 @@ async function hack__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
         react-dom@${(await import("react")).version} <- the version you're using
 
       (See ${__filename.replace(__dirname, "")} for details)
-        `)
+    `)
   }
   // adding ReactCurrentCache back to ReactSharedInternals to unbreak react-dom/server
   ReactSharedInternals.ReactCurrentCache ??= ReactCurrentCache
 }
 
-function get__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED() {
+function get__SECRET_INTERNALS() {
+  console.warn(
+    `WARNING: This code (${__filename}) is using React __SECRET_INTERNALS.
+    React team recommends removing any code that depends on internals.
+    By using this code, upgrading React may not be possible (without changing this code).
+    
+    NOTE: This is a temporary workaround to 
+    unbreak react-dom/server when used with --conditions=react-server.
+
+    This is explicitly not recommended for production code.
+    If you are using this in production, you should either feel smug or ashamed.
+    I trust you.`,
+  )
   const {
-    __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals,
-    __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactServerSharedInternals,
+    [ReactSharedInternalsKey18]: ReactSharedInternals18,
+    [ReactSharedInternalsKey19]: ReactSharedInternals19,
+    [ReactServerSharedInternalsKey18]: ReactServerSharedInternals18,
+    [ReactServerSharedInternalsKey19]: ReactServerSharedInternals19,
   } = React
 
+  const ReactSharedInternals = ReactSharedInternals19 ?? ReactSharedInternals18
+  const ReactServerSharedInternals = ReactServerSharedInternals19 ?? ReactServerSharedInternals18
+
   // react with react-server condition
-  if (!ReactServerSharedInternals)
+  if (!(ReactServerSharedInternals && ReactSharedInternals))
     console.warn(
       // https://github.com/oven-sh/bun/issues/8990
       // https://nodejs.org/api/cli.html#-c-condition---conditionscondition
-      "ReactServerSharedInternals should be defined; You may need to run with --conditions=react-server or upgrade bun",
+      `Expected ReactSharedInternals & ReactServerSharedInternals to be defined; 
+      You may need to run with --conditions=react-server or upgrade ${__filename}`,
       {
-        ReactServerSharedInternals,
-        "React INTERNALS": Object.keys(React).filter(key => key.includes("INTERNALS")),
         argv: process.argv,
+        "'*INTERNALS*' in React": Object.keys(React).filter(key => key.includes("INTERNALS")),
+        [ReactSharedInternalsKey18]: !!ReactSharedInternals18 ? "defined" : "undefined",
+        [ReactSharedInternalsKey19]: !!ReactSharedInternals19 ? "defined" : "undefined",
+        [ReactServerSharedInternalsKey18]: !!ReactServerSharedInternals18 ? "defined" : "undefined",
+        [ReactServerSharedInternalsKey19]: !!ReactServerSharedInternals19 ? "defined" : "undefined",
+        ReactSharedInternals,
+        ReactServerSharedInternals,
       },
     )
 
   const ReactCurrentCache = ReactSharedInternals.ReactCurrentCache ?? ReactServerSharedInternals?.ReactCurrentCache
 
   if (!(typeof ReactCurrentCache === "object" && "current" in ReactCurrentCache))
-    console.warn("ReactSharedInternals.ReactCurrentCache.current should be defined")
+    console.warn(
+      `Expected ReactSharedInternals.ReactCurrentCache.current to be defined, but it was not. You may need to upgrade ${__filename}`,
+    )
 
   return { ReactSharedInternals, ReactServerSharedInternals, ReactCurrentCache }
 }
