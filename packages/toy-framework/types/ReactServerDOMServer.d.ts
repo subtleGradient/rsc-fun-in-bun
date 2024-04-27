@@ -1,3 +1,18 @@
+// prettier-ignore
+{ 
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-node-register.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-plugin.js")
+
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.production.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.edge.production.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.production.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.unbundled.production.js")
+
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.edge.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.development.js")
+  if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.node.unbundled.development.js")
+}
 // so you can quick jump to the code
 if (!1!) import("../../../node_modules/react-server-dom-webpack/cjs/react-server-dom-webpack-server.browser.development.js")
 declare module "react-server-dom-webpack/server.browser" {
