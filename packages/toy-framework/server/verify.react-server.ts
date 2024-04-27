@@ -55,11 +55,12 @@ async function verifyReactDOM() {
   if (!ReactDOMSharedInternals?.ReactDOMCurrentDispatcher?.current)
     console.warn("ReactDOMCurrentDispatcher.current should be defined")
 
-  if (ReactDOM.render != null)
+  if (!("render" in ReactDOM))
     console.warn(
       "ReactDOMServer.render should NOT be defined on the server",
       "You may need to run with --conditions=react-server or upgrade bun",
     )
+  else;
 }
 
 /**
