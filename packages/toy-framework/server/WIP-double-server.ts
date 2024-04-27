@@ -51,8 +51,9 @@ async function parentProcess() {
     port: isReactServer ? 3000 : 3001,
     async fetch(req) {
       const url = new URL(req.url)
+      const rsc = url.searchParams.has("rsc")
       const conditions = url.searchParams.getAll("conditions")
-      const wantsReactServer = conditions.includes("react-server")
+      const wantsReactServer = conditions.includes("react-server") || rsc
       const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
 
       if (wantsReactServer != isReactServer)
@@ -69,10 +70,21 @@ async function parentProcess() {
   })
   console.log("server started at", server.url.href)
 
-  const childUrlFromParent = new URL(server.url.href)
-  childUrlFromParent.searchParams.append("conditions", isReactServer ? "NOT-react-server" : "react-server")
-  console.log("can also handle", childUrlFromParent.href)
-
+  {
+    const childUrlFromParent = new URL(server.url.href)
+    childUrlFromParent.searchParams.append("conditions", isReactServer ? "NOT-react-server" : "react-server")
+    console.log("can also handle", childUrlFromParent.href)
+  }
+  {
+    const parentUrl = new URL(server.url.href)
+    parentUrl.searchParams.append("conditions", !isReactServer ? "NOT-react-server" : "react-server")
+    console.log("can also handle", parentUrl.href)
+  }
+  {
+    const rscUrl = new URL(server.url.href)
+    rscUrl.searchParams.set("rsc", "")
+    console.log("can also handle", rscUrl.href)
+  }
   child.send("hi from parent")
 }
 
