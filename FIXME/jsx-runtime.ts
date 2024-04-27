@@ -5,5 +5,4 @@
  * so this it a workaround to use jsx-runtime instead of jsx-dev-runtime.
  */
 
-// @ts-ignore
 export * from "react/jsx-runtime"
