@@ -9,6 +9,7 @@
 /// <reference path="./types/ReactDOMServer.d.ts" />
 /// <reference path="./types/ReactServerDOMClient.d.ts" />
 /// <reference path="./types/ReactServerDOMServer.d.ts" />
+/// <reference path="./types/JSX.d.ts" />
 
 export * from "./types"
 export { default } from "./types"
