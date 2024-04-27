@@ -20,8 +20,10 @@ type ReactServerSharedInternals = {
 }
 
 type ReactInnards = {
-  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals_default | ReactSharedInternals_react_server
-  __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: ReactServerSharedInternals
+  __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: never
+  __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: never
+  // __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals_default | ReactSharedInternals_react_server
+  // __SECRET_SERVER_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED?: ReactServerSharedInternals
 }
 
 /** @deprecated -- you may want {@link unbreakReactDOMServer} instead */
