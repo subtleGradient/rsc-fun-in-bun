@@ -1,7 +1,7 @@
 import { forkWithConditions } from "./fork-ipc"
 
-export function assert(test: unknown, reason: string) {
-  if (!test) throw new Error(reason)
+export function assert(test: unknown, reason?: string) {
+  if (!test) throw new Error(reason ?? "assertion failed")
 }
 
 export async function assertReactServerEnvironment() {
