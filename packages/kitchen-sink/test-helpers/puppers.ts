@@ -1,3 +1,4 @@
+import packageJson from "#package"
 import { afterAll, beforeAll } from "bun:test"
 import puppeteer, { Browser, ConsoleMessage, Page } from "puppeteer-core"
 
@@ -74,8 +75,10 @@ beforeAll(async () => {
     headless,
     defaultViewport: null,
     waitForInitialPage: false,
+    dumpio: true,
     args: [
       "--no-startup-window", // each new page will open in a new window instead of tabs
+      `--user-data-dir=${process.env.TMPDIR ?? "/tmp/"}/puppers-${packageJson.name.replace(/[^a-z0-9_.$]/gi, "-")}`,
     ],
   })
 
