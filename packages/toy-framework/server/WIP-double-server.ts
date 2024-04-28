@@ -1,123 +1,78 @@
 /// <reference types="bun" />
 
-function assert(test: unknown, reason: string) {
-  if (!test) throw new Error(reason)
-}
-async function isReactServerEnvironment() {
-  const React = require("react")
-  const INTERNALS_KEY = Object.keys(React).find(k => k.includes("INTERNALS"))
-  assert(!INTERNALS_KEY?.includes("CLIENT"), "React internals key should not include CLIENT")
-  assert(INTERNALS_KEY?.includes("SERVER"), "React internals key should include SERVER")
-  // assert(typeof window === "undefined", "window should not be defined in react server environment")
-}
+import type { Serve, Server } from "bun"
 
-const isChildProcess = async () => assert(!!process.send, "process.send should be defined in child process")
-const returns = (value: unknown) => () => value
+type UnixOptions = Serve & { unix: string }
+type NetworkOptions<WebSocketDataType> = Omit<Serve<WebSocketDataType>, "unix">
+type ServerOptions<WebSocketDataType> = NetworkOptions<WebSocketDataType> &
+  UnixOptions & {
+    shouldUseReactServer: (req: Request, server: Server) => Promise<{ wantsReactServer: boolean }>
+  }
+type UnixOptionsWithSubprocess = Awaited<ReturnType<typeof forkWithConditions>>
 
-async function regularServer() {
-  assert(typeof window === "undefined", "window should not be defined in regular server environment")
-  console.log("is NOT react-server")
-  const { default: ReactDOMServer } = await import("react-dom/server")
-  const { default: ReactServerDOMClient } = await import("react-server-dom-webpack/client.edge")
-  console.log({ ReactDOMServer: !!ReactDOMServer, ReactServerDOMClient: !!ReactServerDOMClient })
-}
+import { isChild, isParent, isReactServer } from "./assert-environment"
 
-async function reactServer() {
-  assert(typeof window === "undefined", "window should not be defined in react server environment")
-  console.log("is react-server")
-  const { default: ReactServerDOMServer } = await import("react-server-dom-webpack/server")
-  console.log({ ReactServerDOMServer: !!ReactServerDOMServer })
-}
+import { parseAcceptHeader } from "../util/accept"
+import { forkWithConditions, getDisposableKidSock } from "./fork-ipc"
 
-async function parentProcess() {
-  console.log("is parent process")
-  assert(!process.send, "process.send should NOT be defined in child process")
-  const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
+async function serveDoubleReactServer<W>(props: ServerOptions<W>): Promise<Server> {
+  const { unix, fetch: fetchFn, shouldUseReactServer, ...options } = props
+  const kidRef = { current: null as null | UnixOptionsWithSubprocess }
 
-  const child = Bun.spawn([process.execPath, isReactServer ? "" : "--conditions=react-server", __filename], {
-    stdio: ["ignore", "inherit", "inherit"],
-    // https://bun.sh/guides/process/ipc
-    ipc(message, subprocess) {
-      console.log("IPC from child:", message)
-      subprocess.send("reply from parent")
+  const [unixConfig, netConfig] = [{ ...options, unix }, { ...options, unix: undefined }] // prettier-ignore
+  const [thisConfig, thatServer] = isChild ? [unixConfig, netConfig] : [netConfig, unixConfig]
 
-      if (message.childSockName) {
-        childSockName = message.childSockName
-      }
-    },
-  })
+  const thisServer = Bun.serve({
+    ...thisConfig,
 
-  const server = Bun.serve({
-    port: isReactServer ? 3000 : 3001,
-    async fetch(req) {
-      const url = new URL(req.url)
-      const rsc = url.searchParams.has("rsc")
-      const conditions = url.searchParams.getAll("conditions")
-      const wantsReactServer = conditions.includes("react-server") || rsc
-      const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
-
-      if (wantsReactServer != isReactServer)
-        return fetch(url, {
+    async fetch(req, thisServer) {
+      const { wantsReactServer } = await shouldUseReactServer.call(this, req, thisServer)
+      if (wantsReactServer != isReactServer) {
+        const { unix, onmessageRef, subprocess } = kidRef.current!
+        console.log("established connection to", subprocess.pid, unix)
+        return await fetch(req.url, {
           ...req,
 
           // https://bun.sh/guides/http/fetch-unix
           // @ts-expect-error -- missing types for unix option
-          unix: childSockName,
+          unix,
         })
+      }
 
-      return new Response(`hi from parent server at ${req.url}`)
+      return (await fetchFn.call(this, req, thisServer)) || new Response("no response", { status: 404 })
     },
   })
-  console.log("server started at", server.url.href)
 
-  {
-    const childUrlFromParent = new URL(server.url.href)
-    childUrlFromParent.searchParams.append("conditions", isReactServer ? "NOT-react-server" : "react-server")
-    console.log("can also handle", childUrlFromParent.href)
-  }
-  {
-    const parentUrl = new URL(server.url.href)
-    parentUrl.searchParams.append("conditions", !isReactServer ? "NOT-react-server" : "react-server")
-    console.log("can also handle", parentUrl.href)
-  }
-  {
-    const rscUrl = new URL(server.url.href)
-    rscUrl.searchParams.set("rsc", "")
-    console.log("can also handle", rscUrl.href)
-  }
-  child.send("hi from parent")
-}
-
-let childSockName: string
-
-async function childProcess() {
-  console.log("is child process")
-  assert(!!process.send, "process.send should be defined in child process")
-  process.send!("hi from child")
-  process.on("message", message => {
-    console.log("IPC from parent:", message)
-    // process.send!("reply from child") // this will cause an infinite loop
+  kidRef.current = await forkWithConditions({
+    entrypoint: __filename,
+    unix: thisServer.url.pathname,
+    conditions: { "react-server": !isReactServer },
   })
 
-  const isReactServer = await isReactServerEnvironment().then(returns(true), returns(false))
+  return thisServer
+}
 
-  const sockName = `${process.env.TMPDIR ?? "/tmp/"}${isReactServer ? "react-server" : "not-react-server"}.${Date.now().toString(26)}.${process.ppid}.${process.pid}.sock`
-  process.on("exit", () => fs.unlinkSync(sockName))
+if (import.meta.main) {
+  const doubleServer = await serveDoubleReactServer({
+    port: isReactServer ? 3880 : 3881,
+    // normally you wouldn't have a separate unix setting for parent and child servers
+    unix: isParent ? "let the child process decide" : getDisposableKidSock().sock,
 
-  const server = Bun.serve({
-    unix: sockName, // path to socket
-    fetch(req) {
-      return new Response(`hi from child server at ${req.url}`)
+    async fetch(request, server) {
+      return Response.json({ isChild, isReactServer })
+    },
+
+    async shouldUseReactServer(request) {
+      const acceptsRSC = !!parseAcceptHeader(request.headers.get("Accept")).find(({ type }) => type == "text/x-component")
+      const url = new URL(request.url)
+      const rsc = url.searchParams.get("rsc")
+      const conditions = url.searchParams.getAll("conditions")
+      const wantsReactServer = acceptsRSC || conditions.includes("react-server") || rsc === "1"
+      return { wantsReactServer }
     },
   })
-  process.send!({ childSockName: sockName })
-  // console.log("server started at", server.url.href)
-}
-import fs from "fs"
 
-function main() {
-  isChildProcess().then(childProcess, parentProcess)
-  isReactServerEnvironment().then(reactServer, regularServer)
+  console.log(isParent ? "parent" : "child ", isReactServer ? "    react-server" : "NOT react-server", doubleServer.url.href)
+  if (isParent) console.log("           react-server", doubleServer.url.href + "?rsc=1")
+  if (isParent) console.log("           react-server", doubleServer.url.href + "?rsc=0")
 }
-
-main()
