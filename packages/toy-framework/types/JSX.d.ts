@@ -1,3 +1,5 @@
 declare module "react/jsx-runtime" {
-  export * from "react/jsx-dev-runtime"
+  import { Fragment, JSX, jsxDEV, JSXSource } from "react/jsx-dev-runtime"
+  const jsx = jsxDEV
+  export { Fragment, JSX, JSXSource, jsx, jsxDEV }
 }
